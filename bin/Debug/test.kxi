@@ -1,0 +1,7 @@
+void kxi2019 main() {
+	int x = 14;
+	if (x == 14) {
+		cout << x;
+	}
+	return;
+}
