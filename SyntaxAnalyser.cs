@@ -238,11 +238,48 @@ namespace Compiler
                 expression();
                 if (scanner.getToken().lexeme != "]") syntaxError("]");
             }
+            else syntaxError("( or [");
+        }
+
+        void class_declaration()
+        {
+
+        }
+
+        void class_member_declaration()
+        {
+
+        }
+
+        void field_declaration()
+        {
+
+        }
+
+        void constructor_declaration()
+        {
+
+        }
+
+        void parameter_list()
+        {
+
+        }
+
+        void parameter()
+        {
+
         }
 
         void argument_list()
         {
-
+            expression();
+            scanner.nextToken();
+            while (scanner.getToken().lexeme == ",")
+            {
+                scanner.nextToken();
+                expression();
+            }
         }
 
         void type()
@@ -265,11 +302,29 @@ namespace Compiler
 
         void member_refZ()
         {
-
+            if (scanner.getToken().lexeme != ".") syntaxError(".");
+            scanner.nextToken();
+            if (scanner.getToken().type != "Identifier") syntaxError("Identifier");
+            scanner.nextToken();
+            if (isAfn_arr_member(scanner.getToken().lexeme)) fn_arr_member();
+            if (isAmember_refZ(scanner.getToken().lexeme)) member_refZ();
         }
 
         void fn_arr_member()
         {
+            if (scanner.getToken().lexeme == "(")
+            {
+                scanner.nextToken();
+                if (isAargument_list(scanner.getToken().lexeme)) argument_list();
+                if (scanner.getToken().lexeme != ")") syntaxError(")");
+            }
+            else if (scanner.getToken().lexeme == "[")
+            {
+                scanner.nextToken();
+                expression();
+                if (scanner.getToken().lexeme != "]") syntaxError("[");
+            }
+            else syntaxError("( or [");
 
         }
 
