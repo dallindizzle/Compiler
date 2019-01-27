@@ -1,7 +1,31 @@
-void kxi2019 main() {
-	int x = 14;
-	if (x == 14) {
-		cout << x;
+class Cat {
+	public int age;
+	private int weight;
+	public void run(int x, int y) {
+		int speed;
+		int arr[];
+
+		speed = 7;
 	}
-	return;
+	Cat() {}
+}
+
+class Baller {
+	public int height;
+	public int weight;
+
+	Baller(int h, int w) {
+		height = h;
+		weight = w;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+}
+
+void kxi2019 main() { 
+	char c;
+
+	c = 's';
 }

@@ -22,6 +22,11 @@ namespace Compiler
 
         void compilation_unit()
         {
+            while(scanner.getToken().lexeme == "class")
+            {
+                class_declaration();
+            }
+
             if (scanner.getToken().lexeme != "void") syntaxError("void");
             scanner.nextToken();
             if (scanner.getToken().lexeme != "kxi2019") syntaxError("kxi2019");
@@ -40,17 +45,18 @@ namespace Compiler
             if (scanner.getToken().lexeme != "{") syntaxError("{");
             scanner.nextToken();
 
-            while(isaVariable_Declaration(scanner.getToken().lexeme))
+            while (isaVariable_Declaration(scanner.getToken().lexeme))
             {
                 variable_declaration();
             }
 
-            while(isAstatement())
+            while (isAstatement())
             {
                 statement();
             }
 
             if (scanner.getToken().lexeme != "}") syntaxError("}");
+            scanner.nextToken();
         }
 
         void statement()
@@ -105,7 +111,7 @@ namespace Compiler
                 if (scanner.getToken().lexeme != ";") syntaxError(";");
                 scanner.nextToken();
             }
-            else if (scanner.getToken().lexeme == "cout")
+            else if (scanner.getToken().lexeme == "cin")
             {
                 scanner.nextToken();
                 if (scanner.getToken().lexeme != ">") syntaxError("<");
@@ -116,13 +122,18 @@ namespace Compiler
                 if (scanner.getToken().lexeme != ";") syntaxError(";");
                 scanner.nextToken();
             }
+            else
+            {
+                expression();
+                if (scanner.getToken().lexeme != ";") syntaxError(";");
+                scanner.nextToken();
+            }
 
         }
 
         void variable_declaration()
         {
             type();
-            scanner.nextToken();
             if (scanner.getToken().type != "Identifier") syntaxError("Identifier");
             scanner.nextToken();
             if (scanner.getToken().lexeme == "[")
@@ -164,9 +175,9 @@ namespace Compiler
                 if (isAmember_refZ(scanner.getToken().lexeme)) member_refZ();
                 if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
             }
-            else if (scanner.getToken().type == "Number")
+            else if (scanner.getToken().type == "Number" || scanner.getToken().lexeme == "+" || scanner.getToken().lexeme == "-")
             {
-                scanner.nextToken();
+                numeric_literal();
                 if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
             }
             else if (scanner.getToken().type == "Character")
@@ -179,7 +190,7 @@ namespace Compiler
                 scanner.nextToken();
                 if (isAfn_arr_member(scanner.getToken().lexeme)) fn_arr_member();
                 if (isAmember_refZ(scanner.getToken().lexeme)) member_refZ();
-                expressionZ();
+                if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
             }
             else syntaxError("Expression");
         }
@@ -202,6 +213,7 @@ namespace Compiler
             else if (scanner.getToken().lexeme == "<" && scanner.peekToken().lexeme == "=") expression();
             else if (scanner.getToken().lexeme == ">" && scanner.peekToken().lexeme == "=") expression();
             else if (scanner.getToken().type == "Math" || scanner.getToken().type == "Boolean") expression();
+            else syntaxError("expressionz");
         }
 
         void assignment_expression()
@@ -210,7 +222,6 @@ namespace Compiler
             {
                 scanner.nextToken();
                 type();
-                scanner.nextToken();
                 new_delcaration();
             }
             else if (scanner.getToken().lexeme == "atoi" || scanner.getToken().lexeme == "itoa")
@@ -243,32 +254,94 @@ namespace Compiler
 
         void class_declaration()
         {
-
+            if (scanner.getToken().lexeme != "class") syntaxError("class");
+            scanner.nextToken();
+            class_name();
+            if (scanner.getToken().lexeme != "{") syntaxError("{");
+            scanner.nextToken();
+            while (scanner.getToken().lexeme == "public" || scanner.getToken().lexeme == "private" || scanner.getToken().type == "Identifier")
+            {
+                class_member_declaration();
+            }
+            if (scanner.getToken().lexeme != "}") syntaxError("}");
+            scanner.nextToken();
         }
 
         void class_member_declaration()
         {
-
+            if (scanner.getToken().lexeme == "public" || scanner.getToken().lexeme == "private")
+            {
+                scanner.nextToken();
+                type();
+                if (scanner.getToken().type != "Identifier") syntaxError("Identifier");
+                scanner.nextToken();
+                field_declaration();
+            }
+            else constructor_declaration();
         }
 
         void field_declaration()
         {
+            if (scanner.getToken().lexeme == "(")
+            {
+                scanner.nextToken();
+                if (isAtype(scanner.getToken().lexeme)) parameter_list();
+                if (scanner.getToken().lexeme != ")") syntaxError(")");
+                scanner.nextToken();
+                method_body();
+            }
+            else
+            {
+                if (scanner.getToken().lexeme == "[")
+                {
+                    scanner.nextToken();
+                    if (scanner.getToken().lexeme != "]") syntaxError("]");
+                    scanner.nextToken();
+                }
 
+                if (scanner.getToken().lexeme == "=")
+                {
+                    scanner.nextToken();
+                    assignment_expression();
+                }
+
+                if (scanner.getToken().lexeme != ";") syntaxError(";");
+                scanner.nextToken();
+            }
         }
 
         void constructor_declaration()
         {
-
+            class_name();
+            if (scanner.getToken().lexeme != "(") syntaxError("(");
+            scanner.nextToken();
+            if (isAtype(scanner.getToken().lexeme)) parameter_list();
+            if (scanner.getToken().lexeme != ")") syntaxError(")");
+            scanner.nextToken();
+            method_body();
         }
 
         void parameter_list()
         {
-
+            parameter();
+            while (scanner.getToken().lexeme == ",")
+            {
+                scanner.nextToken();
+                parameter();
+            }
         }
 
         void parameter()
         {
-
+            type();
+            if (scanner.getToken().type != "Identifier") syntaxError("Identifier");
+            scanner.nextToken();
+            if (scanner.getToken().lexeme == "[")
+            {
+                scanner.nextToken();
+                if (scanner.getToken().lexeme != "]") syntaxError("]");
+                scanner.nextToken();
+            }
         }
 
         void argument_list()
@@ -284,14 +357,15 @@ namespace Compiler
 
         void type()
         {
-            if (scanner.getToken().lexeme != "int" 
-                && scanner.getToken().lexeme != "char" 
-                && scanner.getToken().lexeme != "bool"
-                && scanner.getToken().lexeme != "void"
-                && scanner.getToken().lexeme != "sym")
+            if (scanner.getToken().lexeme == "int"
+                || scanner.getToken().lexeme == "char"
+                || scanner.getToken().lexeme == "bool"
+                || scanner.getToken().lexeme == "void"
+                || scanner.getToken().lexeme == "sym")
             {
-                class_name();
+                scanner.nextToken();
             }
+            else class_name();
         }
 
         void class_name()
@@ -328,6 +402,21 @@ namespace Compiler
 
         }
 
+        void numeric_literal()
+        {
+            if (scanner.getToken().lexeme == "+" || scanner.getToken().lexeme == "-")
+            {
+                scanner.nextToken();
+                if (scanner.getToken().type != "Number") syntaxError("Number");
+                scanner.nextToken();
+            }
+            else
+            {
+                if (scanner.getToken().type != "Number") syntaxError("Number");
+                scanner.nextToken();
+            }
+        }
+
         bool isAstatement()
         {
             if (state.Contains(scanner.getToken().lexeme) || scanner.getToken().type == "Number" || scanner.getToken().type == "Character" || scanner.getToken().type == "Identifier")
@@ -349,7 +438,7 @@ namespace Compiler
 
         bool isaVariable_Declaration(string lexeme)
         {
-            return isAtype(lexeme);
+            return (isAtype(lexeme) && scanner.peekToken().type == "Identifier");
         }
 
         bool isAargument_list(string lexeme)
