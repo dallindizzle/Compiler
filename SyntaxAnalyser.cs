@@ -207,12 +207,41 @@ namespace Compiler
                 }
                 else assignment_expression();
             }
-            else if (scanner.getToken().lexeme == "&" && scanner.peekToken().lexeme == "&") expression();
-            else if (scanner.getToken().lexeme == "|" && scanner.peekToken().lexeme == "|") expression();
-            else if (scanner.getToken().lexeme == "!" && scanner.peekToken().lexeme == "=") expression();
-            else if (scanner.getToken().lexeme == "<" && scanner.peekToken().lexeme == "=") expression();
-            else if (scanner.getToken().lexeme == ">" && scanner.peekToken().lexeme == "=") expression();
-            else if (scanner.getToken().type == "Math" || scanner.getToken().type == "Boolean") expression();
+            else if (scanner.getToken().lexeme == "&" && scanner.peekToken().lexeme == "&")
+            {
+                scanner.nextToken();
+                scanner.nextToken();
+                expression();
+            }
+            else if (scanner.getToken().lexeme == "|" && scanner.peekToken().lexeme == "|")
+            {
+                scanner.nextToken();
+                scanner.nextToken();
+                expression();
+            }
+            else if (scanner.getToken().lexeme == "!" && scanner.peekToken().lexeme == "=")
+            {
+                scanner.nextToken();
+                scanner.nextToken();
+                expression();
+            }
+            else if (scanner.getToken().lexeme == "<" && scanner.peekToken().lexeme == "=")
+            {
+                scanner.nextToken();
+                scanner.nextToken();
+                expression();
+            }
+            else if (scanner.getToken().lexeme == ">" && scanner.peekToken().lexeme == "=")
+            {
+                scanner.nextToken();
+                scanner.nextToken();
+                expression();
+            }
+            else if (scanner.getToken().type == "Math" || scanner.getToken().type == "Boolean")
+            {
+                scanner.nextToken();
+                expression();
+            }
             else syntaxError("expressionz");
         }
 
