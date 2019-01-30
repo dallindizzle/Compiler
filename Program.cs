@@ -10,7 +10,7 @@ namespace Compiler
     {
         static void Main(string[] args)
         {
-            string file = "test2.kxi";
+            string file = "test.kxi";
             LexicalAnalyser scanner = new LexicalAnalyser(file);
 
             SyntaxAnalyser syntaxAnalyser = new SyntaxAnalyser(scanner);

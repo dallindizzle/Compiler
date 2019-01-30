@@ -6,6 +6,24 @@ using System.Threading.Tasks;
 
 namespace Compiler
 {
+    class Symbol
+    {
+        public string Scope;
+        public string Symid;
+        public string Value;
+        public string Kind;
+        public Dictionary<string, dynamic> Data;
+
+        public Symbol(string sc, string sy, string v, string k, Dictionary<string, dynamic> d = null)
+        {
+            Scope = sc;
+            Symid = sy;
+            Value = v;
+            Kind = k;
+            Data = d;
+        }
+    }
+
     class SyntaxAnalyser
     {
         LexicalAnalyser scanner;
@@ -13,7 +31,20 @@ namespace Compiler
         string[] state = new string[] { "{", "if", "while", "return", "cout", "cin", "switch", "break", "(", "true", "false", "null", "this" };
         string[] exp = new string[] { "(", "true", "false", "null", "this" };
 
-        public SyntaxAnalyser(LexicalAnalyser s) { scanner = s; }
+        string scope;
+
+        public Dictionary<string, Symbol> symTable;
+        int symId;
+        string lastId;
+
+        public SyntaxAnalyser(LexicalAnalyser s)
+        {
+            scanner = s;
+            scope = "g";
+
+            symTable = new Dictionary<string, Symbol>();
+            symId = 0;
+        }
 
         public void go()
         {
@@ -32,12 +63,21 @@ namespace Compiler
             if (scanner.getToken().lexeme != "kxi2019") syntaxError("kxi2019");
             scanner.nextToken();
             if (scanner.getToken().lexeme != "main") syntaxError("main");
+
+            string id = genId("F");
+            symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "main", new Dictionary<string, dynamic>() { { "return type", "void" } }));
+
             scanner.nextToken();
             if (scanner.getToken().lexeme != "(") syntaxError("(");
+
+            push("main");
+
             scanner.nextToken();
             if (scanner.getToken().lexeme != ")") syntaxError(")");
             scanner.nextToken();
             method_body();
+
+            pop();
         }
 
         void method_body()
@@ -133,11 +173,20 @@ namespace Compiler
 
         void variable_declaration()
         {
+            string typ = scanner.getToken().lexeme; // This is for symbol table
+
             type();
             if (scanner.getToken().type != "Identifier") syntaxError("Identifier");
+
+            // This block is for symbol table
+            string id = genId("L");
+            symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "lvar", new Dictionary<string, dynamic>() { {"type", typ } }));
+
             scanner.nextToken();
             if (scanner.getToken().lexeme == "[")
             {
+                symTable[id].Data["type"] = $"@:{typ}";
+
                 scanner.nextToken();
                 if (scanner.getToken().lexeme != "]") syntaxError("]");
                 scanner.nextToken();
@@ -177,11 +226,17 @@ namespace Compiler
             }
             else if (scanner.getToken().type == "Number" || scanner.getToken().lexeme == "+" || scanner.getToken().lexeme == "-")
             {
+                string id = genId("N");
+                symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "ilit", new Dictionary<string, dynamic>() { { "type", "int" } }));
+
                 numeric_literal();
                 if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
             }
             else if (scanner.getToken().type == "Character")
             {
+                string id = genId("H");
+                symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "clit", new Dictionary<string, dynamic>() { { "type", "char" } }));
+
                 scanner.nextToken();
                 if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
             }
@@ -285,6 +340,12 @@ namespace Compiler
         {
             if (scanner.getToken().lexeme != "class") syntaxError("class");
             scanner.nextToken();
+
+            // This code is for the symbol table
+            string id = genId("C");
+            symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "Class"));
+            push(scanner.getToken().lexeme); // Here we push the class name to the scope, which we assume is here
+
             class_name();
             if (scanner.getToken().lexeme != "{") syntaxError("{");
             scanner.nextToken();
@@ -293,6 +354,9 @@ namespace Compiler
                 class_member_declaration();
             }
             if (scanner.getToken().lexeme != "}") syntaxError("}");
+
+            pop(); // Here we pop the class scope
+
             scanner.nextToken();
         }
 
@@ -300,11 +364,35 @@ namespace Compiler
         {
             if (scanner.getToken().lexeme == "public" || scanner.getToken().lexeme == "private")
             {
+                string modifier = scanner.getToken().lexeme; // This is for the symbol table
+
                 scanner.nextToken();
+
+                string typ = scanner.getToken().lexeme; // This is for the symbol table
+
                 type();
                 if (scanner.getToken().type != "Identifier") syntaxError("Identifier");
+
+                // This whole block is for the symbol table
+                string id;
+                if (scanner.peekToken().lexeme == "(")
+                {
+                    id = genId("M");
+                    symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "method", new Dictionary<string, dynamic>() { { "returnType", typ }, { "accessMod", modifier } }));
+                }
+                else
+                {
+                    id = genId("V");
+                    symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "ivar", new Dictionary<string, dynamic>() { { "type", typ },{ "accessMod", modifier } }));
+                }
+
+                push(scanner.getToken().lexeme); // pushing scope of class method, if class field then it should still be okay, I think
+
                 scanner.nextToken();
                 field_declaration();
+
+
+                pop();
             }
             else constructor_declaration();
         }
@@ -323,6 +411,8 @@ namespace Compiler
             {
                 if (scanner.getToken().lexeme == "[")
                 {
+                    symTable[lastId].Data["type"] = $"@:{symTable[lastId].Data["type"]}"; // For symbol table
+
                     scanner.nextToken();
                     if (scanner.getToken().lexeme != "]") syntaxError("]");
                     scanner.nextToken();
@@ -341,23 +431,45 @@ namespace Compiler
 
         void constructor_declaration()
         {
+            string id = genId("X");
+            symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "Constructor", new Dictionary<string, dynamic>() { { "return type", scanner.getToken().lexeme } }));
+
             class_name();
             if (scanner.getToken().lexeme != "(") syntaxError("(");
+
+            push("constructor"); // Pushing constructor to scope. I think this is the right name
+
             scanner.nextToken();
             if (isAtype(scanner.getToken().lexeme)) parameter_list();
             if (scanner.getToken().lexeme != ")") syntaxError(")");
             scanner.nextToken();
             method_body();
+
+            pop(); // Popping contructor scope
         }
 
         void parameter_list()
         {
+            // This block is for the symbol table
+            string mId = lastId;
+            List<string> pars = new List<string>();
+            string id = genId("P");
+            pars.Add(id);
+            symTable.Add(id, new Symbol(scope, id, scanner.peekToken().lexeme, "param", new Dictionary<string, dynamic>() { { "type", scanner.getToken().lexeme }, { "accessMod", symTable[mId].Data["accessMod"] } }));
+
             parameter();
             while (scanner.getToken().lexeme == ",")
             {
                 scanner.nextToken();
+
+                id = genId("P");
+                pars.Add(id);
+                symTable.Add(id, new Symbol(scope, id, scanner.peekToken().lexeme, "param", new Dictionary<string, dynamic>() { { "accessMod", symTable[mId].Data["accessMod"] } }));
+
                 parameter();
             }
+
+            symTable[mId].Data.Add("Param", pars);
         }
 
         void parameter()
@@ -367,6 +479,8 @@ namespace Compiler
             scanner.nextToken();
             if (scanner.getToken().lexeme == "[")
             {
+                symTable[lastId].Data["type"] = $"@:{symTable[lastId].Data["type"]}"; // For symbol table
+
                 scanner.nextToken();
                 if (scanner.getToken().lexeme != "]") syntaxError("]");
                 scanner.nextToken();
@@ -495,6 +609,26 @@ namespace Compiler
             Console.WriteLine($"<Line {scanner.getToken().lineNum}>:Found {scanner.getToken().lexeme} expecting {expected}");
             Console.ReadKey();
             Environment.Exit(0);
+        }
+
+        // Scope methods
+
+        void push(string s)
+        {
+            scope += '.' + s;
+        }
+
+        void pop()
+        {
+            scope = scope.Substring(0, scope.LastIndexOf('.'));
+        }
+
+        // Symbol Table methods
+
+        string genId(string s)
+        {
+            lastId = s + (++symId).ToString();
+            return lastId;
         }
     }
 }
