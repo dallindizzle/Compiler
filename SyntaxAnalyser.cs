@@ -20,7 +20,9 @@ namespace Compiler
             Symid = sy;
             Value = v;
             Kind = k;
-            Data = d;
+
+            if (d == null) Data = new Dictionary<string, dynamic>();
+            else Data = d;
         }
     }
 
@@ -455,7 +457,7 @@ namespace Compiler
             List<string> pars = new List<string>();
             string id = genId("P");
             pars.Add(id);
-            symTable.Add(id, new Symbol(scope, id, scanner.peekToken().lexeme, "param", new Dictionary<string, dynamic>() { { "type", scanner.getToken().lexeme }, { "accessMod", symTable[mId].Data["accessMod"] } }));
+            symTable.Add(id, new Symbol(scope, id, scanner.peekToken().lexeme, "param", new Dictionary<string, dynamic>() { { "type", scanner.getToken().lexeme }}));
 
             parameter();
             while (scanner.getToken().lexeme == ",")
@@ -464,7 +466,7 @@ namespace Compiler
 
                 id = genId("P");
                 pars.Add(id);
-                symTable.Add(id, new Symbol(scope, id, scanner.peekToken().lexeme, "param", new Dictionary<string, dynamic>() { { "accessMod", symTable[mId].Data["accessMod"] } }));
+                symTable.Add(id, new Symbol(scope, id, scanner.peekToken().lexeme, "param", new Dictionary<string, dynamic>() { { "type", scanner.getToken().lexeme } }));
 
                 parameter();
             }
@@ -629,6 +631,40 @@ namespace Compiler
         {
             lastId = s + (++symId).ToString();
             return lastId;
+        }
+
+
+        // Print 
+        public void printTable()
+        {
+            foreach(var symbol in symTable)
+            {
+                Console.Write($"{symbol.Key} ->");
+                Console.Write($"\tScope:\t {symbol.Value.Scope}\n");
+                Console.WriteLine($"\tSymid:\t {symbol.Value.Symid}");
+                Console.WriteLine($"\tValue:\t {symbol.Value.Value}");
+                Console.WriteLine($"\tKind:\t {symbol.Value.Kind}");
+
+                Console.Write($"\tData:\t ");
+                foreach (var data in symbol.Value.Data)
+                {
+                    if (data.Value is List<string>)
+                    {
+                        Console.Write($"{data.Key}: [");
+                        foreach (string param in data.Value)
+                        {
+                            Console.Write($"{param}, ");
+                        }
+                        Console.Write("]\n");
+                    }
+
+                    else Console.Write($"{data.Key}: {data.Value}\n\t\t ");
+                }
+
+                if (symbol.Value.Data.Count == 0) Console.WriteLine();
+
+                Console.WriteLine();
+            }
         }
     }
 }

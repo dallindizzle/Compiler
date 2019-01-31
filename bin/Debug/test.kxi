@@ -1,14 +1,18 @@
-class Cat {
-	public int age;
-	private int weight;
-	private int data[];
-	public void run(int x[], int y) {
-		int speed;
-		int arr[];
 
-		speed = 7;
+
+class Baller {
+	private int height;
+	private int weight;
+	public int stats[];
+
+	public int getHeight() {
+		return height;
 	}
-	Cat() {}
+
+	Baller(int h, int w) {
+		height = h;
+		weight = w;
+	}
 }
 
 void kxi2019 main() { 

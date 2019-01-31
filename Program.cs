@@ -16,6 +16,9 @@ namespace Compiler
             SyntaxAnalyser syntaxAnalyser = new SyntaxAnalyser(scanner);
 
             syntaxAnalyser.go();
+
+            syntaxAnalyser.printTable();
+            Console.ReadKey();
         }
     }
 }
