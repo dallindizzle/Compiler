@@ -1,22 +1,37 @@
-
-
 class Baller {
 	private int height;
 	private int weight;
 	public int stats[];
 
 	public int getHeight() {
-		return height;
+		return this.height;
 	}
 
 	Baller(int h, int w) {
 		height = h;
 		weight = w;
 	}
+
+	public void read() {
+		cin >> height;
+	}
 }
 
 void kxi2019 main() { 
 	char c;
+	int i;
+	int j = 4;
+	int i = new int();
+	int arr = new int[5];
 
+	int x=y+q-e*t/y<u<=i>o>=p&&z||x==b;
+
+	c = null;
 	c = 's';
+
+	while(true) {
+		if (c == 'x') {
+			cout << 'g';
+		}
+	}
 }

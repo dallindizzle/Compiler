@@ -106,7 +106,10 @@ namespace Compiler
             if (scanner.getToken().lexeme == "{")
             {
                 scanner.nextToken();
-                statement();
+                while (isAstatement())
+                {
+                    statement();
+                }
                 if (scanner.getToken().lexeme != "}") syntaxError("}");
                 scanner.nextToken();
             }
@@ -317,6 +320,7 @@ namespace Compiler
                 scanner.nextToken();
                 expression();
                 if (scanner.getToken().lexeme != ")") syntaxError(")");
+                scanner.nextToken();
             }
             else expression();
         }
@@ -328,12 +332,18 @@ namespace Compiler
                 scanner.nextToken();
                 if (isAargument_list(scanner.getToken().lexeme)) argument_list();
                 if (scanner.getToken().lexeme != ")") syntaxError(")");
+                scanner.nextToken();
             }
             else if (scanner.getToken().lexeme == "[")
             {
                 scanner.nextToken();
+
+                //TODO: change symbol to array
+                symTable[lastId].Data["type"] = $"@:{symTable[lastId].Data["type"]}";
+
                 expression();
                 if (scanner.getToken().lexeme != "]") syntaxError("]");
+                scanner.nextToken();
             }
             else syntaxError("( or [");
         }
@@ -588,7 +598,7 @@ namespace Compiler
 
         bool isAargument_list(string lexeme)
         {
-            return true;
+            return isAexpression();
         }
 
         bool isAexpressionZ(string lexeme)
