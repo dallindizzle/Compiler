@@ -1,0 +1,133 @@
+class Cat 
+{ 	
+	public char paws[] = new char[4];
+	private int weight;
+	private int height; 
+	
+	public int methodStuff(int foo, int foo2)
+	{
+		return this.weight;
+	}
+	
+	private char methodStuff2(char c)
+	{
+		return c;
+	}
+	
+	Cat(int a, char b)
+	{
+		weight = a;
+		height = b;
+	}
+	
+}
+
+class Dog
+{
+	private int weight;
+	private int height;	
+	public Cat hatedCat = new Cat(height, weight);
+	
+	Dog(int x, char y)
+	{
+		weight = x;
+		height = y;
+	}
+	
+	private void blankMethod()
+	{
+	
+	}
+}
+
+class Bird
+{
+
+	public bool hasWings;
+	
+	Bird() {}
+	
+	public void Wings(char w, char z)
+	{
+		cout << w;
+	}
+}
+
+class Bug
+{
+
+}
+
+void kxi2019 main()
+{	
+	int b[];
+	int c[] = new int[1];
+	int x = -18;
+	int y = +21;
+	int d = 0;
+	int e = 856;
+	char w = 'w';
+	char z = 'z';	
+	bool coolBool = true;
+	Dog dog = new Dog(x, y);
+	Bird bird = new Bird();
+	
+	x = 1;
+	y = 2;
+	x = y;
+	z = w;
+	e = d / y * x + e * e * e + y / x - e - d - x >= x == true <= e != false >= null <= this == coolBool;
+	
+	if(w == z)
+	{
+		cout << 'T';
+		
+		if(x <= y)
+		{
+			cout << 'T';
+		}
+		else
+		{
+			cout << 'F';
+		}
+	}
+	else
+	{
+		cout << 'F';
+	}
+	
+	if(x >= y)
+	{
+		cout << 'T';
+	}
+	else
+	{
+		cout << 'F';
+	}
+	
+	while (true)
+	{
+	
+	}
+	
+	if (false)
+	{
+	
+	}
+	
+	while(x != true)
+	{
+		cin >> false;
+		
+		if(x == y)
+		{
+			cout << 4;
+		}	
+	}
+	
+	bird.Wings(w, z);
+	
+	dog.hatedCat.methodStuff(x, y);
+	
+	bird.hasWings() = true;
+}
