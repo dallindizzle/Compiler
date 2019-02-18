@@ -502,7 +502,7 @@ namespace Compiler
         void argument_list()
         {
             expression();
-            scanner.nextToken();
+            //scanner.nextToken();
             while (scanner.getToken().lexeme == ",")
             {
                 scanner.nextToken();
@@ -546,12 +546,14 @@ namespace Compiler
                 scanner.nextToken();
                 if (isAargument_list(scanner.getToken().lexeme)) argument_list();
                 if (scanner.getToken().lexeme != ")") syntaxError(")");
+                scanner.nextToken();
             }
             else if (scanner.getToken().lexeme == "[")
             {
                 scanner.nextToken();
                 expression();
                 if (scanner.getToken().lexeme != "]") syntaxError("[");
+                scanner.nextToken();
             }
             else syntaxError("( or [");
 
@@ -563,6 +565,7 @@ namespace Compiler
             {
                 scanner.nextToken();
                 if (scanner.getToken().type != "Number") syntaxError("Number");
+                symTable[lastId].Value += scanner.getToken().lexeme;
                 scanner.nextToken();
             }
             else
@@ -639,7 +642,7 @@ namespace Compiler
 
         string genId(string s)
         {
-            lastId = s + (++symId).ToString();
+            lastId = s + (symId++).ToString();
             return lastId;
         }
 
