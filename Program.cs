@@ -10,10 +10,10 @@ namespace Compiler
     {
         static void Main(string[] args)
         {
-            string file = "collin.kxi";
+            string file = "semanticsTest.kxi";
             LexicalAnalyser scanner = new LexicalAnalyser(file);
 
-            SyntaxAnalyser syntaxAnalyser = new SyntaxAnalyser(scanner);
+            SemanticAnalyser syntaxAnalyser = new SemanticAnalyser(scanner);
 
             syntaxAnalyser.go();
 

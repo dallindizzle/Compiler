@@ -46,7 +46,7 @@
     <Compile Include="LexicalAnalyser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SyntaxAnalyser.cs" />
+    <Compile Include="SemanticAnalyser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

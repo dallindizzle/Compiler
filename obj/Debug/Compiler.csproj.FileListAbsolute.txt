@@ -5,3 +5,10 @@ C:\Users\dcs37\source\repos\Compiler\Compiler\obj\Debug\Compiler.csprojAssemblyR
 C:\Users\dcs37\source\repos\Compiler\Compiler\obj\Debug\Compiler.csproj.CoreCompileInputs.cache
 C:\Users\dcs37\source\repos\Compiler\Compiler\obj\Debug\Compiler.exe
 C:\Users\dcs37\source\repos\Compiler\Compiler\obj\Debug\Compiler.pdb
+C:\Users\dcs37_000\Documents\CS4490\Compiler\bin\Debug\Compiler.exe.config
+C:\Users\dcs37_000\Documents\CS4490\Compiler\bin\Debug\Compiler.exe
+C:\Users\dcs37_000\Documents\CS4490\Compiler\bin\Debug\Compiler.pdb
+C:\Users\dcs37_000\Documents\CS4490\Compiler\obj\Debug\Compiler.csprojResolveAssemblyReference.cache
+C:\Users\dcs37_000\Documents\CS4490\Compiler\obj\Debug\Compiler.csproj.CoreCompileInputs.cache
+C:\Users\dcs37_000\Documents\CS4490\Compiler\obj\Debug\Compiler.exe
+C:\Users\dcs37_000\Documents\CS4490\Compiler\obj\Debug\Compiler.pdb

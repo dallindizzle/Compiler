@@ -38,7 +38,7 @@ namespace Compiler
         StreamReader reader;
 
         int curToken;
-        List<Token> buffer;
+        public List<Token> buffer { get; set; }
         int lineNum;
 
         string indentPat = @"[a-zA-Z0-9_]+";

@@ -1,0 +1,8 @@
+void kxi2019 main() { 
+	int x;
+	int y = 3;
+	int g = 4;
+	int f = 74;
+	int k = 12;
+	x = y * g + f / k;
+}
