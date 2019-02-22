@@ -95,7 +95,6 @@ namespace Compiler
             var matches = Regex.Matches(line, pat, RegexOptions.Singleline);
             foreach (var match in matches)
             {
-                //Console.WriteLine(match);
 
                 if (int.TryParse(match.ToString(), out int i)) buffer.Add(new Token("Number", lineNum, match.ToString()));
                 else if (match.ToString()[0] == '\'') buffer.Add(new Token("Character", lineNum, match.ToString()));
@@ -109,29 +108,7 @@ namespace Compiler
                 else buffer.Add(new Token("Unknown", lineNum, match.ToString()));
             }
 
-            //foreach (var token in buffer) Console.WriteLine(token.ToString());
-            //Console.WriteLine(buffer.Count);
-
             lineNum++;
         }
-
-        //static void Main(string[] args)
-        //{
-        //    //string file = args[1];
-
-        //    LexicalAnalyser analyser = new LexicalAnalyser("test3.txt");
-
-        //    Token output = analyser.getToken();
-        //    while (output.lexeme != "eof")
-        //    {
-        //        Console.WriteLine(output.ToString());
-        //        analyser.nextToken();
-        //        output = analyser.getToken();
-        //    }
-
-        //    Console.WriteLine(output.ToString());
-
-        //    Console.ReadKey();
-        //}
     }
 }

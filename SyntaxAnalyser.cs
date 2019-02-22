@@ -14,16 +14,16 @@ namespace Compiler
         public string Kind;
         public Dictionary<string, dynamic> Data;
 
-        //public Symbol(string sc, string sy, string v, string k, Dictionary<string, dynamic> d = null)
-        //{
-        //    Scope = sc;
-        //    Symid = sy;
-        //    Value = v;
-        //    Kind = k;
+        public Symbol(string sc, string sy, string v, string k, Dictionary<string, dynamic> d = null)
+        {
+            Scope = sc;
+            Symid = sy;
+            Value = v;
+            Kind = k;
 
-        //    if (d == null) Data = new Dictionary<string, dynamic>();
-        //    else Data = d;
-        //}
+            if (d == null) Data = new Dictionary<string, dynamic>();
+            else Data = d;
+        }
     }
 
     class SyntaxAnalyser
@@ -80,6 +80,8 @@ namespace Compiler
             method_body();
 
             pop();
+
+            if (scanner.getToken().lexeme != "eof") syntaxError("eof");
         }
 
         void method_body()

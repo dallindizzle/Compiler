@@ -6,27 +6,6 @@ using System.Threading.Tasks;
 
 namespace Compiler
 {
-    class Symbol
-    {
-
-        public string Scope;
-        public string Symid;
-        public string Value;
-        public string Kind;
-        public Dictionary<string, dynamic> Data;
-
-        public Symbol(string sc, string sy, string v, string k, Dictionary<string, dynamic> d = null)
-        {
-            Scope = sc;
-            Symid = sy;
-            Value = v;
-            Kind = k;
-
-            if (d == null) Data = new Dictionary<string, dynamic>();
-            else Data = d;
-        }
-    }
-
     class SemanticAnalyser
     {
         LexicalAnalyser scanner;
@@ -40,12 +19,12 @@ namespace Compiler
         int symId;
         string lastId;
 
-        public SemanticAnalyser(LexicalAnalyser s)
+        public SemanticAnalyser(LexicalAnalyser s, Dictionary<string, Symbol> symT)
         {
             scanner = s;
             scope = "g";
 
-            symTable = new Dictionary<string, Symbol>();
+            symTable = symT;
             symId = 0;
 
             SAS = new Stack<SAR>();
@@ -72,8 +51,6 @@ namespace Compiler
             scanner.nextToken();
             if (scanner.getToken().lexeme != "main") syntaxError("main");
 
-            string id = genId("F");
-            symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "main", new Dictionary<string, dynamic>() { { "return type", "void" } }));
 
             scanner.nextToken();
             if (scanner.getToken().lexeme != "(") syntaxError("(");
@@ -193,15 +170,9 @@ namespace Compiler
             type();
             if (scanner.getToken().type != "Identifier") syntaxError("Identifier");
 
-            // This block is for symbol table
-            string id = genId("L");
-            symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "lvar", new Dictionary<string, dynamic>() { { "type", typ } }));
-
             scanner.nextToken();
             if (scanner.getToken().lexeme == "[")
             {
-                symTable[id].Data["type"] = $"@:{typ}";
-
                 scanner.nextToken();
                 if (scanner.getToken().lexeme != "]") syntaxError("]");
                 scanner.nextToken();
@@ -241,24 +212,19 @@ namespace Compiler
             }
             else if (scanner.getToken().type == "Number" || scanner.getToken().lexeme == "+" || scanner.getToken().lexeme == "-")
             {
-                string id = genId("N");
-                symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "ilit", new Dictionary<string, dynamic>() { { "type", "int" } }));
-
                 numeric_literal();
                 if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
             }
             else if (scanner.getToken().type == "Character")
             {
-                string id = genId("H");
-                symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "clit", new Dictionary<string, dynamic>() { { "type", "char" } }));
-
                 scanner.nextToken();
                 if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
             }
             else if (scanner.getToken().type == "Identifier")
             {
                 // Semantic code
-                iPush(scanner.getToken().lexeme);
+                string symKey = symTable.Where(tempsym => tempsym.Value.Scope == scope).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
+                iPush(scanner.getToken().lexeme, symKey);
 
                 scanner.nextToken();
                 if (isAfn_arr_member(scanner.getToken().lexeme)) fn_arr_member();
@@ -364,9 +330,6 @@ namespace Compiler
             {
                 scanner.nextToken();
 
-                //TODO: change symbol to array
-                symTable[lastId].Data["type"] = $"@:{symTable[lastId].Data["type"]}";
-
                 expression();
                 if (scanner.getToken().lexeme != "]") syntaxError("]");
                 scanner.nextToken();
@@ -379,9 +342,6 @@ namespace Compiler
             if (scanner.getToken().lexeme != "class") syntaxError("class");
             scanner.nextToken();
 
-            // This code is for the symbol table
-            string id = genId("C");
-            symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "Class"));
             push(scanner.getToken().lexeme); // Here we push the class name to the scope, which we assume is here
 
             class_name();
@@ -411,19 +371,6 @@ namespace Compiler
                 type();
                 if (scanner.getToken().type != "Identifier") syntaxError("Identifier");
 
-                // This whole block is for the symbol table
-                string id;
-                if (scanner.peekToken().lexeme == "(")
-                {
-                    id = genId("M");
-                    symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "method", new Dictionary<string, dynamic>() { { "returnType", typ }, { "accessMod", modifier } }));
-                }
-                else
-                {
-                    id = genId("V");
-                    symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "ivar", new Dictionary<string, dynamic>() { { "type", typ }, { "accessMod", modifier } }));
-                }
-
                 push(scanner.getToken().lexeme); // pushing scope of class method, if class field then it should still be okay, I think
 
                 scanner.nextToken();
@@ -449,8 +396,6 @@ namespace Compiler
             {
                 if (scanner.getToken().lexeme == "[")
                 {
-                    symTable[lastId].Data["type"] = $"@:{symTable[lastId].Data["type"]}"; // For symbol table
-
                     scanner.nextToken();
                     if (scanner.getToken().lexeme != "]") syntaxError("]");
                     scanner.nextToken();
@@ -469,9 +414,6 @@ namespace Compiler
 
         void constructor_declaration()
         {
-            string id = genId("X");
-            symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "Constructor", new Dictionary<string, dynamic>() { { "return type", scanner.getToken().lexeme } }));
-
             class_name();
             if (scanner.getToken().lexeme != "(") syntaxError("(");
 
@@ -488,26 +430,13 @@ namespace Compiler
 
         void parameter_list()
         {
-            // This block is for the symbol table
-            string mId = lastId;
-            List<string> pars = new List<string>();
-            string id = genId("P");
-            pars.Add(id);
-            symTable.Add(id, new Symbol(scope, id, scanner.peekToken().lexeme, "param", new Dictionary<string, dynamic>() { { "type", scanner.getToken().lexeme } }));
-
             parameter();
             while (scanner.getToken().lexeme == ",")
             {
                 scanner.nextToken();
 
-                id = genId("P");
-                pars.Add(id);
-                symTable.Add(id, new Symbol(scope, id, scanner.peekToken().lexeme, "param", new Dictionary<string, dynamic>() { { "type", scanner.getToken().lexeme } }));
-
                 parameter();
             }
-
-            symTable[mId].Data.Add("Param", pars);
         }
 
         void parameter()
@@ -517,8 +446,6 @@ namespace Compiler
             scanner.nextToken();
             if (scanner.getToken().lexeme == "[")
             {
-                symTable[lastId].Data["type"] = $"@:{symTable[lastId].Data["type"]}"; // For symbol table
-
                 scanner.nextToken();
                 if (scanner.getToken().lexeme != "]") syntaxError("]");
                 scanner.nextToken();
@@ -560,8 +487,16 @@ namespace Compiler
             if (scanner.getToken().lexeme != ".") syntaxError(".");
             scanner.nextToken();
             if (scanner.getToken().type != "Identifier") syntaxError("Identifier");
+
+            // Semantics code
+            iPush(scanner.getToken().lexeme);
+
             scanner.nextToken();
             if (isAfn_arr_member(scanner.getToken().lexeme)) fn_arr_member();
+
+            // Semantics code
+            rExist();
+
             if (isAmember_refZ(scanner.getToken().lexeme)) member_refZ();
         }
 
@@ -591,7 +526,6 @@ namespace Compiler
             {
                 scanner.nextToken();
                 if (scanner.getToken().type != "Number") syntaxError("Number");
-                symTable[lastId].Value += scanner.getToken().lexeme;
                 scanner.nextToken();
             }
             else
@@ -708,6 +642,7 @@ namespace Compiler
 
         #endregion
 
+
         #region SemanticAnalyser defintion
 
         struct SAR
@@ -715,6 +650,7 @@ namespace Compiler
             public enum pushes
             {
                 iExist,
+                rExist,
                 iPush,
                 oPush,
                 mul,
@@ -724,6 +660,7 @@ namespace Compiler
             public enum types
             {
                 id_sar,
+                ref_sar,
                 none
             };
 
@@ -732,21 +669,21 @@ namespace Compiler
             public pushes pushType;
             public string symKey;
 
-            public SAR(string v, types t, pushes p = pushes.none, string s = "")
+            public SAR(string v, types t, pushes p = pushes.none, string key = "")
             {
                 val = v;
                 type = t;
                 pushType = p;
-                symKey = s;
+                symKey = key;
             }
         }
 
         Stack<SAR> SAS;
         Stack<SAR> OS;
 
-        void iPush(string val)
+        void iPush(string val, string symKey = "")
         {
-            SAR sar = new SAR(val, SAR.types.none ,SAR.pushes.iPush);
+            SAR sar = new SAR(val, SAR.types.none ,SAR.pushes.iPush, symKey);
 
             SAS.Push(sar);
         }
@@ -796,12 +733,33 @@ namespace Compiler
 
             if (!potSym.Any(sym => sym.Value.Value == sar.val)) semanticError(scanner.getToken().lineNum, "Variable", scanner.getToken().lexeme, "not defined");
 
-            string key = potSym.Where(sym => sym.Value.Value == sar.val).First().Key;
+            //string key = potSym.Where(sym => sym.Value.Value == sar.val).First().Key;
 
             sar.pushType = SAR.pushes.iExist;
             sar.type = SAR.types.id_sar;
-            sar.symKey = key;
+            //sar.symKey = key;
             SAS.Push(sar);
+        }
+
+        void rExist()
+        {
+            SAR ivarSar = SAS.Pop();
+            SAR classSar = SAS.Pop();
+
+            string className = symTable[classSar.symKey].Data["type"];
+
+            var classSym = symTable.Where(sym => sym.Value.Scope == $"g.{className}").ToList(); // Get list of symbols for the class
+
+            if (!classSym.Any(sym => sym.Value.Value == ivarSar.val)) semanticError(scanner.getToken().lineNum, "Variable", ivarSar.val, $"Not defined/not public in {scope}");
+
+            var symId = genId("t");
+
+            var ivarSymId = classSym.Where(sym => sym.Value.Value == ivarSar.val).First().Key; // Get the symid for the instance variable
+
+            symTable.Add(symId, new Symbol(scope, symId,"temp_ref", symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));
+
+            SAS.Push(new SAR($"{classSar.val}.{ivarSar.val}", SAR.types.ref_sar, SAR.pushes.rExist, symId));
+
         }
 
         void EOE(bool eof = false)
@@ -829,7 +787,7 @@ namespace Compiler
 
                 if (oper.val != "=" || OS.Count > 0) semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
 
-                if (symTable[op1.symKey].Kind != "lvar") semanticError(scanner.getToken().lineNum, "Type", op1.val, "not lvalue");
+                if (symTable[op1.symKey].Kind != "lvar" && symTable[op1.symKey].Kind != "ivar") semanticError(scanner.getToken().lineNum, "Type", op1.val, "not lvalue");
                 if (symTable[op2.symKey].Data["type"] != symTable[op1.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
             }
             else

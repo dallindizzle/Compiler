@@ -2,10 +2,11 @@ class Cat
 { 	
 	public char paws[] = new char[4];
 	private int weight;
-	private int height; 
+	private int height;
 	
-	public int methodStuff(int foo, int foo2)
+	public int methodStuff(int foo, int foo2[], char foo, char foo2[], bool foo, bool foo2[], Dog foo, Cxxat foo2[]) 
 	{
+		int x = 1;
 		return this.weight;
 	}
 	
@@ -14,7 +15,7 @@ class Cat
 		return c;
 	}
 	
-	Cat(int a, char b)
+	Cat(int a, char b) 
 	{
 		weight = a;
 		height = b;
@@ -60,6 +61,7 @@ class Bug
 
 void kxi2019 main()
 {	
+	Dog dog = new Dog(x, y);
 	int b[];
 	int c[] = new int[1];
 	int x = -18;
@@ -69,14 +71,13 @@ void kxi2019 main()
 	char w = 'w';
 	char z = 'z';	
 	bool coolBool = true;
-	Dog dog = new Dog(x, y);
 	Bird bird = new Bird();
 	
 	x = 1;
 	y = 2;
 	x = y;
 	z = w;
-	e = d / y * x + e * e * e + y / x - e - d - x >= x == true <= e != false >= null <= this == coolBool;
+	e = d / y * x + e - e * e + y / x - e - d - x >= x == true <= e != false >= null <= this == coolBool;
 	
 	if(w == z)
 	{
@@ -89,6 +90,12 @@ void kxi2019 main()
 		else
 		{
 			cout << 'F';
+				while (true) {
+	if (false)
+	{
+	
+	}
+				}
 		}
 	}
 	else
@@ -130,4 +137,5 @@ void kxi2019 main()
 	dog.hatedCat.methodStuff(x, y);
 	
 	bird.hasWings() = true;
+
 }

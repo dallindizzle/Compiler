@@ -13,11 +13,15 @@ namespace Compiler
             string file = "semanticsTest.kxi";
             LexicalAnalyser scanner = new LexicalAnalyser(file);
 
-            SemanticAnalyser syntaxAnalyser = new SemanticAnalyser(scanner);
+            SyntaxAnalyser syntaxAnalyser = new SyntaxAnalyser(scanner);
 
             syntaxAnalyser.go();
 
-            syntaxAnalyser.printTable();
+            SemanticAnalyser semanticsAnalyser = new SemanticAnalyser(new LexicalAnalyser(file), syntaxAnalyser.symTable);
+
+            semanticsAnalyser.go();
+
+            semanticsAnalyser.printTable();
             Console.ReadKey();
         }
     }

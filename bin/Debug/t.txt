@@ -1,0 +1,341 @@
+C0 ->	Scope:	 g
+	Symid:	 C0
+	Value:	 Cat
+	Kind:	 Class
+	Data:	 
+
+V1 ->	Scope:	 g.Cat
+	Symid:	 V1
+	Value:	 paws
+	Kind:	 ivar
+	Data:	 type: @:@:char
+		 accessMod: public
+		 
+N2 ->	Scope:	 g.Cat.paws
+	Symid:	 N2
+	Value:	 4
+	Kind:	 ilit
+	Data:	 type: int
+		 
+V3 ->	Scope:	 g.Cat
+	Symid:	 V3
+	Value:	 weight
+	Kind:	 ivar
+	Data:	 type: int
+		 accessMod: private
+		 
+V4 ->	Scope:	 g.Cat
+	Symid:	 V4
+	Value:	 height
+	Kind:	 ivar
+	Data:	 type: int
+		 accessMod: private
+		 
+M5 ->	Scope:	 g.Cat
+	Symid:	 M5
+	Value:	 methodStuff
+	Kind:	 method
+	Data:	 returnType: int
+		 accessMod: public
+		 Param: [P6, P7, ]
+
+P6 ->	Scope:	 g.Cat.methodStuff
+	Symid:	 P6
+	Value:	 foo
+	Kind:	 param
+	Data:	 type: int
+		 
+P7 ->	Scope:	 g.Cat.methodStuff
+	Symid:	 P7
+	Value:	 foo2
+	Kind:	 param
+	Data:	 type: int
+		 
+M8 ->	Scope:	 g.Cat
+	Symid:	 M8
+	Value:	 methodStuff2
+	Kind:	 method
+	Data:	 returnType: char
+		 accessMod: private
+		 Param: [P9, ]
+
+P9 ->	Scope:	 g.Cat.methodStuff2
+	Symid:	 P9
+	Value:	 c
+	Kind:	 param
+	Data:	 type: char
+		 
+X10 ->	Scope:	 g.Cat
+	Symid:	 X10
+	Value:	 Cat
+	Kind:	 Constructor
+	Data:	 return type: Cat
+		 Param: [P11, P12, ]
+
+P11 ->	Scope:	 g.Cat.constructor
+	Symid:	 P11
+	Value:	 a
+	Kind:	 param
+	Data:	 type: int
+		 
+P12 ->	Scope:	 g.Cat.constructor
+	Symid:	 P12
+	Value:	 b
+	Kind:	 param
+	Data:	 type: char
+		 
+C13 ->	Scope:	 g
+	Symid:	 C13
+	Value:	 Dog
+	Kind:	 Class
+	Data:	 
+
+V14 ->	Scope:	 g.Dog
+	Symid:	 V14
+	Value:	 weight
+	Kind:	 ivar
+	Data:	 type: int
+		 accessMod: private
+		 
+V15 ->	Scope:	 g.Dog
+	Symid:	 V15
+	Value:	 height
+	Kind:	 ivar
+	Data:	 type: int
+		 accessMod: private
+		 
+V16 ->	Scope:	 g.Dog
+	Symid:	 V16
+	Value:	 hatedCat
+	Kind:	 ivar
+	Data:	 type: Cat
+		 accessMod: public
+		 
+X17 ->	Scope:	 g.Dog
+	Symid:	 X17
+	Value:	 Dog
+	Kind:	 Constructor
+	Data:	 return type: Dog
+		 Param: [P18, P19, ]
+
+P18 ->	Scope:	 g.Dog.constructor
+	Symid:	 P18
+	Value:	 x
+	Kind:	 param
+	Data:	 type: int
+		 
+P19 ->	Scope:	 g.Dog.constructor
+	Symid:	 P19
+	Value:	 y
+	Kind:	 param
+	Data:	 type: char
+		 
+M20 ->	Scope:	 g.Dog
+	Symid:	 M20
+	Value:	 blankMethod
+	Kind:	 method
+	Data:	 returnType: void
+		 accessMod: private
+		 
+C21 ->	Scope:	 g
+	Symid:	 C21
+	Value:	 Bird
+	Kind:	 Class
+	Data:	 
+
+V22 ->	Scope:	 g.Bird
+	Symid:	 V22
+	Value:	 hasWings
+	Kind:	 ivar
+	Data:	 type: bool
+		 accessMod: public
+		 
+X23 ->	Scope:	 g.Bird
+	Symid:	 X23
+	Value:	 Bird
+	Kind:	 Constructor
+	Data:	 return type: Bird
+		 
+M24 ->	Scope:	 g.Bird
+	Symid:	 M24
+	Value:	 Wings
+	Kind:	 method
+	Data:	 returnType: void
+		 accessMod: public
+		 Param: [P25, P26, ]
+
+P25 ->	Scope:	 g.Bird.Wings
+	Symid:	 P25
+	Value:	 w
+	Kind:	 param
+	Data:	 type: char
+		 
+P26 ->	Scope:	 g.Bird.Wings
+	Symid:	 P26
+	Value:	 z
+	Kind:	 param
+	Data:	 type: char
+		 
+C27 ->	Scope:	 g
+	Symid:	 C27
+	Value:	 Bug
+	Kind:	 Class
+	Data:	 
+
+F28 ->	Scope:	 g
+	Symid:	 F28
+	Value:	 main
+	Kind:	 main
+	Data:	 return type: void
+		 
+L29 ->	Scope:	 g.main
+	Symid:	 L29
+	Value:	 b
+	Kind:	 lvar
+	Data:	 type: @:int
+		 
+L30 ->	Scope:	 g.main
+	Symid:	 L30
+	Value:	 c
+	Kind:	 lvar
+	Data:	 type: @:@:int
+		 
+N31 ->	Scope:	 g.main
+	Symid:	 N31
+	Value:	 1
+	Kind:	 ilit
+	Data:	 type: int
+		 
+L32 ->	Scope:	 g.main
+	Symid:	 L32
+	Value:	 x
+	Kind:	 lvar
+	Data:	 type: int
+		 
+N33 ->	Scope:	 g.main
+	Symid:	 N33
+	Value:	 18
+	Kind:	 ilit
+	Data:	 type: int
+		 
+L34 ->	Scope:	 g.main
+	Symid:	 L34
+	Value:	 y
+	Kind:	 lvar
+	Data:	 type: int
+		 
+N35 ->	Scope:	 g.main
+	Symid:	 N35
+	Value:	 21
+	Kind:	 ilit
+	Data:	 type: int
+		 
+L36 ->	Scope:	 g.main
+	Symid:	 L36
+	Value:	 d
+	Kind:	 lvar
+	Data:	 type: int
+		 
+N37 ->	Scope:	 g.main
+	Symid:	 N37
+	Value:	 0
+	Kind:	 ilit
+	Data:	 type: int
+		 
+L38 ->	Scope:	 g.main
+	Symid:	 L38
+	Value:	 e
+	Kind:	 lvar
+	Data:	 type: int
+		 
+N39 ->	Scope:	 g.main
+	Symid:	 N39
+	Value:	 856
+	Kind:	 ilit
+	Data:	 type: int
+		 
+L40 ->	Scope:	 g.main
+	Symid:	 L40
+	Value:	 w
+	Kind:	 lvar
+	Data:	 type: char
+		 
+H41 ->	Scope:	 g.main
+	Symid:	 H41
+	Value:	 'w'
+	Kind:	 clit
+	Data:	 type: char
+		 
+L42 ->	Scope:	 g.main
+	Symid:	 L42
+	Value:	 z
+	Kind:	 lvar
+	Data:	 type: char
+		 
+H43 ->	Scope:	 g.main
+	Symid:	 H43
+	Value:	 'z'
+	Kind:	 clit
+	Data:	 type: char
+		 
+L44 ->	Scope:	 g.main
+	Symid:	 L44
+	Value:	 dog
+	Kind:	 lvar
+	Data:	 type: Dog
+		 
+L45 ->	Scope:	 g.main
+	Symid:	 L45
+	Value:	 bird
+	Kind:	 lvar
+	Data:	 type: Bird
+		 
+N46 ->	Scope:	 g.main
+	Symid:	 N46
+	Value:	 1
+	Kind:	 ilit
+	Data:	 type: int
+		 
+N47 ->	Scope:	 g.main
+	Symid:	 N47
+	Value:	 2
+	Kind:	 ilit
+	Data:	 type: int
+		 
+H48 ->	Scope:	 g.main
+	Symid:	 H48
+	Value:	 'T'
+	Kind:	 clit
+	Data:	 type: char
+		 
+H49 ->	Scope:	 g.main
+	Symid:	 H49
+	Value:	 'T'
+	Kind:	 clit
+	Data:	 type: char
+		 
+H50 ->	Scope:	 g.main
+	Symid:	 H50
+	Value:	 'F'
+	Kind:	 clit
+	Data:	 type: char
+		 
+H51 ->	Scope:	 g.main
+	Symid:	 H51
+	Value:	 'T'
+	Kind:	 clit
+	Data:	 type: char
+		 
+H52 ->	Scope:	 g.main
+	Symid:	 H52
+	Value:	 'F'
+	Kind:	 clit
+	Data:	 type: char
+		 
+H53 ->	Scope:	 g.main
+	Symid:	 H53
+	Value:	 'T'
+	Kind:	 clit
+	Data:	 type: char
+		 
+e
