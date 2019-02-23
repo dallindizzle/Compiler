@@ -1,14 +1,23 @@
 class Cat {
 	public char name;
 
+	public int f(int x, int y) {
+		
+	}
+
 	Cat() {
 		
 	}
 }
 
 void kxi2019 main() { 
-	Cat cece = new Cat();
-	Cat b = new Cat();
+	int x = 0;
+	int k = 3;
+	int g = 5;
+	int r = 1;
 
-	cece.name = b.name;
+	Cat y = new Cat();
+
+	x = y.f(k, g) + g * r;
+
 }

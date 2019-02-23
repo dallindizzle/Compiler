@@ -504,9 +504,22 @@ namespace Compiler
         {
             if (scanner.getToken().lexeme == "(")
             {
+                // Semnatics code
+                oPush(scanner.getToken().lexeme);
+
                 scanner.nextToken();
+
+                // Semantics code
+                BAL();
+
                 if (isAargument_list(scanner.getToken().lexeme)) argument_list();
                 if (scanner.getToken().lexeme != ")") syntaxError(")");
+
+                // Semantics code
+                OS.Pop(); // This should pop the open paranthesis
+                EAL();
+                func();
+
                 scanner.nextToken();
             }
             else if (scanner.getToken().lexeme == "[")
@@ -653,7 +666,11 @@ namespace Compiler
                 rExist,
                 iPush,
                 oPush,
+                EOE,
                 mul,
+                BAL,
+                EAL,
+                func,
                 none
             };
 
@@ -661,6 +678,9 @@ namespace Compiler
             {
                 id_sar,
                 ref_sar,
+                bal_sar,
+                al_sar,
+                func_sar,
                 none
             };
 
@@ -669,12 +689,16 @@ namespace Compiler
             public pushes pushType;
             public string symKey;
 
+            public List<SAR> arguments; // This is used for al_sar (argument list sar)
+
             public SAR(string v, types t, pushes p = pushes.none, string key = "")
             {
                 val = v;
                 type = t;
                 pushType = p;
                 symKey = key;
+
+                arguments = new List<SAR>();
             }
         }
 
@@ -691,6 +715,12 @@ namespace Compiler
         void oPush(string op)
         {
             SAR sar = new SAR(op, SAR.types.none, SAR.pushes.oPush);
+
+            if (op == "(")
+            {
+                OS.Push(sar);
+                return;
+            }
 
             if (op == "=" && OS.Count > 0) semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
 
@@ -756,10 +786,41 @@ namespace Compiler
 
             var ivarSymId = classSym.Where(sym => sym.Value.Value == ivarSar.val).First().Key; // Get the symid for the instance variable
 
-            symTable.Add(symId, new Symbol(scope, symId,"temp_ref", symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));
+            if (ivarSar.type == SAR.types.func_sar) symTable.Add(symId, new Symbol(scope, symId, "temp_ref", symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["returnType"] } }));
+            else symTable.Add(symId, new Symbol(scope, symId,"temp_ref", symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));
 
             SAS.Push(new SAR($"{classSar.val}.{ivarSar.val}", SAR.types.ref_sar, SAR.pushes.rExist, symId));
 
+        }
+
+        void BAL()
+        {
+            SAR sar = new SAR("BAL", SAR.types.bal_sar, SAR.pushes.BAL);
+            SAS.Push(sar);
+        }
+
+        void EAL()
+        {
+            SAR sar = new SAR("al_sar", SAR.types.al_sar, SAR.pushes.EAL);
+            while(SAS.First().pushType != SAR.pushes.BAL)
+            {
+                sar.arguments.Add(SAS.Pop());
+            }
+
+            SAS.Pop(); // Pop bal_sar
+
+            SAS.Push(sar);
+        }
+
+        void func()
+        {
+            SAR arguments = SAS.Pop();
+            SAR fSar = SAS.Pop();
+
+            SAR functionSar = new SAR(fSar.val, SAR.types.func_sar, SAR.pushes.func);
+            functionSar.arguments = arguments.arguments;
+
+            SAS.Push(functionSar);
         }
 
         void EOE(bool eof = false)
@@ -777,7 +838,7 @@ namespace Compiler
                         if (symTable[op1temp.symKey].Data["type"] != "int" && symTable[op2temp.symKey].Data["type"] != "int") semanticError(scanner.getToken().lineNum, "Math operation", op1temp.val, "Wrong types for math op");
                         string sym = genId("t");
                         symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "int" } }));
-                        SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.mul, sym);
+                        SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
                         SAS.Push(sar);
                     }
                 }
