@@ -1,23 +1,30 @@
 class Cat {
 	public char name;
+	private Cat kid;
+	public int y;
 
-	public int f(int x, int y) {
-		
+	public Cat f() {
+
 	}
 
+	public Cat g() {
+
+	}
+
+
+
 	Cat() {
-		
+
 	}
 }
 
 void kxi2019 main() { 
-	int x = 0;
 	int k = 3;
 	int g = 5;
 	int r = 1;
 
-	Cat y = new Cat();
+	Cat x = new Cat();
 
-	x = y.f(k, g) + g * r;
+	x.f().g().y = r;
 
 }

@@ -786,6 +786,8 @@ namespace Compiler
 
             var ivarSymId = classSym.Where(sym => sym.Value.Value == ivarSar.val).First().Key; // Get the symid for the instance variable
 
+            if (symTable[ivarSymId].Data["accessMod"] == "private") semanticError(scanner.getToken().lineNum, "Variable", ivarSar.val, $"not public in {className}");
+
             if (ivarSar.type == SAR.types.func_sar) symTable.Add(symId, new Symbol(scope, symId, "temp_ref", symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["returnType"] } }));
             else symTable.Add(symId, new Symbol(scope, symId,"temp_ref", symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));
 
