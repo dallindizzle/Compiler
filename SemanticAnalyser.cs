@@ -188,10 +188,18 @@ namespace Compiler
 
             if (scanner.getToken().lexeme == "=")
             {
+
+                // Semantics code
+                oPush(scanner.getToken().lexeme);
+
                 scanner.nextToken();
                 assignment_expression();
             }
             if (scanner.getToken().lexeme != ";") syntaxError(";");
+
+            // Semantics code
+            EOE(true);
+
             scanner.nextToken();
         }
 
@@ -340,6 +348,7 @@ namespace Compiler
                 if (scanner.getToken().lexeme != ")") syntaxError(")");
 
                 // Semantics code
+                OS.Pop(); // Pop closing paranthesis
                 EAL();
                 newObj();
 
@@ -465,6 +474,10 @@ namespace Compiler
         void parameter()
         {
             type();
+
+            // Semantics code
+            tExist();
+
             if (scanner.getToken().type != "Identifier") syntaxError("Identifier");
             scanner.nextToken();
             if (scanner.getToken().lexeme == "[")
@@ -577,6 +590,10 @@ namespace Compiler
             else
             {
                 if (scanner.getToken().type != "Number") syntaxError("Number");
+
+                // Semantics code
+                lPush(scanner.getToken().lexeme);
+
                 scanner.nextToken();
             }
         }
@@ -702,6 +719,8 @@ namespace Compiler
                 oPush,
                 tPush,
                 vPush,
+                lPush,
+                newObj,
                 EOE,
                 mul,
                 BAL,
@@ -719,6 +738,8 @@ namespace Compiler
                 func_sar,
                 type_sar,
                 var_sar,
+                new_sar,
+                lit_sar,
                 none
             };
 
@@ -755,6 +776,13 @@ namespace Compiler
             string symKey = symTable.Where(sym => sym.Value.Scope == scope).ToList().Where(sym => sym.Value.Value == val).First().Key;
 
             SAS.Push(new SAR(val, SAR.types.var_sar, SAR.pushes.vPush, symKey));
+        }
+
+        void lPush(string lit)
+        {
+            string symKey = symTable.Where(sym => sym.Value.Scope == scope).Where(sym => sym.Value.Kind == "clit" || sym.Value.Kind == "ilit").Where(sym => sym.Value.Value == lit).First().Key;
+
+            SAS.Push(new SAR(lit, SAR.types.lit_sar, SAR.pushes.lPush, symKey));
         }
 
         void oPush(string op)
@@ -796,6 +824,41 @@ namespace Compiler
             }
 
 
+        }
+
+        void newObj()
+        {
+            SAR argumentsSar = SAS.Pop();
+            SAR typeSar = SAS.Pop();
+
+            // Get constructor
+            var constructor = symTable.Where(sym => sym.Value.Scope == $"g.{typeSar.val}").Where(sym => sym.Value.Kind == "Constructor").First();
+
+            if (argumentsSar.arguments.Count() > 0)
+            {
+                if (!constructor.Value.Data.ContainsKey("Param")) semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+
+                List<string> constructorArgs = constructor.Value.Data["Param"];
+
+                if (argumentsSar.arguments.Count() != constructorArgs.Count()) semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+
+                for (int i = 0; i < constructorArgs.Count(); i++)
+                {
+                    // Get constructor type
+                    string ct = symTable[constructorArgs[i]].Data["type"];
+
+                    // Get passed in type
+                    string pt = symTable[argumentsSar.arguments[i].symKey].Data["type"];
+
+                    if (pt != ct) semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+                }
+            }
+
+            else if (constructor.Value.Data.ContainsKey("Param")) semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+
+            SAR new_sar = new SAR(typeSar.val, SAR.types.new_sar, SAR.pushes.newObj, constructor.Key);
+            new_sar.arguments = argumentsSar.arguments;
+            SAS.Push(new_sar);
         }
 
         void iExist()
@@ -889,6 +952,12 @@ namespace Compiler
 
         void EOE(bool eof = false)
         {
+            if (OS.Count == 0)
+            {
+                SAS.Clear();
+                return;
+            }
+
             if (eof)
             {
                 while(OS.First().val != "=")
@@ -913,7 +982,13 @@ namespace Compiler
                 if (oper.val != "=" || OS.Count > 0) semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
 
                 if (symTable[op1.symKey].Kind != "lvar" && symTable[op1.symKey].Kind != "ivar") semanticError(scanner.getToken().lineNum, "Type", op1.val, "not lvalue");
-                if (symTable[op2.symKey].Data["type"] != symTable[op1.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+
+                if (op2.pushType == SAR.pushes.newObj)
+                {
+                    if (symTable[op2.symKey].Data["returnType"] != symTable[op1.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                }
+
+                else if (symTable[op2.symKey].Data["type"] != symTable[op1.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
             }
             else
             {

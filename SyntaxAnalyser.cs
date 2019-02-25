@@ -67,7 +67,7 @@ namespace Compiler
             if (scanner.getToken().lexeme != "main") syntaxError("main");
 
             string id = genId("F");
-            symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "main", new Dictionary<string, dynamic>() { { "return type", "void" } }));
+            symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "main", new Dictionary<string, dynamic>() { { "returnType", "void" } }));
 
             scanner.nextToken();
             if (scanner.getToken().lexeme != "(") syntaxError("(");
@@ -446,7 +446,7 @@ namespace Compiler
         void constructor_declaration()
         {
             string id = genId("X");
-            symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "Constructor", new Dictionary<string, dynamic>() { { "return type", scanner.getToken().lexeme } }));
+            symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "Constructor", new Dictionary<string, dynamic>() { { "returnType", scanner.getToken().lexeme } }));
 
             class_name();
             if (scanner.getToken().lexeme != "(") syntaxError("(");
