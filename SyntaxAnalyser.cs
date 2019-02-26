@@ -341,7 +341,7 @@ namespace Compiler
                 scanner.nextToken();
 
                 //TODO: change symbol to array
-                symTable[lastId].Data["type"] = $"@:{symTable[lastId].Data["type"]}";
+                //symTable[lastId].Data["type"] = $"@:{symTable[lastId].Data["type"]}";
 
                 expression();
                 if (scanner.getToken().lexeme != "]") syntaxError("]");

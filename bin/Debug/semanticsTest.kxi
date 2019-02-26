@@ -3,7 +3,7 @@ class Cat {
 	private Cat kid;
 	public int y;
 
-	public Cat f() {
+	public Cat f(int a, bool b) {
 
 	}
 
@@ -21,10 +21,10 @@ class Cat {
 void kxi2019 main() { 
 	Cat x = new Cat(r);
 
-	int y = 4;
+	int k = 4;
 	int g = 5;
 	int r = 1;
 
-	x.f().g().y = r;
+	x.f(r * 3, g < k);
 
 }
