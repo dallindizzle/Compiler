@@ -19,12 +19,12 @@ class Cat {
 }
 
 void kxi2019 main() { 
-	Cat x = new Cat(r);
+	int c[] = new int[10];
 
 	int k = 4;
 	int g = 5;
 	int r = 1;
 
-	x.f(r * 3, g < k);
+	c[r + 3] = 3;
 
 }

@@ -239,6 +239,9 @@ namespace Compiler
             }
             else if (scanner.getToken().type == "Character")
             {
+                // Semantics code
+                lPush(scanner.getToken().lexeme);
+
                 scanner.nextToken();
                 if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
             }
@@ -353,9 +356,7 @@ namespace Compiler
                 if (scanner.getToken().lexeme != ")") syntaxError(")");
 
                 // Semantics code
-                while (OS.First().val != "(")
-                    EOE();
-                OS.Pop();
+                ClosingParen();
                 EAL();
                 newObj();
 
@@ -373,9 +374,7 @@ namespace Compiler
                 if (scanner.getToken().lexeme != "]") syntaxError("]");
 
                 // Semantics code
-                while (OS.First().val != "[")
-                    EOE();
-                OS.Pop();
+                ClosingBracket();
                 newArray();
 
                 scanner.nextToken();
@@ -513,7 +512,7 @@ namespace Compiler
             while (scanner.getToken().lexeme == ",")
             {
                 // Semnatics code
-                EOE();
+                Argument();
 
                 scanner.nextToken();
                 expression();
@@ -571,7 +570,7 @@ namespace Compiler
         {
             if (scanner.getToken().lexeme == "(")
             {
-                // Semnatics code
+                // Semantics code
                 oPush(scanner.getToken().lexeme);
 
                 scanner.nextToken();
@@ -583,9 +582,7 @@ namespace Compiler
                 if (scanner.getToken().lexeme != ")") syntaxError(")");
 
                 // Semantics code
-                while (OS.First().val != "(")
-                    EOE();
-                OS.Pop();
+                ClosingParen();
                 EAL();
                 func();
 
@@ -593,9 +590,17 @@ namespace Compiler
             }
             else if (scanner.getToken().lexeme == "[")
             {
+                // Semantics code
+                oPush(scanner.getToken().lexeme);
+
                 scanner.nextToken();
                 expression();
-                if (scanner.getToken().lexeme != "]") syntaxError("[");
+                if (scanner.getToken().lexeme != "]") syntaxError("]");
+
+                // Semantics code
+                ClosingBracket();
+                arr();
+
                 scanner.nextToken();
             }
             else syntaxError("( or [");
@@ -750,6 +755,7 @@ namespace Compiler
                 BAL,
                 EAL,
                 func,
+                arr,
                 none
             };
 
@@ -759,6 +765,7 @@ namespace Compiler
                 ref_sar,
                 bal_sar,
                 al_sar,
+                arr_sar,
                 func_sar,
                 type_sar,
                 var_sar,
@@ -1042,7 +1049,19 @@ namespace Compiler
                 {
                     if (op1.val.Substring(op1.val.Length - 2) != "[]") semanticError(scanner.getToken().lineNum, "Array init", op1.val, "Not array type");
                 }
+                else if (symTable[op1.symKey].Data["type"][0] == '@')
+                {
+                    string type = symTable[op1.symKey].Data["type"].Substring(2);
 
+                    if (op1.arguments.Count != 1 && symTable[op2.symKey].Data["type"] == type) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+
+                    if (symTable[op2.symKey].Data["type"] == $"@:{type}")
+                    {
+                        if (op2.arguments.Count != 1) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                        return;
+                    }
+                    else if (symTable[op2.symKey].Data["type"] != type) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                }
                 else if (symTable[op2.symKey].Data["type"] != symTable[op1.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
             }
             else
@@ -1074,6 +1093,45 @@ namespace Compiler
                     if (symTable[y.symKey].Data["type"] != symTable[x.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Type", y.val, "not valid type");
                 }
             }
+        }
+
+        void ClosingParen()
+        {
+            while (OS.First().val != "(")
+            {
+                EOE();
+            }
+            OS.Pop();
+        }
+
+        void ClosingBracket()
+        {
+            while (OS.First().val != "[")
+            {
+                EOE();
+            }
+            OS.Pop();
+        }
+
+        void Argument()
+        {
+            while (OS.First().val != "(")
+            {
+                EOE();
+            }
+        }
+
+        void arr()
+        {
+            SAR argument = SAS.Pop();
+            SAR array = SAS.Pop();
+
+            if (symTable[argument.symKey].Data["type"] != "int") semanticError(scanner.getToken().lineNum, "Array init", array.val, $"Array requires int idnex got {symTable[argument.symKey].Data["type"]}");
+
+            SAR arr_sar = new SAR(array.val, SAR.types.arr_sar, SAR.pushes.arr, array.symKey);
+            arr_sar.arguments.Add(argument);
+
+            SAS.Push(arr_sar);
         }
 
         void dup(string val)

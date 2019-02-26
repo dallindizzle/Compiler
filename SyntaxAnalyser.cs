@@ -554,7 +554,7 @@ namespace Compiler
             {
                 scanner.nextToken();
                 expression();
-                if (scanner.getToken().lexeme != "]") syntaxError("[");
+                if (scanner.getToken().lexeme != "]") syntaxError("]");
                 scanner.nextToken();
             }
             else syntaxError("( or [");
