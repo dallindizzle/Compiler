@@ -183,9 +183,9 @@ namespace Compiler
             if (scanner.getToken().lexeme == "[")
             {
                 // Semantics code
-                SAR tempSar = SAS.Pop();
-                tempSar.val += "[]";
-                SAS.Push(tempSar);
+                //SAR tempSar = SAS.Pop();
+                //tempSar.val += "[]";
+                //SAS.Push(tempSar);
 
                 scanner.nextToken();
                 if (scanner.getToken().lexeme != "]") syntaxError("]");
@@ -923,6 +923,11 @@ namespace Compiler
             SAR new_sar = new SAR("new_sar", SAR.types.new_sar, SAR.pushes.newArray);
             new_sar.arguments.Add(expression);
 
+            // Semantics code
+            SAR tempSar = SAS.Pop();
+            tempSar.val += "[]";
+            SAS.Push(tempSar);
+
             SAS.Push(new_sar);
         }
 
@@ -985,7 +990,10 @@ namespace Compiler
             if (ivarSar.type == SAR.types.func_sar) symTable.Add(symId, new Symbol(scope, symId, "temp_ref", symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["returnType"] } }));
             else symTable.Add(symId, new Symbol(scope, symId,"temp_ref", symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));
 
-            SAS.Push(new SAR($"{classSar.val}.{ivarSar.val}", SAR.types.ref_sar, SAR.pushes.rExist, symId));
+            SAR newSar = new SAR($"{classSar.val}.{ivarSar.val}", SAR.types.ref_sar, SAR.pushes.rExist, symId);
+            newSar.arguments = ivarSar.arguments;
+
+            SAS.Push(newSar);
 
         }
 

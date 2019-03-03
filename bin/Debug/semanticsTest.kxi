@@ -1,26 +1,18 @@
 class Cat {
-	public char name;
-	private Cat kid;
-	public int x;
-
-	public Cat f() {
-
-	}
-
-	public Cat g() {
-
-	}
-
-
+	public int x[];
 
 	Cat(int y) {
-		this.x = y;
+		this.x = new int[4];
 	}
 }
 
 void kxi2019 main() { 
-	int y = 4;
-	Cat x = new Cat(y);
+	Cat a = new Cat(y);
+	int r = 3;
+	Cat x[] = new Cat[r];
 
+	int i = 3;
+	int y = 12;
+	a.x[i] = y;
 
 }
