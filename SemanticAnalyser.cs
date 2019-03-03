@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace Compiler
 {
@@ -228,6 +229,11 @@ namespace Compiler
             }
             else if (scanner.getToken().lexeme == "this")
             {
+                // Semantics code
+                iPush(scanner.getToken().lexeme);
+                iExist();
+
+
                 scanner.nextToken();
                 if (isAmember_refZ(scanner.getToken().lexeme)) member_refZ();
                 if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
@@ -241,6 +247,7 @@ namespace Compiler
             {
                 // Semantics code
                 lPush(scanner.getToken().lexeme);
+                iExist();
 
                 scanner.nextToken();
                 if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
@@ -923,6 +930,16 @@ namespace Compiler
         {
             SAR sar = SAS.Pop();
 
+            if (sar.val == "this")
+            {
+                Regex pat = new Regex(@"g\.\w*\.\w+");
+                if (!pat.IsMatch(scope)) semanticError(scanner.getToken().lineNum, "iExist", "this", "Wrong use of \"this\"");
+                sar.pushType = SAR.pushes.iExist;
+                sar.type = SAR.types.id_sar;
+                SAS.Push(sar);
+                return;
+            }
+
             var potSym = symTable.Where(sym => sym.Value.Scope == scope).ToList();
 
             if (potSym.Count == 0) semanticError(scanner.getToken().lineNum, "Variable", scanner.getToken().lexeme, "not defined");
@@ -942,7 +959,15 @@ namespace Compiler
             SAR ivarSar = SAS.Pop();
             SAR classSar = SAS.Pop();
 
-            string className = symTable[classSar.symKey].Data["type"];
+            string className = "";
+
+            if (classSar.val == "this")
+            {
+                Regex pat = new Regex(@"(\w+)");
+
+                className = pat.Matches(scope)[1].ToString();
+            }
+            else className = symTable[classSar.symKey].Data["type"];
 
             var classSym = symTable.Where(sym => sym.Value.Scope == $"g.{className}").ToList(); // Get list of symbols for the class
 
@@ -952,7 +977,10 @@ namespace Compiler
 
             var ivarSymId = classSym.Where(sym => sym.Value.Value == ivarSar.val).First().Key; // Get the symid for the instance variable
 
-            if (symTable[ivarSymId].Data["accessMod"] == "private") semanticError(scanner.getToken().lineNum, "Variable", ivarSar.val, $"not public in {className}");
+            if (classSar.val != "this")
+            {
+                if (symTable[ivarSymId].Data["accessMod"] == "private") semanticError(scanner.getToken().lineNum, "Variable", ivarSar.val, $"not public in {className}");
+            }
 
             if (ivarSar.type == SAR.types.func_sar) symTable.Add(symId, new Symbol(scope, symId, "temp_ref", symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["returnType"] } }));
             else symTable.Add(symId, new Symbol(scope, symId,"temp_ref", symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));

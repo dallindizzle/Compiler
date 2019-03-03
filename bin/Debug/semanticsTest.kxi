@@ -1,9 +1,9 @@
 class Cat {
 	public char name;
 	private Cat kid;
-	public int y;
+	public int x;
 
-	public Cat f(int a, bool b) {
+	public Cat f() {
 
 	}
 
@@ -13,18 +13,14 @@ class Cat {
 
 
 
-	Cat(int a) {
-
+	Cat(int y) {
+		this.x = y;
 	}
 }
 
 void kxi2019 main() { 
-	int c[] = new int[10];
+	int y = 4;
+	Cat x = new Cat(y);
 
-	int k = 4;
-	int g = 5;
-	int r = 1;
-
-	c[r + 3] = 3;
 
 }
