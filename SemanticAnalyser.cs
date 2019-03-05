@@ -101,9 +101,18 @@ namespace Compiler
             {
                 scanner.nextToken();
                 if (scanner.getToken().lexeme != "(") syntaxError("(");
+
+                // Semantics code
+                oPush(scanner.getToken().lexeme);
+
                 scanner.nextToken();
                 expression();
                 if (scanner.getToken().lexeme != ")") syntaxError(")");
+
+                // Semantics code
+                ClosingParen();
+                ifCase();
+
                 scanner.nextToken();
                 statement();
                 if (scanner.getToken().lexeme == "else")
@@ -166,7 +175,7 @@ namespace Compiler
 
         void variable_declaration()
         {
-            string typ = scanner.getToken().lexeme; // This is for symbol table
+            //string typ = scanner.getToken().lexeme; // This is for symbol table
 
             type();
 
@@ -276,6 +285,9 @@ namespace Compiler
             {
                 if (scanner.peekToken().lexeme == "=")
                 {
+                    oPush("==");
+
+                    scanner.nextToken();
                     scanner.nextToken();
                     expression();
                 }
@@ -396,7 +408,11 @@ namespace Compiler
 
             push(scanner.getToken().lexeme); // Here we push the class name to the scope, which we assume is here
 
+            // Semantics code
+            dup(scanner.getToken().lexeme, true);
+
             class_name();
+
             if (scanner.getToken().lexeme != "{") syntaxError("{");
             scanner.nextToken();
             while (scanner.getToken().lexeme == "public" || scanner.getToken().lexeme == "private" || scanner.getToken().type == "Identifier")
@@ -414,11 +430,11 @@ namespace Compiler
         {
             if (scanner.getToken().lexeme == "public" || scanner.getToken().lexeme == "private")
             {
-                string modifier = scanner.getToken().lexeme; // This is for the symbol table
+                //string modifier = scanner.getToken().lexeme; // This is for the symbol table
 
                 scanner.nextToken();
 
-                string typ = scanner.getToken().lexeme; // This is for the symbol table
+                //string typ = scanner.getToken().lexeme; // This is for the symbol table
 
                 type();
 
@@ -426,6 +442,10 @@ namespace Compiler
                 tExist();
 
                 if (scanner.getToken().type != "Identifier") syntaxError("Identifier");
+
+                // Semantics code
+                dup(scanner.getToken().lexeme);
+                vPush(scanner.getToken().lexeme);
 
                 push(scanner.getToken().lexeme); // pushing scope of class method, if class field then it should still be okay, I think
 
@@ -457,19 +477,29 @@ namespace Compiler
                     scanner.nextToken();
                 }
 
+
                 if (scanner.getToken().lexeme == "=")
                 {
+                    // Semantics code
+                    oPush(scanner.getToken().lexeme);
+
                     scanner.nextToken();
                     assignment_expression();
                 }
 
                 if (scanner.getToken().lexeme != ";") syntaxError(";");
                 scanner.nextToken();
+
+                EOE(true);
             }
         }
 
         void constructor_declaration()
         {
+            // Semantics code
+            dup(scanner.getToken().lexeme);
+            CD(scanner.getToken().lexeme);
+
             class_name();
             if (scanner.getToken().lexeme != "(") syntaxError("(");
 
@@ -503,6 +533,10 @@ namespace Compiler
             tExist();
 
             if (scanner.getToken().type != "Identifier") syntaxError("Identifier");
+
+            // Semantics code
+            dup(scanner.getToken().lexeme);
+
             scanner.nextToken();
             if (scanner.getToken().lexeme == "[")
             {
@@ -872,6 +906,18 @@ namespace Compiler
                 }
                 else OS.Push(sar);
             }
+            else if (op == "==" || op == "!=")
+            {
+                if (OS.First().val == "*" || OS.First().val == "/" || OS.First().val == "+" || OS.First().val == "-" || OS.First().val == "<" || OS.First().val == "<=" || OS.First().val == ">" || OS.First().val == ">=" || OS.First().val == "==" || OS.First().val == "!=")
+                {
+                    while (OS.First().val == "*" || OS.First().val == "/" || OS.First().val == "+" || OS.First().val == "-" || OS.First().val == "<" || OS.First().val == "<=" || OS.First().val == ">" || OS.First().val == ">=" || OS.First().val == "==" || OS.First().val == "!=")
+                    {
+                        EOE();
+                    }
+                    OS.Push(sar);
+                }
+                else OS.Push(sar);         
+            }
 
 
         }
@@ -1044,6 +1090,13 @@ namespace Compiler
             SAS.Push(functionSar);
         }
 
+        void CD(string val)
+        {
+            string className = scope.Substring(2);
+
+            if (val != className) semanticError(scanner.getToken().lineNum, "Constructor", val, $"must match class name {className}");
+        }
+
         void EOE(bool eof = false)
         {
             if (OS.Count == 0)
@@ -1122,6 +1175,14 @@ namespace Compiler
                     SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
                     SAS.Push(sar);
                 }
+                else if (op.val == "==" || op.val == "!=")
+                {
+                    if (symTable[x.symKey].Data["type"] != symTable[y.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Logical operation", x.val, "Wrong types for logical op");
+                    string sym = genId("t");
+                    symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "bool" } }));
+                    SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
+                    SAS.Push(sar);
+                }
 
                 else if (op.val == "=")
                 {
@@ -1170,9 +1231,26 @@ namespace Compiler
             SAS.Push(arr_sar);
         }
 
-        void dup(string val)
+        void dup(string val, bool clss = false)
         {
-            if (symTable.Where(sym => sym.Value.Scope == scope).ToList().Where(sym => sym.Value.Value == val).ToList().Count > 1) semanticError(scanner.getToken().lineNum, "Duplicate name", val, "Duplicate name");
+            if (clss)
+            {
+                var clssPotentials = symTable.Where(sym => sym.Value.Scope == "g").ToList().Where(sym => sym.Value.Value == val).ToList();
+                if (clssPotentials.Count > 1) semanticError(scanner.getToken().lineNum, "Duplicate name", val, "Duplicate name");
+                return;
+            }
+
+            var potentials = symTable.Where(sym => sym.Value.Scope == scope).ToList().Where(sym => sym.Value.Value == val).ToList();
+
+            if (potentials.Count > 1) semanticError(scanner.getToken().lineNum, "Duplicate name", val, "Duplicate name");
+        }
+
+        void ifCase()
+        {
+            SAR sar = SAS.Pop();
+            string type = symTable[sar.symKey].Data["type"];
+
+            if (type != "bool") semanticError(scanner.getToken().lineNum, "if", type, $"if requires bool got {type}");
         }
 
         void semanticError(int line, string type, string lexeme, string prob)
