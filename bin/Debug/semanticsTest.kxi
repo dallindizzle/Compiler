@@ -14,17 +14,5 @@ class Cat {
 }
 
 void kxi2019 main() { 
-	Cat a = new Cat(y);
-	int r = 3;
-	Cat x[] = new Cat[r];
-
-	int i = 3;
-	int y = 12;
-
-	r = 3;
-
-	cin >> r;
-
-	a.x[i] = y;
-
+	bool cool = false;
 }

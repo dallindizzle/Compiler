@@ -46,6 +46,15 @@ namespace Compiler
 
             symTable = new Dictionary<string, Symbol>();
             symId = 0;
+
+            // Add these keywords too symbol table because they should always exist globally
+            string id = genId("A");
+            symTable.Add(id, new Symbol("g", id, "true", "ilit", new Dictionary<string, dynamic>() { { "type", "bool" } }));
+            id = genId("A");
+            symTable.Add(id, new Symbol("g", id, "false", "ilit", new Dictionary<string, dynamic>() { { "type", "bool" } }));
+            id = genId("A");
+            symTable.Add(id, new Symbol("g", id, "null", "ilit", new Dictionary<string, dynamic>() { { "type", "unknown" } }));
+
         }
 
         public void go()

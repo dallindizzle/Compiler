@@ -243,17 +243,27 @@ namespace Compiler
         {
             if (scanner.getToken().lexeme == "(")
             {
+                // Semantics code
+                oPush(scanner.getToken().lexeme);
+
                 scanner.nextToken();
                 expression();
                 if (scanner.getToken().lexeme == ")")
                 {
                     scanner.nextToken();
+
+                    // Semantics code
+                    ClosingParen();
+
                     if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
                 }
                 else syntaxError(")");
             }
             else if (scanner.getToken().lexeme == "true" || scanner.getToken().lexeme == "false" || scanner.getToken().lexeme == "null")
             {
+                // Semantics code
+                lPush(scanner.getToken().lexeme);
+
                 scanner.nextToken();
                 if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
             }
@@ -873,7 +883,13 @@ namespace Compiler
 
         void lPush(string lit)
         {
-            string symKey = symTable.Where(sym => sym.Value.Scope == scope).Where(sym => sym.Value.Kind == "clit" || sym.Value.Kind == "ilit").Where(sym => sym.Value.Value == lit).First().Key;
+            string symKey;
+
+            if (lit == "true" || lit == "false" || lit == "null")
+            {
+                symKey = symTable.Where(sym => sym.Value.Scope == "g").Where(sym => sym.Value.Kind == "clit" || sym.Value.Kind == "ilit").Where(sym => sym.Value.Value == lit).First().Key;
+            }
+            else symKey = symTable.Where(sym => sym.Value.Scope == scope).Where(sym => sym.Value.Kind == "clit" || sym.Value.Kind == "ilit").Where(sym => sym.Value.Value == lit).First().Key;
 
             SAS.Push(new SAR(lit, SAR.types.lit_sar, SAR.pushes.lPush, symKey));
         }
