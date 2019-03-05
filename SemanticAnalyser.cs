@@ -125,9 +125,18 @@ namespace Compiler
             {
                 scanner.nextToken();
                 if (scanner.getToken().lexeme != "(") syntaxError("(");
+
+                //Semantics code
+                oPush(scanner.getToken().lexeme);
+
                 scanner.nextToken();
                 expression();
                 if (scanner.getToken().lexeme != ")") syntaxError(")");
+
+                // Semantics code
+                ClosingParen();
+                whileCase();
+
                 scanner.nextToken();
                 statement();
             }
@@ -136,6 +145,10 @@ namespace Compiler
                 scanner.nextToken();
                 if (isAexpression()) expression();
                 if (scanner.getToken().lexeme != ";") syntaxError(";");
+
+                // Semantics code
+                returnCase();
+
                 scanner.nextToken();
             }
             else if (scanner.getToken().lexeme == "cout")
@@ -147,6 +160,10 @@ namespace Compiler
                 scanner.nextToken();
                 expression();
                 if (scanner.getToken().lexeme != ";") syntaxError(";");
+
+                // Semantics code
+                coutCase();
+
                 scanner.nextToken();
             }
             else if (scanner.getToken().lexeme == "cin")
@@ -158,6 +175,10 @@ namespace Compiler
                 scanner.nextToken();
                 expression();
                 if (scanner.getToken().lexeme != ";") syntaxError(";");
+
+                // Semantics code
+                cinCase();
+
                 scanner.nextToken();
             }
             else
@@ -1252,6 +1273,64 @@ namespace Compiler
 
             if (type != "bool") semanticError(scanner.getToken().lineNum, "if", type, $"if requires bool got {type}");
         }
+
+        void whileCase()
+        {
+            SAR sar = SAS.Pop();
+            string type = symTable[sar.symKey].Data["type"];
+
+            if (type != "bool") semanticError(scanner.getToken().lineNum, "while", type, $"while requires bool got {type}");
+        }
+
+        void returnCase()
+        {
+            while(OS.Count > 0)
+            {
+                EOE();
+            }
+
+            SAR sar = SAS.Pop();
+            string varType = symTable[sar.symKey].Data["type"];
+
+            string functionName = scope.Split('.').Last();
+            string classScope = scope.Substring(0, scope.LastIndexOf('.'));
+
+            var functionSym = symTable.Where(sym => sym.Value.Scope == classScope).Where(sym => sym.Value.Value == functionName).First();
+            string functionReturnType = functionSym.Value.Data["returnType"];
+
+            if (functionReturnType != varType) semanticError(scanner.getToken().lineNum, "Return", varType, $"Function requires {functionReturnType} returned {varType}");
+
+        }
+
+        void coutCase()
+        {
+            while(OS.Count > 0)
+            {
+                EOE();
+            }
+
+            SAR sar = SAS.Pop();
+
+            string varType = symTable[sar.symKey].Data["type"];
+
+            if (varType != "int" && varType != "char") semanticError(scanner.getToken().lineNum, "cout", sar.val, $"cout not defined for {varType}");
+        }
+
+        void cinCase()
+        {
+            while (OS.Count > 0)
+            {
+                EOE();
+            }
+
+            SAR sar = SAS.Pop();
+
+            string varType = symTable[sar.symKey].Data["type"];
+
+            if (varType != "int" && varType != "char") semanticError(scanner.getToken().lineNum, "cin", sar.val, $"cin not defined for {varType}");
+        }
+
+
 
         void semanticError(int line, string type, string lexeme, string prob)
         {
