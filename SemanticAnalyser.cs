@@ -316,6 +316,7 @@ namespace Compiler
             {
                 if (scanner.peekToken().lexeme == "=")
                 {
+                    // Semantics code
                     oPush("==");
 
                     scanner.nextToken();
@@ -333,12 +334,18 @@ namespace Compiler
             }
             else if (scanner.getToken().lexeme == "&" && scanner.peekToken().lexeme == "&")
             {
+                // Semantics code
+                oPush("&&");
+
                 scanner.nextToken();
                 scanner.nextToken();
                 expression();
             }
             else if (scanner.getToken().lexeme == "|" && scanner.peekToken().lexeme == "|")
             {
+                // Semantics code
+                oPush("||");
+
                 scanner.nextToken();
                 scanner.nextToken();
                 expression();
@@ -493,6 +500,9 @@ namespace Compiler
         {
             if (scanner.getToken().lexeme == "(")
             {
+                // Semantics code
+                SAS.Pop(); // Pop first record because it is a function, not a variable
+
                 scanner.nextToken();
                 if (isAtype(scanner.getToken().lexeme)) parameter_list();
                 if (scanner.getToken().lexeme != ")") syntaxError(")");
@@ -955,6 +965,30 @@ namespace Compiler
                 }
                 else OS.Push(sar);         
             }
+            else if (op == "&&")
+            {
+                if (OS.First().val == "*" || OS.First().val == "/" || OS.First().val == "+" || OS.First().val == "-" || OS.First().val == "<" || OS.First().val == "<=" || OS.First().val == ">" || OS.First().val == ">=" || OS.First().val == "==" || OS.First().val == "!=" || OS.First().val == "&&")
+                {
+                    while (OS.First().val == "*" || OS.First().val == "/" || OS.First().val == "+" || OS.First().val == "-" || OS.First().val == "<" || OS.First().val == "<=" || OS.First().val == ">" || OS.First().val == ">=" || OS.First().val == "==" || OS.First().val == "!=" || OS.First().val == "&&")
+                    {
+                        EOE();
+                    }
+                    OS.Push(sar);
+                }
+                else OS.Push(sar);
+            }
+            else if (op == "||")
+            {
+                if (OS.First().val == "*" || OS.First().val == "/" || OS.First().val == "+" || OS.First().val == "-" || OS.First().val == "<" || OS.First().val == "<=" || OS.First().val == ">" || OS.First().val == ">=" || OS.First().val == "==" || OS.First().val == "!=" || OS.First().val == "&&" || OS.First().val == "||")
+                {
+                    while (OS.First().val == "*" || OS.First().val == "/" || OS.First().val == "+" || OS.First().val == "-" || OS.First().val == "<" || OS.First().val == "<=" || OS.First().val == ">" || OS.First().val == ">=" || OS.First().val == "==" || OS.First().val == "!=" || OS.First().val == "&&" || OS.First().val == "||")
+                    {
+                        EOE();
+                    }
+                    OS.Push(sar);
+                }
+                else OS.Push(sar);
+            }
 
 
         }
@@ -1146,15 +1180,39 @@ namespace Compiler
             {
                 while(OS.First().val != "=")
                 {
-                    var op2temp = SAS.Pop();
-                    var op1temp = SAS.Pop();
+                    var y = SAS.Pop();
+                    var x = SAS.Pop();
                     var operTemp = OS.Pop();
 
                     if (operTemp.val == "*" || operTemp.val == "/" || operTemp.val == "-" || operTemp.val == "+")
                     {
-                        if (symTable[op1temp.symKey].Data["type"] != "int" && symTable[op2temp.symKey].Data["type"] != "int") semanticError(scanner.getToken().lineNum, "Math operation", op1temp.val, "Wrong types for math op");
+                        if (symTable[x.symKey].Data["type"] != "int" && symTable[y.symKey].Data["type"] != "int") semanticError(scanner.getToken().lineNum, "Math operation", x.val, "Wrong types for math op");
                         string sym = genId("t");
                         symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "int" } }));
+                        SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
+                        SAS.Push(sar);
+                    }
+                    else if (operTemp.val == "<" || operTemp.val == "<=" || operTemp.val == ">" || operTemp.val == ">=")
+                    {
+                        if (symTable[x.symKey].Data["type"] != "int" && symTable[y.symKey].Data["type"] != "int") semanticError(scanner.getToken().lineNum, "Math operation", x.val, "Wrong types for math op");
+                        string sym = genId("t");
+                        symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "bool" } }));
+                        SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
+                        SAS.Push(sar);
+                    }
+                    else if (operTemp.val == "==" || operTemp.val == "!=")
+                    {
+                        if (symTable[x.symKey].Data["type"] != symTable[y.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Logical operation", x.val, "Wrong types for logical op");
+                        string sym = genId("t");
+                        symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "bool" } }));
+                        SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
+                        SAS.Push(sar);
+                    }
+                    else if (operTemp.val == "&&" || operTemp.val == "||")
+                    {
+                        if (symTable[x.symKey].Data["type"] != "bool" || symTable[y.symKey].Data["type"] != "bool") semanticError(scanner.getToken().lineNum, "Logical operation", x.val, "Wrong types for logical op");
+                        string sym = genId("t");
+                        symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "bool" } }));
                         SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
                         SAS.Push(sar);
                     }
@@ -1215,6 +1273,14 @@ namespace Compiler
                 else if (op.val == "==" || op.val == "!=")
                 {
                     if (symTable[x.symKey].Data["type"] != symTable[y.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Logical operation", x.val, "Wrong types for logical op");
+                    string sym = genId("t");
+                    symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "bool" } }));
+                    SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
+                    SAS.Push(sar);
+                }
+                else if (op.val == "&&" || op.val == "||")
+                {
+                    if (symTable[x.symKey].Data["type"] != "bool" || symTable[y.symKey].Data["type"] != "bool") semanticError(scanner.getToken().lineNum, "Logical operation", x.val, "Wrong types for logical op");
                     string sym = genId("t");
                     symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "bool" } }));
                     SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);

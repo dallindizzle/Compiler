@@ -14,5 +14,11 @@ class Cat {
 }
 
 void kxi2019 main() { 
+	int x = 3;
 	bool cool = false;
+	bool school = true;
+
+	while(x == 3 && school == true){
+		cool = true;
+	}
 }
