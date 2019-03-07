@@ -3,22 +3,13 @@ class Cat {
 	public char y = 'd';
 	private int age;
 
-	Cat(int y) {
-		this.x = new int[4];
-		this.age = y;
+	Cat(int x, bool b) {
 	}
 
 	public int GetAge() {
-		return this.age * 3;
 	}
 }
 
 void kxi2019 main() { 
-	int x = 3;
-	bool cool = false;
-	bool school = true;
-
-	while(x == 3 && school == true){
-		cool = true;
-	}
+	Cat cat = new Cat(3, true);
 }

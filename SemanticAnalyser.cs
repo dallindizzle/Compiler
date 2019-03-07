@@ -1011,6 +1011,8 @@ namespace Compiler
 
                 for (int i = 0; i < constructorArgs.Count(); i++)
                 {
+                    if (i > argumentsSar.arguments.Count - 1) semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+
                     // Get constructor type
                     string ct = symTable[constructorArgs[i]].Data["type"];
 
@@ -1142,7 +1144,7 @@ namespace Compiler
             SAR sar = new SAR("al_sar", SAR.types.al_sar, SAR.pushes.EAL);
             while(SAS.First().pushType != SAR.pushes.BAL)
             {
-                sar.arguments.Add(SAS.Pop());
+                sar.arguments.Insert(0,SAS.Pop());
             }
 
             SAS.Pop(); // Pop bal_sar
@@ -1222,6 +1224,7 @@ namespace Compiler
                 SAR oper = OS.Pop();
 
                 if (oper.val != "=" || OS.Count > 0) semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
+                if (op1.val == "this") semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
 
                 if (symTable[op1.symKey].Kind != "lvar" && symTable[op1.symKey].Kind != "ivar") semanticError(scanner.getToken().lineNum, "Type", op1.val, "not lvalue");
 
