@@ -4,6 +4,7 @@ class Cat {
 	private int age;
 
 	Cat(int x, bool b) {
+		int y = 4;
 	}
 
 	public int GetAge() {

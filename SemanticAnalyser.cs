@@ -287,7 +287,7 @@ namespace Compiler
             {
                 // Semantics code
                 lPush(scanner.getToken().lexeme);
-                iExist();
+                //iExist();
 
                 scanner.nextToken();
                 if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
@@ -295,9 +295,7 @@ namespace Compiler
             else if (scanner.getToken().type == "Identifier")
             {
                 // Semantic code
-
                 if (!symTable.Where(tempsym => tempsym.Value.Scope == scope).Any(sym => sym.Value.Value == scanner.getToken().lexeme)) semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
-
                 string symKey = symTable.Where(tempsym => tempsym.Value.Scope == scope).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
                 iPush(scanner.getToken().lexeme, symKey);
 
@@ -902,7 +900,7 @@ namespace Compiler
             {
                 symKey = symTable.Where(sym => sym.Value.Scope == "g").Where(sym => sym.Value.Kind == "clit" || sym.Value.Kind == "ilit").Where(sym => sym.Value.Value == lit).First().Key;
             }
-            else symKey = symTable.Where(sym => sym.Value.Scope == scope).Where(sym => sym.Value.Kind == "clit" || sym.Value.Kind == "ilit").Where(sym => sym.Value.Value == lit).First().Key;
+            else symKey = symTable.Where(sym => sym.Value.Scope == "g").Where(sym => sym.Value.Kind == "clit" || sym.Value.Kind == "ilit").Where(sym => sym.Value.Value == lit).First().Key;
 
             SAS.Push(new SAR(lit, SAR.types.lit_sar, SAR.pushes.lPush, symKey));
         }
@@ -1066,6 +1064,8 @@ namespace Compiler
                 SAS.Push(sar);
                 return;
             }
+
+            if (sar.type == SAR.types.lit_sar) return; // It's a literal and literals always exist so we're good
 
             var potSym = symTable.Where(sym => sym.Value.Scope == scope).ToList();
 

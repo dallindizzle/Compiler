@@ -246,7 +246,7 @@ namespace Compiler
 
                 if (!symTable.Any(sym => sym.Value.Value == scanner.getToken().lexeme)) // Check if literal is already in symbol table
                 { 
-                    symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "ilit", new Dictionary<string, dynamic>() { { "type", "int" } }));
+                    symTable.Add(id, new Symbol("g", id, scanner.getToken().lexeme, "ilit", new Dictionary<string, dynamic>() { { "type", "int" } }));
                 }
 
                 numeric_literal();
@@ -258,7 +258,7 @@ namespace Compiler
 
                 if (!symTable.Any(sym => sym.Value.Value == scanner.getToken().lexeme)) // Check if literal is already in symbol table
                 { 
-                    symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "clit", new Dictionary<string, dynamic>() { { "type", "char" } }));
+                    symTable.Add(id, new Symbol("g", id, scanner.getToken().lexeme, "clit", new Dictionary<string, dynamic>() { { "type", "char" } }));
                 }
 
                 scanner.nextToken();
