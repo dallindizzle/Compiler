@@ -11,5 +11,9 @@ class Cat {
 }
 
 void kxi2019 main() { 
-	Cat cat = new Cat(3, true);
+	int x = 4;
+	char b = '3';
+	char z = '3';
+
+	cout << 4;
 }

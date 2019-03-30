@@ -64,7 +64,7 @@ namespace Compiler
 
         void compilation_unit()
         {
-            while(scanner.getToken().lexeme == "class")
+            while (scanner.getToken().lexeme == "class")
             {
                 class_declaration();
             }
@@ -196,7 +196,7 @@ namespace Compiler
 
             // This block is for symbol table
             string id = genId("L");
-            symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "lvar", new Dictionary<string, dynamic>() { {"type", typ } }));
+            symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "lvar", new Dictionary<string, dynamic>() { { "type", typ } }));
 
             scanner.nextToken();
             if (scanner.getToken().lexeme == "[")
@@ -243,7 +243,11 @@ namespace Compiler
             else if (scanner.getToken().type == "Number" || scanner.getToken().lexeme == "+" || scanner.getToken().lexeme == "-")
             {
                 string id = genId("N");
-                symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "ilit", new Dictionary<string, dynamic>() { { "type", "int" } }));
+
+                if (!symTable.Any(sym => sym.Value.Value == scanner.getToken().lexeme)) // Check if literal is already in symbol table
+                { 
+                    symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "ilit", new Dictionary<string, dynamic>() { { "type", "int" } }));
+                }
 
                 numeric_literal();
                 if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
@@ -251,7 +255,11 @@ namespace Compiler
             else if (scanner.getToken().type == "Character")
             {
                 string id = genId("H");
-                symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "clit", new Dictionary<string, dynamic>() { { "type", "char" } }));
+
+                if (!symTable.Any(sym => sym.Value.Value == scanner.getToken().lexeme)) // Check if literal is already in symbol table
+                { 
+                    symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "clit", new Dictionary<string, dynamic>() { { "type", "char" } }));
+                }
 
                 scanner.nextToken();
                 if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
@@ -406,7 +414,7 @@ namespace Compiler
                 else
                 {
                     id = genId("V");
-                    symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "ivar", new Dictionary<string, dynamic>() { { "type", typ },{ "accessMod", modifier } }));
+                    symTable.Add(id, new Symbol(scope, id, scanner.getToken().lexeme, "ivar", new Dictionary<string, dynamic>() { { "type", typ }, { "accessMod", modifier } }));
                 }
 
                 push(scanner.getToken().lexeme); // pushing scope of class method, if class field then it should still be okay, I think
@@ -478,7 +486,7 @@ namespace Compiler
             List<string> pars = new List<string>();
             string id = genId("P");
             pars.Add(id);
-            symTable.Add(id, new Symbol(scope, id, scanner.peekToken().lexeme, "param", new Dictionary<string, dynamic>() { { "type", scanner.getToken().lexeme }}));
+            symTable.Add(id, new Symbol(scope, id, scanner.peekToken().lexeme, "param", new Dictionary<string, dynamic>() { { "type", scanner.getToken().lexeme } }));
 
             parameter();
             while (scanner.getToken().lexeme == ",")
@@ -661,7 +669,7 @@ namespace Compiler
         // Print 
         public void printTable()
         {
-            foreach(var symbol in symTable)
+            foreach (var symbol in symTable)
             {
                 Console.Write($"{symbol.Key} ->");
                 Console.Write($"\tScope:\t {symbol.Value.Scope}\n");

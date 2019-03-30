@@ -295,6 +295,9 @@ namespace Compiler
             else if (scanner.getToken().type == "Identifier")
             {
                 // Semantic code
+
+                if (!symTable.Where(tempsym => tempsym.Value.Scope == scope).Any(sym => sym.Value.Value == scanner.getToken().lexeme)) semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
+
                 string symKey = symTable.Where(tempsym => tempsym.Value.Scope == scope).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
                 iPush(scanner.getToken().lexeme, symKey);
 
