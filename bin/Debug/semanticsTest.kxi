@@ -1,10 +1,10 @@
 class Cat {
 	public int x[];
-	public char y = 'd';
 	private int age;
+	public int b;
 
 	Cat(int x, bool b) {
-		int y = 4;
+
 	}
 
 	public int GetAge() {
@@ -12,9 +12,8 @@ class Cat {
 }
 
 void kxi2019 main() { 
+	Cat a = new Cat(1, true);
 	int x = 4;
-	char b = '3';
-	char z = '3';
 
-	cout << 4;
+	x = a.b;
 }

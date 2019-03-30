@@ -30,7 +30,16 @@ namespace Compiler
 
             SAS = new Stack<SAR>();
             OS = new Stack<SAR>();
+
+            // iCode
+            quads = new List<List<string>>();
         }
+
+        #region iCode definition
+
+        List<List<string>> quads;
+
+        #endregion
 
         #region SynataxAnalyser definition
 
@@ -1100,6 +1109,7 @@ namespace Compiler
 
             if (!classSym.Any(sym => sym.Value.Value == ivarSar.val)) semanticError(scanner.getToken().lineNum, "Variable", ivarSar.val, $"Not defined/not public in {scope}");
 
+            // TODO: mark sym to indicate indirect addressing
             var symId = genId("t");
 
             var ivarSymId = classSym.Where(sym => sym.Value.Value == ivarSar.val).First().Key; // Get the symid for the instance variable
@@ -1117,6 +1127,9 @@ namespace Compiler
 
             SAS.Push(newSar);
 
+            // iCode
+            quads.Add(new List<string>() { "REF", classSar.symKey, ivarSymId, symId });
+
         }
 
         void tPush(string type)
@@ -1132,8 +1145,6 @@ namespace Compiler
             {
                 if (!symTable.Where(sym => sym.Value.Kind == "Class").ToList().Any(sym => sym.Value.Value == sar.val)) semanticError(scanner.getToken().lineNum, "Type", sar.val, "not defined");
             }
-
-
         }
 
         void BAL()
@@ -1253,6 +1264,9 @@ namespace Compiler
                     else if (symTable[op2.symKey].Data["type"] != type) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
                 }
                 else if (symTable[op2.symKey].Data["type"] != symTable[op1.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+
+                // iCode
+                quads.Add(new List<string>() {"MOV", op2.symKey, op1.symKey});
             }
             else
             {
