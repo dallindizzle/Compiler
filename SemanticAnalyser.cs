@@ -33,64 +33,102 @@ namespace Compiler
 
             // iCode
             quads = new List<List<string>>();
+            labelCounter = 0;
+            labelStack = new Stack<string>();
+            skipStack = new Stack<string>();
         }
 
         #region iCode definition
 
         List<List<string>> quads;
+        int labelCounter;
+        Stack<string> labelStack;
+        Stack<string> skipStack;
 
         void MathAndLogicalInst(string op, string key1, string key2, string tempKey)
         {
             switch (op)
             {
                 case "*":
-                    quads.Add(new List<string>() { "MUL", key1, key2, tempKey });
+                    //quads.Add(new List<string>() { "MUL", key1, key2, tempKey });
+                    createQuad("MUL", key1, key2, tempKey);
                     break;
 
                 case "/":
-                    quads.Add(new List<string>() { "DIV", key1, key2, tempKey });
+                    //quads.Add(new List<string>() { "DIV", key1, key2, tempKey });
+                    createQuad("DIV", key1, key2, tempKey);
                     break;
 
                 case "+":
-                    quads.Add(new List<string>() { "ADD", key1, key2, tempKey });
+                    //quads.Add(new List<string>() { "ADD", key1, key2, tempKey });
+                    createQuad("ADD", key1, key2, tempKey);
                     break;
 
                 case "-":
-                    quads.Add(new List<string>() { "SUB", key1, key2, tempKey });
+                    //quads.Add(new List<string>() { "SUB", key1, key2, tempKey });
+                    createQuad("SUB", key1, key2, tempKey);
                     break;
 
                 case "<":
-                    quads.Add(new List<string>() { "LT", key1, key2, tempKey });
+                    //quads.Add(new List<string>() { "LT", key1, key2, tempKey });
+                    createQuad("LT", key1, key2, tempKey);
                     break;
 
                 case ">":
-                    quads.Add(new List<string>() { "GT", key1, key2, tempKey });
+                    //quads.Add(new List<string>() { "GT", key1, key2, tempKey });
+                    createQuad("GT", key1, key2, tempKey);
                     break;
 
                 case "!=":
-                    quads.Add(new List<string>() { "NE", key1, key2, tempKey });
+                    //quads.Add(new List<string>() { "NE", key1, key2, tempKey });
+                    createQuad("NE", key1, key2, tempKey);
                     break;
 
                 case "==":
-                    quads.Add(new List<string>() { "EQ", key1, key2, tempKey });
+                    //quads.Add(new List<string>() { "EQ", key1, key2, tempKey });
+                    createQuad("EQ", key1, key2, tempKey);
                     break;
 
                 case "<=":
-                    quads.Add(new List<string>() { "LE", key1, key2, tempKey });
+                    //quads.Add(new List<string>() { "LE", key1, key2, tempKey });
+                    createQuad("LE", key1, key2, tempKey);
                     break;
 
                 case ">=":
-                    quads.Add(new List<string>() { "GE", key1, key2, tempKey });
+                    //quads.Add(new List<string>() { "GE", key1, key2, tempKey });
+                    createQuad("GE", key1, key2, tempKey);
                     break;
 
                 case "&&":
-                    quads.Add(new List<string>() { "AND", key1, key2, tempKey });
+                    //quads.Add(new List<string>() { "AND", key1, key2, tempKey });
+                    createQuad("AND", key1, key2, tempKey);
                     break;
 
                 case "||":
-                    quads.Add(new List<string>() { "OR", key1, key2, tempKey });
+                    //quads.Add(new List<string>() { "OR", key1, key2, tempKey });
+                    createQuad("OR", key1, key2, tempKey);
                     break;
             }
+        }
+
+        void createQuad(string op, string oper1, string oper2 = "", string oper3 = "")
+        {
+            if (skipStack.Count == 0)
+            {
+                quads.Add(new List<string>() { op, oper1, oper2, oper3 });
+            }
+            else
+            {
+                quads.Add(new List<string>() { skipStack.Pop(), op, oper1, oper2, oper3 });
+            }
+        }
+
+        string genLabel(string input)
+        {
+            string label = $"{input}{labelCounter}";
+            labelStack.Push(label);
+            labelCounter++;
+            return label;
         }
 
         public void PrintICode()
@@ -186,14 +224,34 @@ namespace Compiler
 
                 scanner.nextToken();
                 statement();
+
+                // iCode
+                if (scanner.getToken().lexeme == "else")
+                {
+                    skipStack.Push(labelStack.Pop());
+                    quads.Add(new List<string>() { "JMP", genLabel("SKIPELSE") });
+                }
+                else
+                {
+                    skipStack.Push(labelStack.Pop());
+                }
+
                 if (scanner.getToken().lexeme == "else")
                 {
                     scanner.nextToken();
                     statement();
+
+                    // iCode
+                    skipStack.Push(labelStack.Pop());
                 }
             }
             else if (scanner.getToken().lexeme == "while")
             {
+
+                // iCode
+                string label = genLabel("BEGIN");
+                skipStack.Push(label);
+
                 scanner.nextToken();
                 if (scanner.getToken().lexeme != "(") syntaxError("(");
 
@@ -210,6 +268,12 @@ namespace Compiler
 
                 scanner.nextToken();
                 statement();
+
+                // iCode
+                string endLabel = labelStack.Pop();
+                string beginLabel = labelStack.Pop();
+                quads.Add(new List<string>() { "JMP", beginLabel });
+                skipStack.Push(endLabel);
             }
             else if (scanner.getToken().lexeme == "return")
             {
@@ -1201,7 +1265,8 @@ namespace Compiler
                 else symTable.Add(symId, new Symbol(scope, symId, ref_val, symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));
 
                 // iCode
-                quads.Add(new List<string>() { "REF", classSar.symKey, ivarSymId, symId });
+                //quads.Add(new List<string>() { "REF", classSar.symKey, ivarSymId, symId });
+                createQuad("REF", classSar.symKey, ivarSymId, symId);
             }
             else
             {
@@ -1356,7 +1421,8 @@ namespace Compiler
                 else if (symTable[op2.symKey].Data["type"] != symTable[op1.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
 
                 // iCode
-                quads.Add(new List<string>() { "MOV", op2.symKey, op1.symKey });
+                //quads.Add(new List<string>() { "MOV", op2.symKey, op1.symKey });
+                createQuad("MOV", op2.symKey, op1.symKey);
             }
             else
             {
@@ -1468,6 +1534,10 @@ namespace Compiler
             string type = symTable[sar.symKey].Data["type"];
 
             if (type != "bool") semanticError(scanner.getToken().lineNum, "if", type, $"if requires bool got {type}");
+
+            // iCode
+            //quads.Add(new List<string>() { "BF", sar.symKey, genSkipIf() });
+            createQuad("BF", sar.symKey, genLabel("SKIPIF"));
         }
 
         void whileCase()
@@ -1476,6 +1546,9 @@ namespace Compiler
             string type = symTable[sar.symKey].Data["type"];
 
             if (type != "bool") semanticError(scanner.getToken().lineNum, "while", type, $"while requires bool got {type}");
+
+            // iCode
+            quads.Add(new List<string>() { "BF", sar.symKey, genLabel("ENDWHILE") });
         }
 
         void returnCase()
