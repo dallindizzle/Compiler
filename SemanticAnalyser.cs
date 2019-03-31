@@ -119,7 +119,26 @@ namespace Compiler
             }
             else
             {
-                quads.Add(new List<string>() { skipStack.Pop(), op, oper1, oper2, oper3 });
+                if (skipStack.Count > 1) // Here is back patching
+                {
+                    quads.Add(new List<string>() { skipStack.Peek(), op, oper1, oper2, oper3 }); // Create the quad then do the back patching
+
+                    string find = skipStack.Pop();
+                    string replace = skipStack.Pop();
+
+                    foreach (var quad in quads)
+                    {
+                        int index = quad.FindIndex(idx => idx.Equals(find));
+                        if (index != -1)
+                        {
+                            quad[index] = replace;
+                        }
+                    }
+                }
+                else
+                {
+                    quads.Add(new List<string>() { skipStack.Pop(), op, oper1, oper2, oper3 });
+                }
             }
         }
 
