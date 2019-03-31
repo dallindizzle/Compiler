@@ -22,6 +22,9 @@ namespace Compiler
             semanticsAnalyser.go();
 
             semanticsAnalyser.printTable();
+
+            semanticsAnalyser.PrintICode();
+
             Console.ReadKey();
         }
     }

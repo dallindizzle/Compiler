@@ -1,7 +1,8 @@
 class Cat {
-	public int x[];
+	public int x;
 	private int age;
-	public int b;
+	public Cat b;
+	public int y;
 
 	Cat(int x, bool b) {
 
@@ -12,8 +13,8 @@ class Cat {
 }
 
 void kxi2019 main() { 
-	Cat a = new Cat(1, true);
-	int x = 4;
-
-	x = a.b;
+	int x = 3;
+	int y = 7;
+	int z = 1;
+	bool m = (x < y) && (z != 3);
 }
