@@ -111,7 +111,7 @@ namespace Compiler
             }
         }
 
-        void createQuad(string op, string oper1, string oper2 = "", string oper3 = "")
+        void createQuad(string op, string oper1 = "", string oper2 = "", string oper3 = "")
         {
             if (skipStack.Count == 0)
             {
@@ -449,8 +449,23 @@ namespace Compiler
             else if (scanner.getToken().type == "Identifier")
             {
                 // Semantic code
-                if (!symTable.Where(tempsym => tempsym.Value.Scope == scope).Any(sym => sym.Value.Value == scanner.getToken().lexeme)) semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
-                string symKey = symTable.Where(tempsym => tempsym.Value.Scope == scope).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
+                string symKey = "";
+                Regex pat = new Regex(@"g\.(?!main).+");
+                if (pat.IsMatch(scope))
+                {
+                    Regex pat2 = new Regex(@"(\w+)");
+                    var matches = pat2.Matches(scope);
+                    List<string> matchesList = new List<string>() { matches[0].ToString(), matches[1].ToString() };
+
+                    string className = String.Join(".", matchesList);
+                    if (!symTable.Where(tempsym => tempsym.Value.Scope == className).Any(sym => sym.Value.Value == scanner.getToken().lexeme)) semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
+                    symKey = symTable.Where(tempsym => tempsym.Value.Scope == className).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
+                }
+                else
+                {
+                    if (!symTable.Where(tempsym => tempsym.Value.Scope == scope).Any(sym => sym.Value.Value == scanner.getToken().lexeme)) semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
+                    symKey = symTable.Where(tempsym => tempsym.Value.Scope == scope).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
+                }
                 iPush(scanner.getToken().lexeme, symKey);
 
                 scanner.nextToken();
@@ -665,7 +680,10 @@ namespace Compiler
             if (scanner.getToken().lexeme == "(")
             {
                 // Semantics code
-                SAS.Pop(); // Pop first record because it is a function, not a variable
+                var sar = SAS.Pop(); // Pop first record because it is a function, not a variable
+
+                // iCode
+                createQuad(sar.symKey, "FUNC", sar.symKey);
 
                 scanner.nextToken();
                 if (isAtype(scanner.getToken().lexeme)) parameter_list();
@@ -1218,8 +1236,14 @@ namespace Compiler
         {
             SAR sar = SAS.Pop();
 
-            if (sar.val == "this")
+            if (sar.val == "this" || sar.type == SAR.types.func_sar)
             {
+                // iCode
+                if (sar.type == SAR.types.func_sar)
+                {
+                    createQuad("FRAME", sar.symKey, "this");
+                }
+
                 Regex pat = new Regex(@"g\.\w*\.\w+");
                 if (!pat.IsMatch(scope)) semanticError(scanner.getToken().lineNum, "iExist", "this", "Wrong use of \"this\"");
                 sar.pushType = SAR.pushes.iExist;
@@ -1263,8 +1287,6 @@ namespace Compiler
 
             if (!classSym.Any(sym => sym.Value.Value == ivarSar.val)) semanticError(scanner.getToken().lineNum, "Variable", ivarSar.val, $"Not defined/not public in {scope}");
 
-            // TODO: mark sym to indicate indirect addressing
-
             string ref_val = $"{classSar.val}.{ivarSar.val}";
 
             var ivarSymId = classSym.Where(sym => sym.Value.Value == ivarSar.val).First().Key; // Get the symid for the instance variable
@@ -1284,8 +1306,23 @@ namespace Compiler
                 else symTable.Add(symId, new Symbol(scope, symId, ref_val, symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));
 
                 // iCode
-                //quads.Add(new List<string>() { "REF", classSar.symKey, ivarSymId, symId });
-                createQuad("REF", classSar.symKey, ivarSymId, symId);
+                if (ivarSar.type == SAR.types.func_sar)
+                {
+                    string refObject = "";
+                    if (classSar.val == "this") refObject = "this";
+                    else refObject = classSar.symKey;
+
+                    createQuad("FRAME", ivarSymId, refObject);
+                    foreach(var arg in ivarSar.arguments)
+                    {
+                        createQuad("PUSH", arg.symKey);
+                    }
+                    createQuad("CALL", ivarSymId);
+                }
+                else
+                {
+                    createQuad("REF", classSar.symKey, ivarSymId, symId);
+                }
             }
             else
             {
@@ -1340,7 +1377,7 @@ namespace Compiler
             SAR arguments = SAS.Pop();
             SAR fSar = SAS.Pop();
 
-            SAR functionSar = new SAR(fSar.val, SAR.types.func_sar, SAR.pushes.func);
+            SAR functionSar = new SAR(fSar.val, SAR.types.func_sar, SAR.pushes.func, fSar.symKey);
             functionSar.arguments = arguments.arguments;
 
             SAS.Push(functionSar);
@@ -1577,6 +1614,12 @@ namespace Compiler
                 EOE();
             }
 
+            if (SAS.Count == 0)
+            {
+                createQuad("RTN");
+                return;
+            }
+
             SAR sar = SAS.Pop();
             string varType = symTable[sar.symKey].Data["type"];
 
@@ -1587,6 +1630,9 @@ namespace Compiler
             string functionReturnType = functionSym.Value.Data["returnType"];
 
             if (functionReturnType != varType) semanticError(scanner.getToken().lineNum, "Return", varType, $"Function requires {functionReturnType} returned {varType}");
+
+            // iCode
+            createQuad("RETURN", sar.symKey);
 
         }
 
@@ -1602,6 +1648,16 @@ namespace Compiler
             string varType = symTable[sar.symKey].Data["type"];
 
             if (varType != "int" && varType != "char") semanticError(scanner.getToken().lineNum, "cout", sar.val, $"cout not defined for {varType}");
+
+            // iCode
+            if (varType == "int")
+            {
+                createQuad("WRITE 1", sar.symKey);
+            }
+            else
+            {
+                createQuad("WRITE 2", sar.symKey);
+            }
         }
 
         void cinCase()
@@ -1616,6 +1672,16 @@ namespace Compiler
             string varType = symTable[sar.symKey].Data["type"];
 
             if (varType != "int" && varType != "char") semanticError(scanner.getToken().lineNum, "cin", sar.val, $"cin not defined for {varType}");
+
+            // iCode
+            if (varType == "int")
+            {
+                createQuad("READ 1", sar.symKey);
+            }
+            else
+            {
+                createQuad("READ 2", sar.symKey);
+            }
         }
 
 

@@ -4,24 +4,21 @@ class Cat {
 	public Cat b;
 	public int y;
 
-	Cat(int x, bool b) {
-
+	Cat(int x) {
+		
 	}
 
 	public int GetAge() {
+		Test();
+	}
+
+	public void Test() {
+	
 	}
 }
 
 void kxi2019 main() { 
-	int x = 3;
-	int y = 7;
-	int z = 1;
-	
-	if (x < y) {
-		x = y;
-	}
-	else if (z != 3) {
-		y = x;
-	}
-	z = x;
+	Cat x = new Cat(3);
+
+	x.GetAge();
 }
