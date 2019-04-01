@@ -460,13 +460,14 @@ namespace Compiler
                     string className = String.Join(".", matchesList);
                     if (!symTable.Where(tempsym => tempsym.Value.Scope == className).Any(sym => sym.Value.Value == scanner.getToken().lexeme)) semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
                     symKey = symTable.Where(tempsym => tempsym.Value.Scope == className).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
+                    iPush("this", symKey);
                 }
                 else
                 {
                     if (!symTable.Where(tempsym => tempsym.Value.Scope == scope).Any(sym => sym.Value.Value == scanner.getToken().lexeme)) semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
                     symKey = symTable.Where(tempsym => tempsym.Value.Scope == scope).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
+                    iPush(scanner.getToken().lexeme, symKey);
                 }
-                iPush(scanner.getToken().lexeme, symKey);
 
                 scanner.nextToken();
                 if (isAfn_arr_member(scanner.getToken().lexeme)) fn_arr_member();
@@ -1242,6 +1243,11 @@ namespace Compiler
                 if (sar.type == SAR.types.func_sar)
                 {
                     createQuad("FRAME", sar.symKey, "this");
+                    foreach(var arg in sar.arguments)
+                    {
+                        createQuad("PUSH", arg.symKey);
+                    }
+                    createQuad("CALL", sar.symKey);
                 }
 
                 Regex pat = new Regex(@"g\.\w*\.\w+");

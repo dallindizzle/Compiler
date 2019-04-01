@@ -9,10 +9,10 @@ class Cat {
 	}
 
 	public int GetAge() {
-		Test();
+
 	}
 
-	public void Test() {
+	public void Test(int x, int y) {
 	
 	}
 }
@@ -20,5 +20,5 @@ class Cat {
 void kxi2019 main() { 
 	Cat x = new Cat(3);
 
-	x.GetAge();
+	x.Test(3,5);
 }
