@@ -450,21 +450,25 @@ namespace Compiler
             {
                 // Semantic code
                 string symKey = "";
-                Regex pat = new Regex(@"g\.(?!main).+");
-                if (pat.IsMatch(scope))
-                {
-                    Regex pat2 = new Regex(@"(\w+)");
-                    var matches = pat2.Matches(scope);
-                    List<string> matchesList = new List<string>() { matches[0].ToString(), matches[1].ToString() };
+                if (!symTable.Where(tempsym => tempsym.Value.Scope == scope).Any(sym => sym.Value.Value == scanner.getToken().lexeme))
+                { 
+                    Regex pat = new Regex(@"g\.(?!main).+");
+                    if (pat.IsMatch(scope))
+                    {
+                        Regex pat2 = new Regex(@"(\w+)");
+                        var matches = pat2.Matches(scope);
+                        List<string> matchesList = new List<string>() { matches[0].ToString(), matches[1].ToString() };
 
-                    string className = String.Join(".", matchesList);
-                    if (!symTable.Where(tempsym => tempsym.Value.Scope == className).Any(sym => sym.Value.Value == scanner.getToken().lexeme)) semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
-                    symKey = symTable.Where(tempsym => tempsym.Value.Scope == className).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
-                    iPush("this", symKey);
+                        string className = String.Join(".", matchesList);
+                        if (!symTable.Where(tempsym => tempsym.Value.Scope == className).Any(sym => sym.Value.Value == scanner.getToken().lexeme)) semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
+                        symKey = symTable.Where(tempsym => tempsym.Value.Scope == className).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
+                        iPush("this", symKey);
+                    }
+                    else semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
                 }
                 else
                 {
-                    if (!symTable.Where(tempsym => tempsym.Value.Scope == scope).Any(sym => sym.Value.Value == scanner.getToken().lexeme)) semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
+                    //if (!symTable.Where(tempsym => tempsym.Value.Scope == scope).Any(sym => sym.Value.Value == scanner.getToken().lexeme)) semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
                     symKey = symTable.Where(tempsym => tempsym.Value.Scope == scope).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
                     iPush(scanner.getToken().lexeme, symKey);
                 }
@@ -1248,6 +1252,22 @@ namespace Compiler
                         createQuad("PUSH", arg.symKey);
                     }
                     createQuad("CALL", sar.symKey);
+
+                    if (symTable[sar.symKey].Data.ContainsKey("returnType"))
+                    {
+                        //sar.symKey = ivarSymId;
+                        string tSymId = genId("t");
+                        string type = "";
+                        if (symTable[sar.symKey].Data.ContainsKey("returnType")) type = symTable[sar.symKey].Data["returnType"];
+                        else type = symTable[sar.symKey].Data["type"];
+                        Symbol tSymbol = new Symbol(scope, tSymId, symTable[sar.symKey].Value, symTable[sar.symKey].Kind, new Dictionary<string, dynamic>() { { "type", type } });
+                        //symTable.Remove(symId);
+                        //symId = tSymId;
+                        symTable.Add(tSymId, tSymbol);
+                        createQuad("PEAK", tSymId);
+                        sar.symKey = tSymId;
+                        sar.val = "";
+                    }
                 }
 
                 Regex pat = new Regex(@"g\.\w*\.\w+");
@@ -1324,6 +1344,20 @@ namespace Compiler
                         createQuad("PUSH", arg.symKey);
                     }
                     createQuad("CALL", ivarSymId);
+
+                    if (symTable[ivarSymId].Data.ContainsKey("returnType"))
+                    {
+                        ivarSar.symKey = ivarSymId;
+                        string tSymId = genId("t");
+                        string type = "";
+                        if (symTable[ivarSar.symKey].Data.ContainsKey("returnType")) type = symTable[ivarSar.symKey].Data["returnType"];
+                        else type = symTable[ivarSar.symKey].Data["type"];
+                        Symbol tSymbol = new Symbol(scope, tSymId, symTable[ivarSar.symKey].Value, symTable[ivarSar.symKey].Kind, new Dictionary<string, dynamic>() { { "type", type } });
+                        symTable.Remove(symId);
+                        symId = tSymId;
+                        symTable.Add(tSymId, tSymbol);
+                        createQuad("PEAK", tSymId);
+                    }
                 }
                 else
                 {
@@ -1457,7 +1491,7 @@ namespace Compiler
                 if (oper.val != "=" || OS.Count > 0) semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
                 if (op1.val == "this") semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
 
-                if (symTable[op1.symKey].Kind != "lvar" && symTable[op1.symKey].Kind != "ivar") semanticError(scanner.getToken().lineNum, "Type", op1.val, "not lvalue");
+                if (symTable[op1.symKey].Kind != "lvar" && symTable[op1.symKey].Kind != "ivar" && symTable[op1.symKey].Kind != "param") semanticError(scanner.getToken().lineNum, "Type", op1.val, "not lvalue");
 
                 if (op2.pushType == SAR.pushes.newObj)
                 {

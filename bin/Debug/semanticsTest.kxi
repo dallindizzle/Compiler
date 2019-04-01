@@ -4,21 +4,21 @@ class Cat {
 	public Cat b;
 	public int y;
 
-	Cat(int x) {
-		
+	Cat() {
+		cout << g().f().y;
 	}
 
-	public int GetAge() {
-
+	public Cat g() {
 	}
 
-	public void Test(int x, int y) {
+	public Cat f() {
 	
 	}
 }
 
 void kxi2019 main() { 
-	Cat x = new Cat(3);
+	Cat x = new Cat();
+	int r = 3;
 
-	x.Test(3,5);
+	x.f().g().y = r;
 }
