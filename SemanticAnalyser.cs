@@ -33,7 +33,7 @@ namespace Compiler
 
             // iCode
             quads = new List<List<string>>();
-            labelCounter = 0;
+            labelCounter = 1;
             labelStack = new Stack<string>();
             skipStack = new Stack<string>();
         }
@@ -123,8 +123,8 @@ namespace Compiler
                 {
                     quads.Add(new List<string>() { skipStack.Peek(), op, oper1, oper2, oper3 }); // Create the quad then do the back patching
 
-                    string find = skipStack.Pop();
                     string replace = skipStack.Pop();
+                    string find = skipStack.Pop();
 
                     foreach (var quad in quads)
                     {
