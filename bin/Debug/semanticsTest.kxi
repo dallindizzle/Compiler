@@ -5,7 +5,6 @@ class Cat {
 	public int y;
 
 	Cat() {
-		cout << g().f().y;
 	}
 
 	public Cat g() {
@@ -20,5 +19,6 @@ void kxi2019 main() {
 	Cat x = new Cat();
 	int r = 3;
 
-	x.f().g().y = r;
+	r = x.x;
+
 }

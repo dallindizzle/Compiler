@@ -826,11 +826,13 @@ namespace Compiler
             // Semantics code
             iPush(scanner.getToken().lexeme);
 
+            // Semantics code
+            rExist();
+
             scanner.nextToken();
             if (isAfn_arr_member(scanner.getToken().lexeme)) fn_arr_member();
 
-            // Semantics code
-            rExist();
+            // rExist() was here but moved. I hope it works?
 
             if (isAmember_refZ(scanner.getToken().lexeme)) member_refZ();
         }
@@ -1328,11 +1330,11 @@ namespace Compiler
             {
                 symId = genId("r");
 
-                if (ivarSar.type == SAR.types.func_sar) symTable.Add(symId, new Symbol(scope, symId, ref_val, symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["returnType"] } }));
+                if (ivarSar.type == SAR.types.func_sar || symTable[ivarSymId].Kind == "method") symTable.Add(symId, new Symbol(scope, symId, ref_val, symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["returnType"] } }));
                 else symTable.Add(symId, new Symbol(scope, symId, ref_val, symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));
 
                 // iCode
-                if (ivarSar.type == SAR.types.func_sar)
+                if (ivarSar.type == SAR.types.func_sar || symTable[ivarSymId].Kind == "method")
                 {
                     string refObject = "";
                     if (classSar.val == "this") refObject = "this";
@@ -1514,6 +1516,19 @@ namespace Compiler
                     }
                     else if (symTable[op2.symKey].Data["type"] != type) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
                 }
+                else if (symTable[op2.symKey].Data["type"][0] == '@')
+                {
+                    string type = symTable[op2.symKey].Data["type"].Substring(2);
+
+                    if (op2.arguments.Count != 1 && symTable[op2.symKey].Data["type"] == type) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+
+                    if (symTable[op1.symKey].Data["type"] == $"@:{type}")
+                    {
+                        if (op1.arguments.Count != 1) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                        return;
+                    }
+                    else if (symTable[op1.symKey].Data["type"] != type) semanticError(scanner.getToken().lineNum, "Type", op1.val, "not valid type");
+                }
                 else if (symTable[op2.symKey].Data["type"] != symTable[op1.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
 
                 // iCode
@@ -1606,6 +1621,13 @@ namespace Compiler
 
             SAR arr_sar = new SAR(array.val, SAR.types.arr_sar, SAR.pushes.arr, array.symKey);
             arr_sar.arguments.Add(argument);
+
+
+            // iCode
+            string tempSymId = genId("t");
+            symTable.Add(tempSymId, new Symbol(scope, tempSymId, $"{array.val}[{argument.symKey}]", "lvar", new Dictionary<string, dynamic>() { { "type", "int" } }));
+            createQuad("AEF", array.symKey, argument.symKey,tempSymId);
+            arr_sar.symKey = tempSymId;
 
             SAS.Push(arr_sar);
         }
@@ -1723,8 +1745,6 @@ namespace Compiler
                 createQuad("READ 2", sar.symKey);
             }
         }
-
-
 
         void semanticError(int line, string type, string lexeme, string prob)
         {
