@@ -1,24 +1,17 @@
 class Cat {
 	public int x;
 	private int age;
-	public Cat b;
 	public int y;
 
-	Cat() {
+	Cat(int x, int y) {
 	}
 
-	public Cat g() {
-	}
-
-	public Cat f() {
-	
-	}
 }
 
-void kxi2019 main() { 
-	Cat x = new Cat();
-	int r = 3;
-
-	r = x.x;
+void kxi2019 main() {
+	int x = 4;
+	int r = 5;
+	int k = 2;
+	Cat c[] = new Cat[r*k];
 
 }

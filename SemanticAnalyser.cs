@@ -142,6 +142,20 @@ namespace Compiler
             }
         }
 
+        int getObjectSize(string type)
+        {
+            var ivars = symTable.Where(sym => sym.Value.Scope == $"g.{type}").Where(sym2 => sym2.Value.Kind == "ivar");
+            int objectSize = 0;
+            foreach (var sym in ivars)
+            {
+                if (sym.Value.Data["type"] == "int") objectSize += 4;
+                else if (sym.Value.Data["type"] == "char") objectSize += 1;
+                else objectSize += getObjectSize(sym.Value.Data["type"]);
+            }
+
+            return objectSize;
+        }
+
         string genLabel(string input)
         {
             string label = $"{input}{labelCounter}";
@@ -979,7 +993,7 @@ namespace Compiler
                 Console.WriteLine($"\tSymid:\t {symbol.Value.Symid}");
                 Console.WriteLine($"\tValue:\t {symbol.Value.Value}");
                 Console.WriteLine($"\tKind:\t {symbol.Value.Kind}");
-
+            
                 Console.Write($"\tData:\t ");
                 foreach (var data in symbol.Value.Data)
                 {
@@ -1216,6 +1230,24 @@ namespace Compiler
 
             SAR new_sar = new SAR(typeSar.val, SAR.types.new_sar, SAR.pushes.newObj, constructor.Key);
             new_sar.arguments = argumentsSar.arguments;
+
+            // iCode
+            int objectSize = getObjectSize(typeSar.val);
+            string objSizeSymId = genId("t");
+            symTable.Add(objSizeSymId, new Symbol(scope, objSizeSymId, "new object memory", "new object memory", new Dictionary<string, dynamic>() { { "returnType", typeSar.val } }));
+            createQuad("NEWI", objectSize.ToString(), objSizeSymId);
+            string constructKey = symTable.Where(sym2 => sym2.Value.Kind == "Constructor").Where(sym => sym.Value.Data["returnType"] == typeSar.val).First().Key;
+            createQuad("FRAME", constructKey, objSizeSymId);          
+            foreach(var arg in new_sar.arguments)
+            {
+                createQuad("PUSH", arg.symKey);
+            }
+            createQuad("CALL", constructKey);
+            string newObjSymId = genId("t");
+            symTable.Add(newObjSymId, new Symbol(scope, newObjSymId, "new object", "new object", new Dictionary<string, dynamic>() { { "returnType", typeSar.val } }));
+            createQuad("PEEK", newObjSymId);
+            new_sar.symKey = newObjSymId;
+
             SAS.Push(new_sar);
         }
 
@@ -1225,6 +1257,9 @@ namespace Compiler
 
             // Test that expression is an int
             if (symTable[expression.symKey].Data["type"] != "int") semanticError(scanner.getToken().lineNum, "Array init", expression.val, $"Array requires int index got {symTable[expression.symKey].Data["type"]}");
+
+            // iCode
+            string type = SAS.Peek().val;
 
             tExist();
 
@@ -1236,7 +1271,48 @@ namespace Compiler
             tempSar.val += "[]";
             SAS.Push(tempSar);
 
+
+            // iCode
+            string op1Id = genId("c");
+            if (type == "int")
+            {
+                var matches = symTable.Where(sym => sym.Value.Scope == "g" && sym.Value.Kind == "int size");
+                if (matches.Count() == 0)
+                {
+                    symTable.Add(op1Id, new Symbol("g", op1Id, "4", "int size"));
+                }
+                else op1Id = matches.First().Key;
+            }
+            else if (type == "char")
+            {
+                var matches = symTable.Where(sym => sym.Value.Scope == "g" && sym.Value.Kind == "char size");
+                if (matches.Count() == 0)
+                {
+                    symTable.Add(op1Id, new Symbol("g", op1Id, "1", "char size"));
+                }
+                else op1Id = matches.First().Key;
+            }
+            else
+            {
+                var matches = symTable.Where(sym => sym.Value.Scope == "g" && sym.Value.Kind == "pointer size");
+                if (matches.Count() == 0)
+                {
+                    symTable.Add(op1Id, new Symbol("g", op1Id, "4", "pointer size"));
+                }
+                else op1Id = matches.First().Key;
+            }
+
+            string mulKey = genId("t");
+            symTable.Add(mulKey, new Symbol(scope, mulKey, "array allocation size", "array allocation size"));
+            createQuad("MUL", op1Id, expression.symKey, mulKey);
+
+            string memLocKey = genId("t");
+            symTable.Add(memLocKey, new Symbol(scope, memLocKey, "new array location", "new array location"));
+            createQuad("NEW", mulKey, memLocKey);
+            new_sar.symKey = memLocKey;
+
             SAS.Push(new_sar);
+
         }
 
         void iExist()
