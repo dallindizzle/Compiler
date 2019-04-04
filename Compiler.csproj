@@ -48,6 +48,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SemanticAnalyser.cs" />
     <Compile Include="SyntaxAnalyser.cs" />
+    <Compile Include="TargetCode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

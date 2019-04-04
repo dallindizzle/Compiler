@@ -40,7 +40,7 @@ namespace Compiler
 
         #region iCode definition
 
-        List<List<string>> quads;
+        public List<List<string>> quads;
         int labelCounter;
         Stack<string> labelStack;
         Stack<string> skipStack;
@@ -194,6 +194,9 @@ namespace Compiler
             scanner.nextToken();
             if (scanner.getToken().lexeme != "main") syntaxError("main");
 
+            // iCode
+            string mainKey = symTable.Where(sym => sym.Value.Scope == "g" && sym.Value.Value == "main").First().Key;
+            createQuad(mainKey, "FUNC", mainKey);
 
             scanner.nextToken();
             if (scanner.getToken().lexeme != "(") syntaxError("(");

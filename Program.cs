@@ -25,6 +25,9 @@ namespace Compiler
 
             semanticsAnalyser.PrintICode();
 
+            TargetCode target = new TargetCode(semanticsAnalyser.quads, semanticsAnalyser.symTable);
+            target.go();
+
             Console.ReadKey();
         }
     }

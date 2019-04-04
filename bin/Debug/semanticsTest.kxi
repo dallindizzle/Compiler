@@ -1,17 +1,7 @@
-class Cat {
-	public int x;
-	private int age;
-	public int y;
-
-	Cat(int x, int y) {
-	}
-
-}
-
 void kxi2019 main() {
-	int x = 4;
-	int r = 5;
-	int k = 2;
-	Cat c[] = new Cat[r*k];
+	int x = 3;
+	int y = 4;
+	x = x + y;
 
+	cout << x;
 }
