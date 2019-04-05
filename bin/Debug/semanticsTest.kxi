@@ -1,7 +1,6 @@
 void kxi2019 main() {
 	int x = 3;
-	int y = 4;
+	int y = 5;
 	x = x + y;
-
 	cout << x;
 }

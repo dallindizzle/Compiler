@@ -197,6 +197,8 @@ namespace Compiler
             // iCode
             string mainKey = symTable.Where(sym => sym.Value.Scope == "g" && sym.Value.Value == "main").First().Key;
             createQuad(mainKey, "FUNC", mainKey);
+            quads.Insert(0, new List<string>() { "FRAME", mainKey, "A2" });
+            quads.Insert(1, new List<string>() { "CALL", mainKey });
 
             scanner.nextToken();
             if (scanner.getToken().lexeme != "(") syntaxError("(");

@@ -21,12 +21,13 @@ namespace Compiler
 
             semanticsAnalyser.go();
 
-            semanticsAnalyser.printTable();
+            //semanticsAnalyser.printTable();
 
-            semanticsAnalyser.PrintICode();
+            //semanticsAnalyser.PrintICode();
 
             TargetCode target = new TargetCode(semanticsAnalyser.quads, semanticsAnalyser.symTable);
             target.go();
+            target.PrintTCode();
 
             Console.ReadKey();
         }
