@@ -211,6 +211,8 @@ namespace Compiler
             method_body();
 
             pop();
+
+            createQuad("TRP", "0");
         }
 
         void method_body()

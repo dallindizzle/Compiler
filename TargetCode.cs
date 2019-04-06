@@ -75,12 +75,20 @@ namespace Compiler
                         BranchFalseCase(quad);
                         break;
 
+                    case "JMP":
+                        tQuads.Add(new List<string>() { quad[0], quad[1] });
+                        break;
+
                     case "WRITE 1":
                         Write1Case(quad);
                         break;
 
                     case "FUNC":
                         FuncCase(quad);
+                        break;
+
+                    case "TRP":
+                        tQuads.Add(quad);
                         break;
 
                     default:
@@ -100,7 +108,7 @@ namespace Compiler
                 ResetRegisters();
             }
 
-            tQuads.Add(new List<string>() { "TRP", "0" });
+            //tQuads.Add(new List<string>() { "TRP", "0" });
         }
 
         void ResetRegisters()
