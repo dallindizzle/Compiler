@@ -13,6 +13,8 @@ namespace Compiler
         List<List<string>> iQuads;
         List<List<string>> tQuads = new List<List<string>>();
         string[] registers = new string[12];
+        int labelCount = 0;
+        Stack<string> labels = new Stack<string>();
 
         enum MemoryLocations
         {
@@ -35,9 +37,16 @@ namespace Compiler
 
             for (int i = 0; i < iQuads.Count; i++)
             {
-                var quad = iQuads[i];
+                // vars for placing labels
+                bool addLabel = false;
+                int labelLoc = -1;
 
-                switch (quad[0])
+                var quad = iQuads[i];
+                string instruction;
+                if (quad[1] == "FUNC") instruction = "FUNC";
+                else instruction = quad[0];
+
+                Restart: switch (instruction)
                 {
                     case "MOV":
                         MovCase(quad);
@@ -58,13 +67,34 @@ namespace Compiler
                         MathCase(quad);
                         break;
 
+                    case "GT":
+                        GreaterThanCase(quad);
+                        break;
+
+                    case "BF":
+                        BranchFalseCase(quad);
+                        break;
+
                     case "WRITE 1":
                         Write1Case(quad);
                         break;
 
-                    default:
+                    case "FUNC":
                         FuncCase(quad);
                         break;
+
+                    default:
+                        labels.Push(quad[0]); // This means that there is a label
+                        labelLoc = tQuads.Count;
+                        addLabel = true;
+                        quad.RemoveAt(0);
+                        instruction = quad[0];
+                        goto Restart;
+                }
+
+                if (addLabel)
+                {
+                    tQuads[labelLoc].Insert(0, labels.Pop());
                 }
 
                 ResetRegisters();
@@ -83,6 +113,10 @@ namespace Compiler
 
         private void SetConstants()
         {
+            // Add 1 and 0 to literals
+            tQuads.Add(new List<string>() { "ZERO", ".INT", "0" });
+            tQuads.Add(new List<string>() { "ONE", ".INT", "1" });
+
             var literalKeys = symTable.Where(sym => sym.Value.Scope == "g" && sym.Value.Kind == "ilit" || sym.Value.Kind == "clit").ToList();
 
             int offset = 0;
@@ -284,6 +318,44 @@ namespace Compiler
             string register3 = FetchAndLoadAddress(quad[3]);
 
             tQuads.Add(new List<string>() { "STR", register1Value, register3 });
+        }
+
+        string genLabel(string l)
+        {
+            labelCount++;
+            return $"{l}{labelCount}";
+        }
+
+        void GreaterThanCase(List<string> quad)
+        {
+            string register1 = FetchAndLoadValue(quad[1]);
+            string register2 = FetchAndLoadValue(quad[2]);
+            tQuads.Add(new List<string>() { "CMP", register1, register2 });
+
+            string label = genLabel("L");
+
+            tQuads.Add(new List<string>() { "BGT", register1, label });
+
+            // Set FALSE
+            string label2 = genLabel("L");
+            string tempRegister = "R" + getRegister("temp");
+            tQuads.Add(new List<string>() { "MOV", tempRegister, "ZERO"});
+            string register3 = FetchAndLoadAddress(quad[3]);
+            tQuads.Add(new List<string>() { "STR", tempRegister, register3 });
+            tQuads.Add(new List<string>() { "JMP", label2 });
+            labels.Push(label2); // Add to labels Stack so that in next BF we will use that label
+
+            // Set TRUE
+            tQuads.Add(new List<string>() { label, "MOV", tempRegister, "ONE" });
+            tQuads.Add(new List<string>() { "STR", tempRegister, register3 });
+           
+        }
+
+        void BranchFalseCase(List<string> quad)
+        {
+            string register1 = FetchAndLoadValue(quad[1]);
+            tQuads[tQuads.Count - 3].Insert(0, labels.Pop());
+            tQuads.Add(new List<string>() { "BRZ", register1, quad[2] });
         }
 
         void Write1Case(List<string> quad)

@@ -1,5 +1,9 @@
 void kxi2019 main() {
-	int x = 3;
+	int x = 6;
 	int y = 5;
-	cout << x + 10;
+	
+	if(x > y + 3) {
+		cout << x;
+	}
+	cout << y;
 }
