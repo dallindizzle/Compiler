@@ -49,6 +49,7 @@
     <Compile Include="SemanticAnalyser.cs" />
     <Compile Include="SyntaxAnalyser.cs" />
     <Compile Include="TargetCode.cs" />
+    <Compile Include="VM.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

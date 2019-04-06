@@ -27,7 +27,9 @@ namespace Compiler
 
             TargetCode target = new TargetCode(semanticsAnalyser.quads, semanticsAnalyser.symTable);
             target.go();
-            target.PrintTCode();
+            //target.PrintTCode();
+
+            VM.go("output.asm");
 
             Console.ReadKey();
         }

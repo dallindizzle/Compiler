@@ -52,7 +52,10 @@ namespace Compiler
                         break;
 
                     case "ADD":
-                        AddCase(quad);
+                    case "SUB":
+                    case "MUL":
+                    case "DIV":
+                        MathCase(quad);
                         break;
 
                     case "WRITE 1":
@@ -231,37 +234,54 @@ namespace Compiler
             }
         }
 
-        void AddCase(List<string> quad)
+        // Creates instructions to fetch a variable from memory and load it into a register. The register string is returned
+        string FetchAndLoadValue(string symKey)
         {
-            int register = getRegister(quad[1]);
-            Tuple<MemoryLocations, int> location = getLocation(quad[1]);
+            // TODO: Add case for loading a BYT
+
+            string register = "R" + getRegister(symKey);
+            Tuple<MemoryLocations, int> location = getLocation(symKey);
+
             if (location.Item1 == MemoryLocations.stack)
             {
-                tQuads.Add(new List<string>() { "MOV", $"R{register}", "FP" });
-                tQuads.Add(new List<string>() { "ADI", $"R{register}", $"{location.Item2}" });
+                tQuads.Add(new List<string>() { "MOV", register, "FP" });
+                tQuads.Add(new List<string>() { "ADI", register, $"{location.Item2}" });
             }
-            string register1Value = "R" + getRegister("R1Val");
-            tQuads.Add(new List<string>() { "LDR", register1Value, "R" + register });
+            else if (location.Item1 == MemoryLocations.memory)
+            {
+                tQuads.Add(new List<string>() { "LDR", register, symKey });
+                return register;
+            }
 
-            string register2 = "R" + getRegister(quad[2]);
-            Tuple<MemoryLocations, int> location2 = getLocation(quad[2]);
+            string registerValue = "R" + getRegister("R1Val");
+            tQuads.Add(new List<string>() { "LDR", registerValue, register });
+
+            return registerValue;
+        }
+
+        string FetchAndLoadAddress(string symKey)
+        {
+            string register = "R" + getRegister(symKey);
+            Tuple<MemoryLocations, int> location = getLocation(symKey);
+
             if (location.Item1 == MemoryLocations.stack)
             {
-                tQuads.Add(new List<string>() { "MOV", register2, "FP" });
-                tQuads.Add(new List<string>() { "ADI", register2, $"{location2.Item2}" });
+                tQuads.Add(new List<string>() { "MOV", $"{register}", "FP" });
+                tQuads.Add(new List<string>() { "ADI", $"{register}", $"{location.Item2}" });
             }
-            string register2Value = "R" + getRegister("R2Val");
-            tQuads.Add(new List<string>() { "LDR", register2Value, register2 });
 
-            tQuads.Add(new List<string>() { "ADD", register1Value, register2Value });
+            return register;
+        }
 
-            string register3 = "R" + getRegister(quad[3]);
-            Tuple<MemoryLocations, int> location3 = getLocation(quad[3]);
-            if (location.Item1 == MemoryLocations.stack)
-            {
-                tQuads.Add(new List<string>() { "MOV", register3, "FP" });
-                tQuads.Add(new List<string>() { "ADI", register3, $"{location3.Item2}" });
-            }
+        void MathCase(List<string> quad)
+        {
+            string register1Value = FetchAndLoadValue(quad[1]);
+
+            string register2Value = FetchAndLoadValue(quad[2]);
+
+            tQuads.Add(new List<string>() { quad[0], register1Value, register2Value });
+
+            string register3 = FetchAndLoadAddress(quad[3]);
 
             tQuads.Add(new List<string>() { "STR", register1Value, register3 });
         }
