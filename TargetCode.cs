@@ -35,11 +35,14 @@ namespace Compiler
             // First generate data segment
             SetConstants();
 
+            bool addOwnLabel = false;
+            int ownLabelLoc = 0;
             for (int i = 0; i < iQuads.Count; i++)
             {
                 // vars for placing labels
                 bool addLabel = false;
                 int labelLoc = -1;
+                Stack<string> leadingLabel = new Stack<string>();
 
                 var quad = iQuads[i];
                 string instruction;
@@ -64,7 +67,9 @@ namespace Compiler
                     case "SUB":
                     case "MUL":
                     case "DIV":
-                        MathCase(quad);
+                    case "OR":
+                    case "AND":
+                        MathLogicCase(quad);
                         break;
 
                     case "GT":
@@ -88,6 +93,10 @@ namespace Compiler
                         Write1Case(quad);
                         break;
 
+                    case "WRITE 2":
+                        Write2Case(quad);
+                        break;
+
                     case "FUNC":
                         FuncCase(quad);
                         break;
@@ -97,7 +106,8 @@ namespace Compiler
                         break;
 
                     default:
-                        labels.Push(quad[0]); // This means that there is a label
+                        //labels.Push(quad[0]); // This means that there is a label
+                        leadingLabel.Push(quad[0]);
                         labelLoc = tQuads.Count;
                         addLabel = true;
                         quad.RemoveAt(0);
@@ -107,7 +117,17 @@ namespace Compiler
 
                 if (addLabel)
                 {
-                    tQuads[labelLoc].Insert(0, labels.Pop());
+                    tQuads[labelLoc].Insert(0, leadingLabel.Pop());
+                }
+                if (addOwnLabel)
+                {
+                    tQuads[ownLabelLoc].Insert(0, labels.Pop());
+                    addOwnLabel = false;
+                }
+                if (labels.Count > 0)
+                {
+                    addOwnLabel = true;
+                    ownLabelLoc = tQuads.Count;
                 }
 
                 ResetRegisters();
@@ -254,30 +274,34 @@ namespace Compiler
 
         void MovCase(List<string> quad)
         {
-            int register = getRegister(quad[2]);
-            Tuple<MemoryLocations, int> location = getLocation(quad[2]);
+            string register1 = FetchAndLoadAddress(quad[2]);
 
-            if (location.Item1 == MemoryLocations.stack)
-            {
-                tQuads.Add(new List<string>() { "MOV", $"R{register}", "FP" });
-                tQuads.Add(new List<string>() { "ADI", $"R{register}", $"{location.Item2}" });
-            }
+            //int register = getRegister(quad[2]);
+            //Tuple<MemoryLocations, int> location = getLocation(quad[2]);
+
+            //if (location.Item1 == MemoryLocations.stack)
+            //{
+            //    tQuads.Add(new List<string>() { "MOV", $"R{register}", "FP" });
+            //    tQuads.Add(new List<string>() { "ADI", $"R{register}", $"{location.Item2}" });
+            //}
+
+            string register2 = FetchAndLoadValue(quad[1]);
 
             // Load into a register the second operand
-            int register2 = getRegister(quad[1]);
-            Tuple<MemoryLocations, int> location2 = getLocation(quad[1]);
+            //int register2 = getRegister(quad[1]);
+            //Tuple<MemoryLocations, int> location2 = getLocation(quad[1]);
 
-            if (location2.Item1 == MemoryLocations.memory)
-            {
-                if (symTable[quad[1]].Data["type"] == "int")
-                {
-                    tQuads.Add(new List<string>() { "LDR", $"R{register2}", quad[1] });
-                }
-            }
+            //if (location2.Item1 == MemoryLocations.memory)
+            //{
+            //    if (symTable[quad[1]].Data["type"] == "int")
+            //    {
+            //        tQuads.Add(new List<string>() { "LDR", $"R{register2}", quad[1] });
+            //    }
+            //}
 
-            if (symTable[quad[2]].Data["type"] == "int")
+            if (symTable[quad[2]].Data["type"] == "int" || symTable[quad[2]].Data["type"] == "bool")
             {
-                tQuads.Add(new List<string>() { "STR", $"R{register2}", $"R{register}" });
+                tQuads.Add(new List<string>() { "STR", register2, register1 });
             }
         }
 
@@ -296,12 +320,14 @@ namespace Compiler
             }
             else if (location.Item1 == MemoryLocations.memory)
             {
-                tQuads.Add(new List<string>() { "LDR", register, symKey });
+                if (symTable[symKey].Data["type"] == "char") tQuads.Add(new List<string>() { "LDB", register, symKey });
+                else tQuads.Add(new List<string>() { "LDR", register, symKey });
                 return register;
             }
 
             string registerValue = "R" + getRegister("R1Val");
-            tQuads.Add(new List<string>() { "LDR", registerValue, register });
+            if (symTable[symKey].Data["type"] == "char") tQuads.Add(new List<string>() { "LDB", registerValue, register });
+            else tQuads.Add(new List<string>() { "LDR", registerValue, register });
 
             return registerValue;
         }
@@ -316,11 +342,17 @@ namespace Compiler
                 tQuads.Add(new List<string>() { "MOV", $"{register}", "FP" });
                 tQuads.Add(new List<string>() { "ADI", $"{register}", $"{location.Item2}" });
             }
+            //else if (location.Item1 == MemoryLocations.memory)
+            //{
+            //    if (symTable[symKey].Data["type"] == "char") tQuads.Add(new List<string>() { "LDB", register, symKey });
+            //    else tQuads.Add(new List<string>() { "LDR", register, symKey });
+            //    return register;
+            //}
 
             return register;
         }
 
-        void MathCase(List<string> quad)
+        void MathLogicCase(List<string> quad)
         {
             string register1Value = FetchAndLoadValue(quad[1]);
 
@@ -332,6 +364,19 @@ namespace Compiler
 
             tQuads.Add(new List<string>() { "STR", register1Value, register3 });
         }
+
+        //void OrCase(List<string> quad)
+        //{
+        //    string register1Value = FetchAndLoadValue(quad[1]);
+
+        //    string register2Value = FetchAndLoadValue(quad[2]);
+
+        //    tQuads.Add(new List<string>() { "OR", register1Value, register2Value });
+
+        //    string register3 = FetchAndLoadAddress(quad[3]);
+
+        //    tQuads.Add(new List<string>() { "STR", register1Value, register3 });
+        //}
 
         string genLabel(string l)
         {
@@ -347,24 +392,33 @@ namespace Compiler
 
             string label = genLabel("L");
 
-            if (quad[0] == "LT") tQuads.Add(new List<string>() { "BGT", register1, label }); // less than
-            else if (quad[0] == "GT") tQuads.Add(new List<string>() { "BLT", register1, label }); // greater than
-            else if (quad[0] == "EQ") tQuads.Add(new List<string>() { "BNZ", register1, label }); // equal
-            else if (quad[0] == "NE") tQuads.Add(new List<string>() { "BRZ", register1, label });
-            else if (quad[0] == "GE") tQuads.Add(new List<string>() { "BLT", register1, label });
-            else if (quad[0] == "LE") tQuads.Add(new List<string>() { "BGT", register1, label });
+            if (quad[0] == "LT") tQuads.Add(new List<string>() { "BLT", register1, label }); // less than
+            else if (quad[0] == "GT") tQuads.Add(new List<string>() { "BGT", register1, label }); // greater than
+            else if (quad[0] == "EQ") tQuads.Add(new List<string>() { "BRZ", register1, label }); // equal
+            else if (quad[0] == "NE") tQuads.Add(new List<string>() { "BNZ", register1, label });
+            else if (quad[0] == "GE")
+            {
+                tQuads.Add(new List<string>() { "BRZ", register1, label });
+                tQuads.Add(new List<string>() { "BGT", register1, label });
+            }
+            else if (quad[0] == "LE")
+            {
+                tQuads.Add(new List<string>() { "BRZ", register1, label });
+                tQuads.Add(new List<string>() { "BLT", register1, label });
+            }
 
             // Set FALSE
             string label2 = genLabel("L");
             string tempRegister = "R" + getRegister("temp");
-            tQuads.Add(new List<string>() { "MOV", tempRegister, "ZERO"});
+            tQuads.Add(new List<string>() { "LDR", tempRegister, "ZERO"});
             string register3 = FetchAndLoadAddress(quad[3]);
             tQuads.Add(new List<string>() { "STR", tempRegister, register3 });
             tQuads.Add(new List<string>() { "JMP", label2 });
             labels.Push(label2); // Add to labels Stack so that in next BF we will use that label
 
             // Set TRUE
-            tQuads.Add(new List<string>() { label, "MOV", tempRegister, "ONE" });
+            tQuads.Add(new List<string>() { label, "LDR", tempRegister, "ONE" });
+            register3 = FetchAndLoadAddress(quad[3]);
             tQuads.Add(new List<string>() { "STR", tempRegister, register3 });
            
         }
@@ -400,24 +454,26 @@ namespace Compiler
         void BranchFalseCase(List<string> quad)
         {
             string register1 = FetchAndLoadValue(quad[1]);
-            tQuads[tQuads.Count - 3].Insert(0, labels.Pop());
+            //if (labels.Count > 0) tQuads[tQuads.Count - 3].Insert(0, labels.Pop());
             tQuads.Add(new List<string>() { "BRZ", register1, quad[2] });
         }
 
         void Write1Case(List<string> quad)
         {
-            int register = getRegister(quad[1]);
-            Tuple<MemoryLocations, int> location = getLocation(quad[1]);
+            string register = FetchAndLoadValue(quad[1]);
 
-            if (location.Item1 == MemoryLocations.stack)
-            {
-                tQuads.Add(new List<string>() { "MOV", $"R{register}", "FP" });
-                tQuads.Add(new List<string>() { "ADI", $"R{register}", $"{location.Item2}" });
-            }
-
-            tQuads.Add(new List<string>() { "LDR", "R3", "R" + register });
+            tQuads.Add(new List<string>() { "MOV", "R3", register });
 
             tQuads.Add(new List<string>() { "TRP", "1" });
+        }
+
+        void Write2Case(List<string> quad)
+        {
+            string register = FetchAndLoadValue(quad[1]);
+
+            tQuads.Add(new List<string>() { "MOV", "R3", register });
+
+            tQuads.Add(new List<string>() { "TRP", "3" });
         }
 
         public void PrintTCode()

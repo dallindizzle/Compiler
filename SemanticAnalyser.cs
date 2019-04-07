@@ -903,6 +903,9 @@ namespace Compiler
         {
             if (scanner.getToken().lexeme == "+" || scanner.getToken().lexeme == "-")
             {
+                // Semantics code
+                lPush(scanner.getToken().lexeme + scanner.peekToken().lexeme);
+
                 scanner.nextToken();
                 if (scanner.getToken().type != "Number") syntaxError("Number");
                 scanner.nextToken();
@@ -1111,6 +1114,10 @@ namespace Compiler
             }
             else symKey = symTable.Where(sym => sym.Value.Scope == "g").Where(sym => sym.Value.Kind == "clit" || sym.Value.Kind == "ilit").Where(sym => sym.Value.Value == lit).First().Key;
 
+            // Check for Non-Printable ASCII characters
+            if (lit == "'\\n'") symTable[symKey].Value = "10";
+            else if (lit == "' '") symTable[symKey].Value = "32";
+
             SAS.Push(new SAR(lit, SAR.types.lit_sar, SAR.pushes.lPush, symKey));
         }
 
@@ -1134,6 +1141,7 @@ namespace Compiler
                     while (OS.First().val == "*" || OS.First().val == "/")
                     {
                         EOE();
+                        if (OS.Count == 0) break;
                     }
                     OS.Push(sar);
                 }
@@ -1146,6 +1154,7 @@ namespace Compiler
                     while (OS.First().val == "*" || OS.First().val == "/" || OS.First().val == "+" || OS.First().val == "-")
                     {
                         EOE();
+                        if (OS.Count == 0) break;
                     }
                     OS.Push(sar);
                 }
@@ -1158,6 +1167,7 @@ namespace Compiler
                     while (OS.First().val == "*" || OS.First().val == "/" || OS.First().val == "+" || OS.First().val == "-" || OS.First().val == "<" || OS.First().val == "<=" || OS.First().val == ">" || OS.First().val == ">=")
                     {
                         EOE();
+                        if (OS.Count == 0) break;
                     }
                     OS.Push(sar);
                 }
@@ -1170,6 +1180,7 @@ namespace Compiler
                     while (OS.First().val == "*" || OS.First().val == "/" || OS.First().val == "+" || OS.First().val == "-" || OS.First().val == "<" || OS.First().val == "<=" || OS.First().val == ">" || OS.First().val == ">=" || OS.First().val == "==" || OS.First().val == "!=")
                     {
                         EOE();
+                        if (OS.Count == 0) break;
                     }
                     OS.Push(sar);
                 }
@@ -1182,6 +1193,7 @@ namespace Compiler
                     while (OS.First().val == "*" || OS.First().val == "/" || OS.First().val == "+" || OS.First().val == "-" || OS.First().val == "<" || OS.First().val == "<=" || OS.First().val == ">" || OS.First().val == ">=" || OS.First().val == "==" || OS.First().val == "!=" || OS.First().val == "&&")
                     {
                         EOE();
+                        if (OS.Count == 0) break;
                     }
                     OS.Push(sar);
                 }
@@ -1194,6 +1206,7 @@ namespace Compiler
                     while (OS.First().val == "*" || OS.First().val == "/" || OS.First().val == "+" || OS.First().val == "-" || OS.First().val == "<" || OS.First().val == "<=" || OS.First().val == ">" || OS.First().val == ">=" || OS.First().val == "==" || OS.First().val == "!=" || OS.First().val == "&&" || OS.First().val == "||")
                     {
                         EOE();
+                        if (OS.Count == 0) break;
                     }
                     OS.Push(sar);
                 }

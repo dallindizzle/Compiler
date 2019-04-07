@@ -301,6 +301,14 @@ namespace Compiler
                 case "ULK":
                     opInt = 30;
                     break;
+
+                case "OR":
+                    opInt = 31;
+                    break;
+
+                case "AND":
+                    opInt = 32;
+                    break;
             }
 
             if (opInt == 27 || opInt == 28)
@@ -589,6 +597,14 @@ namespace Compiler
                     case 30:
                         ULK(inst);
                         break;
+
+                    case 31:
+                        OR(inst);
+                        break;
+
+                    case 32:
+                        AND(inst);
+                        break;
                 }
                 threadSwitch(); // We thread switch here because we are doing Round Robin where we run 1 instruction each thread at a time
             }
@@ -861,6 +877,24 @@ namespace Compiler
 
             byte[] bytes = BitConverter.GetBytes(-1);
             bytes.CopyTo(mem, inst[1]);
+        }
+
+        void OR(int[] inst)
+        {
+            if (reg[inst[1]] == 1 || reg[inst[2]] == 1)
+            {
+                reg[inst[1]] = 1;
+            }
+            else reg[inst[1]] = 0;
+        }
+
+        void AND(int[] inst)
+        {
+            if (reg[inst[1]] == 1 && reg[inst[2]] == 1)
+            {
+                reg[inst[1]] = 1;
+            }
+            else reg[inst[1]] = 0;
         }
 
         void TRP(int[] inst)
