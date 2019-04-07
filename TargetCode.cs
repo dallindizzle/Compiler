@@ -68,7 +68,12 @@ namespace Compiler
                         break;
 
                     case "GT":
-                        GreaterThanCase(quad);
+                    case "LT":
+                    case "EQ":
+                    case "NE":
+                    case "GE":
+                    case "LE":
+                        ConditionalCase(quad);
                         break;
 
                     case "BF":
@@ -334,7 +339,7 @@ namespace Compiler
             return $"{l}{labelCount}";
         }
 
-        void GreaterThanCase(List<string> quad)
+        void ConditionalCase(List<string> quad)
         {
             string register1 = FetchAndLoadValue(quad[1]);
             string register2 = FetchAndLoadValue(quad[2]);
@@ -342,7 +347,12 @@ namespace Compiler
 
             string label = genLabel("L");
 
-            tQuads.Add(new List<string>() { "BGT", register1, label });
+            if (quad[0] == "LT") tQuads.Add(new List<string>() { "BGT", register1, label }); // less than
+            else if (quad[0] == "GT") tQuads.Add(new List<string>() { "BLT", register1, label }); // greater than
+            else if (quad[0] == "EQ") tQuads.Add(new List<string>() { "BNZ", register1, label }); // equal
+            else if (quad[0] == "NE") tQuads.Add(new List<string>() { "BRZ", register1, label });
+            else if (quad[0] == "GE") tQuads.Add(new List<string>() { "BLT", register1, label });
+            else if (quad[0] == "LE") tQuads.Add(new List<string>() { "BGT", register1, label });
 
             // Set FALSE
             string label2 = genLabel("L");
@@ -357,6 +367,34 @@ namespace Compiler
             tQuads.Add(new List<string>() { label, "MOV", tempRegister, "ONE" });
             tQuads.Add(new List<string>() { "STR", tempRegister, register3 });
            
+        }
+
+        void EqualGreaterLesserCase(List<string> quad)
+        {
+            string register1 = FetchAndLoadValue(quad[1]);
+            string register2 = FetchAndLoadValue(quad[2]);
+            tQuads.Add(new List<string>() { "CMP", register1, register2 });
+
+            string label = genLabel("L");
+
+            //tQuads.Add(new List<string>() { "BLT", register1, label });
+
+            if (quad[0] == "GE") tQuads.Add(new List<string>() { "BLT", register1, label });
+            else if (quad[0] == "LE") tQuads.Add(new List<string>() { "BGT", register1, label });
+
+            // Set FALSE
+            string label2 = genLabel("L");
+            string tempRegister = "R" + getRegister("temp");
+            tQuads.Add(new List<string>() { "MOV", tempRegister, "ZERO" });
+            string register3 = FetchAndLoadAddress(quad[3]);
+            tQuads.Add(new List<string>() { "STR", tempRegister, register3 });
+            tQuads.Add(new List<string>() { "JMP", label2 });
+            labels.Push(label2); // Add to labels Stack so that in next BF we will use that label
+
+            // Set TRUE
+            tQuads.Add(new List<string>() { label, "MOV", tempRegister, "ONE" });
+            tQuads.Add(new List<string>() { "STR", tempRegister, register3 });
+
         }
 
         void BranchFalseCase(List<string> quad)

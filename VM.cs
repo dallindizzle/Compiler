@@ -409,14 +409,14 @@ namespace Compiler
             //assembler.PassTwo(args[0]);
 
             VM vm = new VM(assembler.code, assembler.PC, assembler.SIZE, assembler.mem);
-            try
-            {
+            //try
+            //{
                 vm.Run();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            //}
+            //catch (Exception e)
+            //{
+                //Console.WriteLine(e.Message);
+            //}
             //Console.ReadKey();
         }
 

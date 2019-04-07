@@ -1,12 +1,9 @@
 void kxi2019 main() {
-	int x = 3;
-	int y = 5;
+	int x = 9;
+	int y = 7;
 	
-	if(x > y) {
+	if(x <= y ) {
 		cout << x;
-	}
-	else {
-		cout << y;
 	}
 	
 }
