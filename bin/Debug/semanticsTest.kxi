@@ -1,18 +1,7 @@
-class Cat {
-	private int x = 7;
-	private int i = 5;
 
-	Cat(int val) {
-		y = val;
-	}
-
-	public int GetX() {
-		return x;
-	}
-
-	private int y;
-}
 
 void kxi2019 main() {
+	int x = 5;
 
+	cout << x + 5 * 90;
 }

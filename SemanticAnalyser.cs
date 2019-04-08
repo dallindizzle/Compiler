@@ -46,6 +46,7 @@ namespace Compiler
         Stack<string> skipStack;
         bool staticConstructor = false;
         List<List<string>> staticConstQuads = new List<List<string>>();
+        int heapCounter = 0;
 
         void MathAndLogicalInst(string op, string key1, string key2, string tempKey)
         {
@@ -150,9 +151,8 @@ namespace Compiler
             int objectSize = 0;
             foreach (var sym in ivars)
             {
-                if (sym.Value.Data["type"] == "int") objectSize += 4;
-                else if (sym.Value.Data["type"] == "char") objectSize += 1;
-                else objectSize += getObjectSize(sym.Value.Data["type"]);
+                if (sym.Value.Data["type"] == "char") objectSize += 1;
+                else objectSize += 4;
             }
 
             return objectSize;
@@ -672,6 +672,7 @@ namespace Compiler
             {
                 quads.Add(quad);
             }
+            staticConstQuads.Clear();
 
             if (scanner.getToken().lexeme != "}") syntaxError("}");
 
@@ -762,6 +763,8 @@ namespace Compiler
         {
             // iCode
             staticConstructor = false;
+            string constKey = symTable.Where(sym => sym.Value.Scope == scope && sym.Value.Kind == "Constructor").First().Key;
+            createQuad(constKey, "FUNC", constKey);
 
             // Semantics code
             dup(scanner.getToken().lexeme);
@@ -1277,7 +1280,9 @@ namespace Compiler
             new_sar.arguments = argumentsSar.arguments;
 
             // iCode
+            symTable[SAS.Peek().symKey].Data["heapLocation"] = heapCounter;
             int objectSize = getObjectSize(typeSar.val);
+            heapCounter += objectSize;
             string objSizeSymId = genId("t");
             symTable.Add(objSizeSymId, new Symbol(scope, objSizeSymId, "new object memory", "new object memory", new Dictionary<string, dynamic>() { { "returnType", typeSar.val } }));
             createQuad("NEWI", objectSize.ToString(), objSizeSymId);
