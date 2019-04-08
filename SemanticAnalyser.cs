@@ -44,6 +44,8 @@ namespace Compiler
         int labelCounter;
         Stack<string> labelStack;
         Stack<string> skipStack;
+        bool staticConstructor = false;
+        List<List<string>> staticConstQuads = new List<List<string>>();
 
         void MathAndLogicalInst(string op, string key1, string key2, string tempKey)
         {
@@ -483,7 +485,7 @@ namespace Compiler
                         string className = String.Join(".", matchesList);
                         if (!symTable.Where(tempsym => tempsym.Value.Scope == className).Any(sym => sym.Value.Value == scanner.getToken().lexeme)) semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
                         symKey = symTable.Where(tempsym => tempsym.Value.Scope == className).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
-                        iPush("this", symKey);
+                        iPush($"this", symKey);
                     }
                     else semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
                 }
@@ -662,6 +664,15 @@ namespace Compiler
             {
                 class_member_declaration();
             }
+
+            // iCode
+            string staticConstKey = symTable.Where(sym => sym.Value.Scope == scope + ".constructor" && sym.Value.Value == "static constructor").First().Key;
+            createQuad(staticConstKey, "FUNC", staticConstKey);
+            foreach(var quad in staticConstQuads)
+            {
+                quads.Add(quad);
+            }
+
             if (scanner.getToken().lexeme != "}") syntaxError("}");
 
             pop(); // Here we pop the class scope
@@ -709,6 +720,7 @@ namespace Compiler
                 var sar = SAS.Pop(); // Pop first record because it is a function, not a variable
 
                 // iCode
+                staticConstructor = false;
                 createQuad(sar.symKey, "FUNC", sar.symKey);
 
                 scanner.nextToken();
@@ -719,6 +731,9 @@ namespace Compiler
             }
             else
             {
+                // iCode
+                staticConstructor = true;
+
                 if (scanner.getToken().lexeme == "[")
                 {
                     scanner.nextToken();
@@ -745,6 +760,9 @@ namespace Compiler
 
         void constructor_declaration()
         {
+            // iCode
+            staticConstructor = false;
+
             // Semantics code
             dup(scanner.getToken().lexeme);
             CD(scanner.getToken().lexeme);
@@ -758,6 +776,13 @@ namespace Compiler
             if (isAtype(scanner.getToken().lexeme)) parameter_list();
             if (scanner.getToken().lexeme != ")") syntaxError(")");
             scanner.nextToken();
+
+            // iCode static contructor
+            string key = genId("S");
+            symTable.Add(key, new Symbol(scope, key, "static constructor", "static constructor"));
+            createQuad("FRAME", key, "this");
+            createQuad("CALL", key);
+
             method_body();
 
             pop(); // Popping contructor scope
@@ -1372,6 +1397,7 @@ namespace Compiler
                 if (!pat.IsMatch(scope)) semanticError(scanner.getToken().lineNum, "iExist", "this", "Wrong use of \"this\"");
                 sar.pushType = SAR.pushes.iExist;
                 sar.type = SAR.types.id_sar;
+                sar.val = "i var";
                 SAS.Push(sar);
                 return;
             }
@@ -1629,7 +1655,8 @@ namespace Compiler
 
                 // iCode
                 //quads.Add(new List<string>() { "MOV", op2.symKey, op1.symKey });
-                createQuad("MOV", op2.symKey, op1.symKey);
+                if (staticConstructor) staticConstQuads.Add(new List<string>() { "MOV", op2.symKey, op1.symKey });
+                else createQuad("MOV", op2.symKey, op1.symKey);
             }
             else
             {
@@ -1722,7 +1749,7 @@ namespace Compiler
             // iCode
             string tempSymId = genId("t");
             symTable.Add(tempSymId, new Symbol(scope, tempSymId, $"{array.val}[{argument.symKey}]", "lvar", new Dictionary<string, dynamic>() { { "type", "int" } }));
-            createQuad("AEF", array.symKey, argument.symKey,tempSymId);
+            createQuad("AEF", array.symKey, argument.symKey, tempSymId);
             arr_sar.symKey = tempSymId;
 
             SAS.Push(arr_sar);
