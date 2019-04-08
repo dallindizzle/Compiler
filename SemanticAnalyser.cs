@@ -672,6 +672,7 @@ namespace Compiler
             {
                 quads.Add(quad);
             }
+            createQuad("RTN");
             staticConstQuads.Clear();
 
             if (scanner.getToken().lexeme != "}") syntaxError("}");

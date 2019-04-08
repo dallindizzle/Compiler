@@ -63,6 +63,10 @@ namespace Compiler
                         CallCase(quad, iQuads[i + 1]);
                         break;
 
+                    case "RTN":
+                        ReturnCase(quad);
+                        break;
+
                     case "ADD":
                     case "SUB":
                     case "MUL":
@@ -266,14 +270,6 @@ namespace Compiler
         {
             // test for overflow
 
-            // FRAME
-            string register = $"R{getRegister(quad[1])}";
-            tQuads.Add(new List<string>() { "MOV", register, "FP" });
-            tQuads.Add(new List<string>() { "MOV", "FP", "SP" });
-            tQuads.Add(new List<string>() { "ADI", "SP", "-4" });
-            tQuads.Add(new List<string>() { "STR", register, "SP" });
-            tQuads.Add(new List<string>() { "ADI", "SP", "-4" });
-
             string register2 = "";
 
             if (quad[2] == "this")
@@ -284,6 +280,15 @@ namespace Compiler
                 tQuads.Add(new List<string>() { "LDR", register2, register2 });
             }
             else register2 = FetchAndLoadValue(quad[2]);
+
+            // FRAME
+            string register = $"R{getRegister(quad[1])}";
+            tQuads.Add(new List<string>() { "MOV", register, "FP" });
+            tQuads.Add(new List<string>() { "MOV", "FP", "SP" });
+            tQuads.Add(new List<string>() { "ADI", "SP", "-4" });
+            tQuads.Add(new List<string>() { "STR", register, "SP" });
+            tQuads.Add(new List<string>() { "ADI", "SP", "-4" });
+
             tQuads.Add(new List<string>() { "STR", register2, "SP" });
             tQuads.Add(new List<string>() { "ADI", "SP", "-4" }); // Setting "this" onto the stack (probably change later)
 
@@ -400,6 +405,19 @@ namespace Compiler
             //}
 
             return register;
+        }
+
+        void ReturnCase(List<string> quad)
+        {
+            // Check underflow
+
+            string register1 = "R" + getRegister("RTN");
+            tQuads.Add(new List<string>() { "LDR", register1, "FP" });
+            string register2 = "R" + getRegister("RTN");
+            tQuads.Add(new List<string>() { "MOV", register2, "FP" });
+            tQuads.Add(new List<string>() { "ADI", register2, "-4" });
+            tQuads.Add(new List<string>() { "LDR", "FP", register2 });
+            tQuads.Add(new List<string>() { "JMR", register1 });
         }
 
         void MathLogicCase(List<string> quad)

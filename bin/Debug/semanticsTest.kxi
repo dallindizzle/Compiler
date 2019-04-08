@@ -1,7 +1,11 @@
+class Cat {
+	public int x = 1;
 
+	Cat() {
+		cout << x;
+	}
+}
 
 void kxi2019 main() {
-	int x = 5;
-
-	cout << x + 5 * 90;
+	Cat x = new Cat();
 }
