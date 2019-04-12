@@ -1,11 +1,15 @@
 class Cat {
-	public char y = 'y';
+	public char x = 'b';
 
-	Cat() {
+	Cat() {		
 	}
+
 }
 
 void kxi2019 main() {
 	Cat c = new Cat();
-	cout << c.y;
+
+	if (c.x == 'b') {
+		cout << c.x;
+	}
 }

@@ -1489,7 +1489,7 @@ namespace Compiler
                         symTable.Remove(symId);
                         symId = tSymId;
                         symTable.Add(tSymId, tSymbol);
-                        createQuad("PEAK", tSymId);
+                        createQuad("PEEK", tSymId);
                     }
                 }
                 else
@@ -1624,7 +1624,7 @@ namespace Compiler
                 if (oper.val != "=" || OS.Count > 0) semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
                 if (op1.val == "this") semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
 
-                if (symTable[op1.symKey].Kind != "lvar" && symTable[op1.symKey].Kind != "ivar" && symTable[op1.symKey].Kind != "param") semanticError(scanner.getToken().lineNum, "Type", op1.val, "not lvalue");
+                if (symTable[op1.symKey].Kind != "lvar" && symTable[op1.symKey].Kind != "ivar" && symTable[op1.symKey].Kind != "param" && symTable[op1.symKey].Kind != "ref var") semanticError(scanner.getToken().lineNum, "Type", op1.val, "not lvalue");
 
                 if (op2.pushType == SAR.pushes.newObj)
                 {
