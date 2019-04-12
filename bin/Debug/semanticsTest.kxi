@@ -1,5 +1,5 @@
 class Cat {
-	public int x = 1;
+	public int x = 14;
 
 	Cat() {
 		cout << x;

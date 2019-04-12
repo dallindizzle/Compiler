@@ -370,6 +370,14 @@ namespace Compiler
                 else tQuads.Add(new List<string>() { "LDR", register, symKey });
                 return register;
             }
+            else if (location.Item1 == MemoryLocations.heap)
+            {
+                string thisRegister = FetchAndLoadThis();
+                tQuads.Add(new List<string>() { "ADI", thisRegister, location.Item2.ToString() });
+                if (symTable[symKey].Data["type"] == "char") tQuads.Add(new List<string>() { "LDB", register, thisRegister });
+                else tQuads.Add(new List<string>() { "LDR", register, thisRegister });
+                return register;
+            }
 
             string registerValue = "R" + getRegister("R1Val");
             if (symTable[symKey].Data.ContainsKey("returnType")) tQuads.Add(new List<string>() { "LDR", registerValue, register });
@@ -575,8 +583,10 @@ namespace Compiler
             string register1 = "R" + getRegister("this");
             tQuads.Add(new List<string>() { "MOV", register1, "FP" });
             tQuads.Add(new List<string>() { "ADI", register1, "-8" });
+            string register2 = "R" + getRegister("thisValue");
+            tQuads.Add(new List<string>() { "LDR", register2, register2 });
 
-            return register1;
+            return register2;
         }
 
         void BranchFalseCase(List<string> quad)
