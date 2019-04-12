@@ -201,6 +201,7 @@ namespace Compiler
             createQuad(mainKey, "FUNC", mainKey);
             quads.Insert(0, new List<string>() { "FRAME", mainKey, "A2" });
             quads.Insert(1, new List<string>() { "CALL", mainKey });
+            quads.Insert(2, new List<string>() { "TRP", "0" });
 
             scanner.nextToken();
             if (scanner.getToken().lexeme != "(") syntaxError("(");
@@ -214,7 +215,7 @@ namespace Compiler
 
             pop();
 
-            createQuad("TRP", "0");
+            //createQuad("TRP", "0");
         }
 
         void method_body()
@@ -234,6 +235,8 @@ namespace Compiler
 
             if (scanner.getToken().lexeme != "}") syntaxError("}");
             scanner.nextToken();
+
+            createQuad("RTN");
         }
 
         void statement()
@@ -1459,7 +1462,7 @@ namespace Compiler
                 symId = genId("r");
 
                 if (ivarSar.type == SAR.types.func_sar || symTable[ivarSymId].Kind == "method") symTable.Add(symId, new Symbol(scope, symId, ref_val, symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["returnType"] } }));
-                else symTable.Add(symId, new Symbol(scope, symId, ref_val, symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));
+                else symTable.Add(symId, new Symbol(scope, symId, ref_val, "ref var", new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));
 
                 // iCode
                 if (ivarSar.type == SAR.types.func_sar || symTable[ivarSymId].Kind == "method")

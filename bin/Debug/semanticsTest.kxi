@@ -1,11 +1,11 @@
 class Cat {
-	public int x = 14;
+	public char y = 'y';
 
 	Cat() {
-		cout << x;
 	}
 }
 
 void kxi2019 main() {
-	Cat x = new Cat();
+	Cat c = new Cat();
+	cout << c.y;
 }

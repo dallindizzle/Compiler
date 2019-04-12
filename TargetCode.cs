@@ -220,7 +220,7 @@ namespace Compiler
                 return new Tuple<MemoryLocations, int>(MemoryLocations.memory, -1);
             }
 
-            if (symTable[symKey].Data.ContainsKey("heapLocation"))
+            if (symTable[symKey].Data.ContainsKey("heapLocation") && symTable[symKey].Kind != "lvar")
             {
                 return new Tuple<MemoryLocations, int>(MemoryLocations.heap, symTable[symKey].Data["heapLocation"]);
             }
@@ -349,6 +349,7 @@ namespace Compiler
             {
                 tQuads.Add(new List<string>() { "STR", register2, register1 });
             }
+            else tQuads.Add(new List<string>() { "STB", register2, register1 });
         }
 
         // Creates instructions to fetch a variable from memory and load it into a register. The register string is returned
@@ -400,8 +401,9 @@ namespace Compiler
             else if (location.Item1 == MemoryLocations.heap)
             {
                 string register2 = FetchAndLoadThis();
-                tQuads.Add(new List<string>() { "LDR", register, register2 });
-                tQuads.Add(new List<string>() { "ADI", register, location.Item2.ToString() });
+                //tQuads.Add(new List<string>() { "LDR", register, register2 });
+                tQuads.Add(new List<string>() { "ADI", register2, location.Item2.ToString() });
+                return register2;
                 //tQuads.Add(new List<string>() { "MOV", register, "SL" });
                 //tQuads.Add(new List<string>() { "ADI", register, location.Item2.ToString() });
             }
@@ -558,7 +560,10 @@ namespace Compiler
 
         void RefCase(List<string> quad)
         {
-            string register1 = FetchAndLoadAddress(quad[1]);
+            //Debug VM
+            //tQuads.Add(new List<string>() { "TRP", "99" });
+
+            string register1 = FetchAndLoadValue(quad[1]);
 
 
             // Get offset
@@ -566,12 +571,15 @@ namespace Compiler
             var fellowIvars = symTable.Where(sym => sym.Value.Scope == "g." + symTable[quad[1]].Data["type"] && sym.Value.Kind == "ivar").ToList();
             foreach(var ivar in fellowIvars)
             {
-                if (ivar.Key == quad[2]) continue;
-                if (ivar.Value.Data["type"] == "char") offset += 1;
+                if (ivar.Key == quad[2]) break;
+                if (ivar.Value.Data["type"] == "char") offset += 4;
                 else offset += 4;
             }
 
             tQuads.Add(new List<string>() { "ADI", register1, offset.ToString() });
+
+            if (symTable[quad[1]].Data["type"] == "char") tQuads.Add(new List<string>() { "LDB", register1, register1 });
+            else tQuads.Add(new List<string>() { "LDR", register1, register1 });
 
             string register2 = FetchAndLoadAddress(quad[3]);
 
@@ -584,7 +592,7 @@ namespace Compiler
             tQuads.Add(new List<string>() { "MOV", register1, "FP" });
             tQuads.Add(new List<string>() { "ADI", register1, "-8" });
             string register2 = "R" + getRegister("thisValue");
-            tQuads.Add(new List<string>() { "LDR", register2, register2 });
+            tQuads.Add(new List<string>() { "LDR", register2, register1 });
 
             return register2;
         }
@@ -598,6 +606,9 @@ namespace Compiler
 
         void Write1Case(List<string> quad)
         {
+            // Debug VM
+            //tQuads.Add(new List<string>() { "TRP", "99" });
+
             string register = FetchAndLoadValue(quad[1]);
 
             tQuads.Add(new List<string>() { "MOV", "R3", register });
@@ -607,6 +618,9 @@ namespace Compiler
 
         void Write2Case(List<string> quad)
         {
+            // Debug VM
+            //tQuads.Add(new List<string>() { "TRP", "99" });
+
             string register = FetchAndLoadValue(quad[1]);
 
             tQuads.Add(new List<string>() { "MOV", "R3", register });

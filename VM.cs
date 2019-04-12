@@ -127,7 +127,11 @@ namespace Compiler
                         {
                             //Insert the value into memory using the symbols table
                             if (int.TryParse(tokens[2], out int i)) InsertChar(int.Parse(tokens[2]), symbols[tokens[0]]);
-                            else InsertMem(tokens[2][0], symbols[tokens[0]]);
+                            else
+                            {
+                                if (tokens[2][0] == '\'' && tokens[2].Length > 1) InsertMem(tokens[2][1], symbols[tokens[0]]);
+                                else InsertMem(tokens[2][0], symbols[tokens[0]]);
+                            }
                         }
                         PC += (tokens[1] == ".INT") ? 4 : 1;
                         continue;
