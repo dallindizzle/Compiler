@@ -1,5 +1,5 @@
 class Cat {
-	public char x = 'b';
+	public int age = 6;
 
 	Cat() {		
 	}
@@ -9,7 +9,10 @@ class Cat {
 void kxi2019 main() {
 	Cat c = new Cat();
 
-	if (c.x == 'b') {
-		cout << c.x;
+	if (c.age > 2 || c.age < 6) {
+		cout << c.age;
+	}
+	else {
+		cout << 'c';
 	}
 }

@@ -14,7 +14,7 @@ namespace Compiler
         List<List<string>> tQuads = new List<List<string>>();
         string[] registers = new string[12];
         int labelCount = 0;
-        Stack<string> labels = new Stack<string>();
+        Queue<string> labels = new Queue<string>();
 
         enum MemoryLocations
         {
@@ -137,7 +137,7 @@ namespace Compiler
                 }
                 if (addOwnLabel)
                 {
-                    tQuads[ownLabelLoc].Insert(0, labels.Pop());
+                    tQuads[ownLabelLoc].Insert(0, labels.Dequeue());
                     addOwnLabel = false;
                 }
                 if (labels.Count > 0)
@@ -451,7 +451,19 @@ namespace Compiler
         {
             string register1Value = FetchAndLoadValue(quad[1]);
 
+            if (quad[1][0] == 'r')
+            {
+                if (symTable[quad[1]].Data["type"] == "char") tQuads.Add(new List<string>() { "LDB", register1Value, register1Value });
+                else tQuads.Add(new List<string>() { "LDR", register1Value, register1Value });
+            }
+
             string register2Value = FetchAndLoadValue(quad[2]);
+
+            if (quad[2][0] == 'r')
+            {
+                if (symTable[quad[1]].Data["type"] == "char") tQuads.Add(new List<string>() { "LDB", register2Value, register2Value });
+                else tQuads.Add(new List<string>() { "LDR", register2Value, register2Value });
+            }
 
             tQuads.Add(new List<string>() { quad[0], register1Value, register2Value });
 
@@ -482,7 +494,21 @@ namespace Compiler
         void ConditionalCase(List<string> quad)
         {
             string register1 = FetchAndLoadValue(quad[1]);
+
+            if (quad[1][0] == 'r')
+            {
+                if (symTable[quad[1]].Data["type"] == "char") tQuads.Add(new List<string>() { "LDB", register1, register1 });
+                else tQuads.Add(new List<string>() { "LDR", register1, register1 });
+            }
+
             string register2 = FetchAndLoadValue(quad[2]);
+
+            if (quad[2][0] == 'r')
+            {
+                if (symTable[quad[1]].Data["type"] == "char") tQuads.Add(new List<string>() { "LDB", register2, register2 });
+                else tQuads.Add(new List<string>() { "LDR", register2, register2 });
+            }
+
             tQuads.Add(new List<string>() { "CMP", register1, register2 });
 
             string label = genLabel("L");
@@ -509,7 +535,7 @@ namespace Compiler
             string register3 = FetchAndLoadAddress(quad[3]);
             tQuads.Add(new List<string>() { "STR", tempRegister, register3 });
             tQuads.Add(new List<string>() { "JMP", label2 });
-            labels.Push(label2); // Add to labels Stack so that in next BF we will use that label
+            labels.Enqueue(label2); // Add to labels Stack so that in next BF we will use that label
 
             // Set TRUE
             tQuads.Add(new List<string>() { label, "LDR", tempRegister, "ONE" });
@@ -521,7 +547,20 @@ namespace Compiler
         void EqualGreaterLesserCase(List<string> quad)
         {
             string register1 = FetchAndLoadValue(quad[1]);
+
+            if (quad[1][0] == 'r')
+            {
+                if (symTable[quad[1]].Data["type"] == "char") tQuads.Add(new List<string>() { "LDB", register1, register1 });
+                else tQuads.Add(new List<string>() { "LDR", register1, register1 });
+            }
+
             string register2 = FetchAndLoadValue(quad[2]);
+
+            if (quad[2][0] == 'r')
+            {
+                if (symTable[quad[1]].Data["type"] == "char") tQuads.Add(new List<string>() { "LDB", register2, register2 });
+                else tQuads.Add(new List<string>() { "LDR", register2, register2 });
+            }
             tQuads.Add(new List<string>() { "CMP", register1, register2 });
 
             string label = genLabel("L");
@@ -538,7 +577,7 @@ namespace Compiler
             string register3 = FetchAndLoadAddress(quad[3]);
             tQuads.Add(new List<string>() { "STR", tempRegister, register3 });
             tQuads.Add(new List<string>() { "JMP", label2 });
-            labels.Push(label2); // Add to labels Stack so that in next BF we will use that label
+            labels.Enqueue(label2); // Add to labels Stack so that in next BF we will use that label
 
             // Set TRUE
             tQuads.Add(new List<string>() { label, "MOV", tempRegister, "ONE" });
@@ -603,7 +642,7 @@ namespace Compiler
             // Get offset
             int offset = 0;
             var fellowIvars = symTable.Where(sym => sym.Value.Scope == "g." + symTable[quad[1]].Data["type"] && sym.Value.Kind == "ivar").ToList();
-            foreach(var ivar in fellowIvars)
+            foreach (var ivar in fellowIvars)
             {
                 if (ivar.Key == quad[2]) break;
                 if (ivar.Value.Data["type"] == "char") offset += 4;
@@ -634,7 +673,6 @@ namespace Compiler
         void BranchFalseCase(List<string> quad)
         {
             string register1 = FetchAndLoadValue(quad[1]);
-            //if (labels.Count > 0) tQuads[tQuads.Count - 3].Insert(0, labels.Pop());
             tQuads.Add(new List<string>() { "BRZ", register1, quad[2] });
         }
 
