@@ -1475,11 +1475,11 @@ namespace Compiler
                     else refObject = classSar.symKey;
 
                     createQuad("FRAME", ivarSymId, refObject);
-                    foreach(var arg in ivarSar.arguments)
-                    {
-                        createQuad("PUSH", arg.symKey);
-                    }
-                    createQuad("CALL", ivarSymId);
+                    //foreach(var arg in ivarSar.arguments)
+                    //{
+                    //    createQuad("PUSH", arg.symKey);
+                    //}
+                    //createQuad("CALL", ivarSymId);
 
                     if (symTable[ivarSymId].Data.ContainsKey("returnType"))
                     {
@@ -1492,7 +1492,7 @@ namespace Compiler
                         symTable.Remove(symId);
                         symId = tSymId;
                         symTable.Add(tSymId, tSymbol);
-                        createQuad("PEEK", tSymId);
+                        //createQuad("PEEK", tSymId);
                     }
                 }
                 else
@@ -1579,10 +1579,13 @@ namespace Compiler
                 if (arguments.arguments.Count > 0) semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
             }
 
-            foreach(var arg in arguments.arguments)
+            //createQuad("FRAME", ivarSymId, refObject);
+            foreach (var arg in arguments.arguments)
             {
                 createQuad("PUSH", arg.symKey);
             }
+            createQuad("CALL", methodKey);
+            createQuad("PEEK", fSar.symKey);
 
             SAR functionSar = new SAR(fSar.val, SAR.types.func_sar, SAR.pushes.func, fSar.symKey);
             functionSar.arguments = arguments.arguments;

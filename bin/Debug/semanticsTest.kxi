@@ -1,13 +1,16 @@
 class Cat {
-	public int age = 6;
 
-	Cat(int a) {
-		age = a;
+	Cat() {
+
 	}
 
-
+	public void Print(char n) {
+		cout << n;
+	}
 }
 
 void kxi2019 main() {
-	Cat c = new Cat(5);
+	Cat c = new Cat();
+
+	c.Print('c');
 }

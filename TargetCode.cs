@@ -113,6 +113,10 @@ namespace Compiler
                         PeekCase(quad);
                         break;
 
+                    case "PUSH":
+                        PushCase(quad);
+                        break;
+
                     case "REF":
                         RefCase(quad);
                         break;
@@ -472,19 +476,6 @@ namespace Compiler
             tQuads.Add(new List<string>() { "STR", register1Value, register3 });
         }
 
-        //void OrCase(List<string> quad)
-        //{
-        //    string register1Value = FetchAndLoadValue(quad[1]);
-
-        //    string register2Value = FetchAndLoadValue(quad[2]);
-
-        //    tQuads.Add(new List<string>() { "OR", register1Value, register2Value });
-
-        //    string register3 = FetchAndLoadAddress(quad[3]);
-
-        //    tQuads.Add(new List<string>() { "STR", register1Value, register3 });
-        //}
-
         string genLabel(string l)
         {
             labelCount++;
@@ -629,6 +620,37 @@ namespace Compiler
                     tQuads.Add(new List<string>() { "STR", tempRegister, register2 });
                 }
             }
+        }
+
+        void PushCase(List<string> quad)
+        {
+            var loc = getLocation(quad[1]);
+
+            string valRegister = "";
+
+            if (loc.Item1 == MemoryLocations.stack) // Get old frame
+            {
+                string register1 = "R" + getRegister("pfp");
+                tQuads.Add(new List<string>() { "MOV", register1, "FP" });
+                tQuads.Add(new List<string>() { "ADI", register1, "-4" });
+                string oldFrameRegister = "R" + getRegister("ofr");
+                tQuads.Add(new List<string>() { "LDR", oldFrameRegister, register1 });
+                tQuads.Add(new List<string>() { "ADI", oldFrameRegister, loc.Item2.ToString() });
+
+                valRegister = "R" + getRegister("val");
+
+                if (symTable[quad[1]].Data["type"] == "char") tQuads.Add(new List<string>() { "LDB", valRegister, oldFrameRegister });
+                else tQuads.Add(new List<string>() { "LDR", valRegister, oldFrameRegister });
+            }
+            else
+            {
+                valRegister = FetchAndLoadValue(quad[1]);
+            }
+
+            if (symTable[quad[1]].Data["type"] == "char") tQuads.Add(new List<string>() { "STB", valRegister, "SP" });
+            else tQuads.Add(new List<string>() { "STR", valRegister, "SP" });
+
+            tQuads.Add(new List<string>() { "ADI", "SP", "-4" });
         }
 
         void RefCase(List<string> quad)
