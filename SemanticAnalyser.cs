@@ -118,7 +118,8 @@ namespace Compiler
         {
             if (skipStack.Count == 0)
             {
-                quads.Add(new List<string>() { op, oper1, oper2, oper3 });
+                if (staticConstructor) staticConstQuads.Add(new List<string>() { op, oper1, oper2, oper3 });
+                else quads.Add(new List<string>() { op, oper1, oper2, oper3 });
             }
             else
             {
@@ -212,6 +213,7 @@ namespace Compiler
             if (scanner.getToken().lexeme != ")") syntaxError(")");
             scanner.nextToken();
             method_body();
+            createQuad("RTN");
 
             pop();
 
@@ -236,7 +238,7 @@ namespace Compiler
             if (scanner.getToken().lexeme != "}") syntaxError("}");
             scanner.nextToken();
 
-            createQuad("RTN");
+            //createQuad("RTN");
         }
 
         void statement()
@@ -733,6 +735,7 @@ namespace Compiler
                 if (scanner.getToken().lexeme != ")") syntaxError(")");
                 scanner.nextToken();
                 method_body();
+                createQuad("RTN");
             }
             else
             {
@@ -791,6 +794,8 @@ namespace Compiler
             createQuad("CALL", key);
 
             method_body();
+
+            createQuad("RETURN", "this");
 
             pop(); // Popping contructor scope
         }
