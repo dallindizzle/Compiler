@@ -1461,7 +1461,10 @@ namespace Compiler
             {
                 symId = genId("r");
 
-                if (ivarSar.type == SAR.types.func_sar || symTable[ivarSymId].Kind == "method") symTable.Add(symId, new Symbol(scope, symId, ref_val, symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["returnType"] } }));
+                if (ivarSar.type == SAR.types.func_sar || symTable[ivarSymId].Kind == "method")
+                {
+                    symTable.Add(symId, new Symbol(scope, symId, ref_val, symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["returnType"] }}));
+                }
                 else symTable.Add(symId, new Symbol(scope, symId, ref_val, "ref var", new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));
 
                 // iCode
@@ -1485,7 +1488,7 @@ namespace Compiler
                         string type = "";
                         if (symTable[ivarSar.symKey].Data.ContainsKey("returnType")) type = symTable[ivarSar.symKey].Data["returnType"];
                         else type = symTable[ivarSar.symKey].Data["type"];
-                        Symbol tSymbol = new Symbol(scope, tSymId, symTable[ivarSar.symKey].Value, symTable[ivarSar.symKey].Kind, new Dictionary<string, dynamic>() { { "type", type } });
+                        Symbol tSymbol = new Symbol(scope, tSymId, symTable[ivarSar.symKey].Value, symTable[ivarSar.symKey].Kind, new Dictionary<string, dynamic>() { { "type", type }, { "methodKey", ivarSymId } });
                         symTable.Remove(symId);
                         symId = tSymId;
                         symTable.Add(tSymId, tSymbol);
@@ -1549,6 +1552,37 @@ namespace Compiler
         {
             SAR arguments = SAS.Pop();
             SAR fSar = SAS.Pop();
+
+            // Get method key
+            string methodKey = symTable[fSar.symKey].Data["methodKey"];
+
+            if (symTable[methodKey].Data.ContainsKey("Param"))
+            {
+                if (arguments.arguments.Count == 0) semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
+
+                List<string> parms = symTable[methodKey].Data["Param"];
+                var args = arguments.arguments;
+
+                if (parms.Count != args.Count) semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
+
+                for (int i = 0; i < parms.Count; i++)
+                {
+                    string parmType = symTable[parms[i]].Data["type"];
+                    string argsType = symTable[args[i].symKey].Data["type"];
+
+                    if (parmType != argsType) semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
+                }
+
+            }
+            else
+            {
+                if (arguments.arguments.Count > 0) semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
+            }
+
+            foreach(var arg in arguments.arguments)
+            {
+                createQuad("PUSH", arg.symKey);
+            }
 
             SAR functionSar = new SAR(fSar.val, SAR.types.func_sar, SAR.pushes.func, fSar.symKey);
             functionSar.arguments = arguments.arguments;

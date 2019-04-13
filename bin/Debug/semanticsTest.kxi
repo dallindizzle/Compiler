@@ -1,18 +1,13 @@
 class Cat {
 	public int age = 6;
 
-	Cat() {		
+	Cat(int a) {
+		age = a;
 	}
+
 
 }
 
 void kxi2019 main() {
-	Cat c = new Cat();
-
-	if (c.age > 2 || c.age < 6) {
-		cout << c.age;
-	}
-	else {
-		cout << 'c';
-	}
+	Cat c = new Cat(5);
 }
