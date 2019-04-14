@@ -302,6 +302,11 @@ namespace Compiler
             }
             else register2 = FetchAndLoadValue(quad[2]);
 
+            if (quad[2][0] == 'r') {
+                tQuads.Add(new List<string>() { "TRP", "99" });
+                tQuads.Add(new List<string>() { "LDR", register2, register2 });
+            }
+
             // FRAME
             string register = $"R{getRegister(quad[1])}";
             tQuads.Add(new List<string>() { "MOV", register, "FP" });
@@ -471,7 +476,7 @@ namespace Compiler
         void ReturnCase(List<string> quad)
         {
             // VM Debug
-            tQuads.Add(new List<string>() { "TRP", "99" });
+            //tQuads.Add(new List<string>() { "TRP", "99" });
 
             // Check underflow
 
@@ -483,7 +488,7 @@ namespace Compiler
             }
             else valRegister = FetchAndLoadValue(quad[1]);
 
-            if (quad[1] != "this" && getLocation(quad[1]).Item1 == MemoryLocations.heap)
+            if (quad[1] != "this" && getLocation(quad[1]).Item1 == MemoryLocations.heap && symTable[quad[1]].Kind != "ivar")
             {
                 if (symTable[quad[1]].Data["type"] == "char") tQuads.Add(new List<string>() { "LDB", valRegister, valRegister });
                 else tQuads.Add(new List<string>() { "LDR", valRegister, valRegister });
@@ -702,6 +707,11 @@ namespace Compiler
                 tQuads.Add(new List<string>() { "ADI", oldFrameRegister, loc.Item2.ToString() });
 
                 valRegister = "R" + getRegister("val");
+
+                if (quad[1][0] == 'r')
+                {
+                    tQuads.Add(new List<string>() { "LDR", oldFrameRegister, oldFrameRegister });
+                }
 
                 if (symTable[quad[1]].Data["type"] == "char") tQuads.Add(new List<string>() { "LDB", valRegister, oldFrameRegister });
                 else tQuads.Add(new List<string>() { "LDR", valRegister, oldFrameRegister });

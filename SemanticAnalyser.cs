@@ -1401,7 +1401,7 @@ namespace Compiler
                         //symTable.Remove(symId);
                         //symId = tSymId;
                         symTable.Add(tSymId, tSymbol);
-                        createQuad("PEAK", tSymId);
+                        createQuad("PEEK", tSymId);
                         sar.symKey = tSymId;
                         sar.val = "";
                     }
@@ -1481,12 +1481,7 @@ namespace Compiler
                     if (classSar.val == "this") refObject = "this";
                     else refObject = classSar.symKey;
 
-                    createQuad("FRAME", ivarSymId, refObject);
-                    //foreach(var arg in ivarSar.arguments)
-                    //{
-                    //    createQuad("PUSH", arg.symKey);
-                    //}
-                    //createQuad("CALL", ivarSymId);
+                    //createQuad("FRAME", ivarSymId, refObject);
 
                     if (symTable[ivarSymId].Data.ContainsKey("returnType"))
                     {
@@ -1495,7 +1490,7 @@ namespace Compiler
                         string type = "";
                         if (symTable[ivarSar.symKey].Data.ContainsKey("returnType")) type = symTable[ivarSar.symKey].Data["returnType"];
                         else type = symTable[ivarSar.symKey].Data["type"];
-                        Symbol tSymbol = new Symbol(scope, tSymId, symTable[ivarSar.symKey].Value, symTable[ivarSar.symKey].Kind, new Dictionary<string, dynamic>() { { "type", type }, { "methodKey", ivarSymId } });
+                        Symbol tSymbol = new Symbol(scope, tSymId, symTable[ivarSar.symKey].Value, symTable[ivarSar.symKey].Kind, new Dictionary<string, dynamic>() { { "type", type }, { "methodKey", ivarSymId }, { "objectKey", classSar.symKey } });
                         symTable.Remove(symId);
                         symId = tSymId;
                         symTable.Add(tSymId, tSymbol);
@@ -1561,8 +1556,17 @@ namespace Compiler
             SAR fSar = SAS.Pop();
 
             // Get method key
-            if (!symTable[fSar.symKey].Data.ContainsKey("methodKey")) semanticError(scanner.getToken().lineNum, "Not a method", fSar.val, "Not a method");
-            string methodKey = symTable[fSar.symKey].Data["methodKey"];
+            string methodKey;
+            if (symTable[fSar.symKey].Kind == "method")
+            {
+                if (symTable[fSar.symKey].Data.ContainsKey("methodKey")) methodKey = symTable[fSar.symKey].Data["methodKey"];
+                else methodKey = fSar.symKey;
+            }
+            else
+            {
+                if (!symTable[fSar.symKey].Data.ContainsKey("methodKey")) semanticError(scanner.getToken().lineNum, "Not a method", fSar.val, "Not a method");
+                methodKey = symTable[fSar.symKey].Data["methodKey"];
+            }
 
             if (symTable[methodKey].Data.ContainsKey("Param"))
             {
@@ -1587,7 +1591,7 @@ namespace Compiler
                 if (arguments.arguments.Count > 0) semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
             }
 
-            //createQuad("FRAME", ivarSymId, refObject);
+            createQuad("FRAME", methodKey, symTable[fSar.symKey].Data["objectKey"]);
             foreach (var arg in arguments.arguments)
             {
                 createQuad("PUSH", arg.symKey);
