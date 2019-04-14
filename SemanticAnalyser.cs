@@ -1381,31 +1381,31 @@ namespace Compiler
             if (sar.val == "this" || sar.type == SAR.types.func_sar)
             {
                 // iCode
-                if (sar.type == SAR.types.func_sar)
-                {
-                    createQuad("FRAME", sar.symKey, "this");
-                    foreach(var arg in sar.arguments)
-                    {
-                        createQuad("PUSH", arg.symKey);
-                    }
-                    createQuad("CALL", sar.symKey);
+                //if (sar.type == SAR.types.func_sar)
+                //{
+                //    createQuad("FRAME", sar.symKey, "this");
+                //    foreach(var arg in sar.arguments)
+                //    {
+                //        createQuad("PUSH", arg.symKey);
+                //    }
+                //    createQuad("CALL", sar.symKey);
 
-                    if (symTable[sar.symKey].Data.ContainsKey("returnType"))
-                    {
-                        //sar.symKey = ivarSymId;
-                        string tSymId = genId("t");
-                        string type = "";
-                        if (symTable[sar.symKey].Data.ContainsKey("returnType")) type = symTable[sar.symKey].Data["returnType"];
-                        else type = symTable[sar.symKey].Data["type"];
-                        Symbol tSymbol = new Symbol(scope, tSymId, symTable[sar.symKey].Value, symTable[sar.symKey].Kind, new Dictionary<string, dynamic>() { { "type", type } });
-                        //symTable.Remove(symId);
-                        //symId = tSymId;
-                        symTable.Add(tSymId, tSymbol);
-                        createQuad("PEEK", tSymId);
-                        sar.symKey = tSymId;
-                        sar.val = "";
-                    }
-                }
+                //    if (symTable[sar.symKey].Data.ContainsKey("returnType"))
+                //    {
+                //        //sar.symKey = ivarSymId;
+                //        string tSymId = genId("t");
+                //        string type = "";
+                //        if (symTable[sar.symKey].Data.ContainsKey("returnType")) type = symTable[sar.symKey].Data["returnType"];
+                //        else type = symTable[sar.symKey].Data["type"];
+                //        Symbol tSymbol = new Symbol(scope, tSymId, symTable[sar.symKey].Value, symTable[sar.symKey].Kind, new Dictionary<string, dynamic>() { { "type", type } });
+                //        //symTable.Remove(symId);
+                //        //symId = tSymId;
+                //        symTable.Add(tSymId, tSymbol);
+                //        createQuad("PEEK", tSymId);
+                //        sar.symKey = tSymId;
+                //        sar.val = "";
+                //    }
+                //}
 
                 Regex pat = new Regex(@"g\.\w*\.\w+");
                 if (!pat.IsMatch(scope)) semanticError(scanner.getToken().lineNum, "iExist", "this", "Wrong use of \"this\"");
@@ -1591,13 +1591,31 @@ namespace Compiler
                 if (arguments.arguments.Count > 0) semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
             }
 
-            createQuad("FRAME", methodKey, symTable[fSar.symKey].Data["objectKey"]);
+            if (symTable[fSar.symKey].Data.ContainsKey("objectKey")) createQuad("FRAME", methodKey, symTable[fSar.symKey].Data["objectKey"]);
+            else createQuad("FRAME", methodKey, "this");
+
             foreach (var arg in arguments.arguments)
             {
                 createQuad("PUSH", arg.symKey);
             }
             createQuad("CALL", methodKey);
-            createQuad("PEEK", fSar.symKey);
+            //createQuad("PEEK", fSar.symKey);
+
+            if (symTable[fSar.symKey].Data.ContainsKey("returnType"))
+            {
+                //sar.symKey = ivarSymId;
+                string tSymId = genId("t");
+                string type = "";
+                if (symTable[fSar.symKey].Data.ContainsKey("returnType")) type = symTable[fSar.symKey].Data["returnType"];
+                else type = symTable[fSar.symKey].Data["type"];
+                Symbol tSymbol = new Symbol(scope, tSymId, symTable[fSar.symKey].Value, symTable[fSar.symKey].Kind, new Dictionary<string, dynamic>() { { "type", type } });
+                //symTable.Remove(symId);
+                //symId = tSymId;
+                symTable.Add(tSymId, tSymbol);
+                createQuad("PEEK", tSymId);
+                fSar.symKey = tSymId;
+                fSar.val = "";
+            }
 
             SAR functionSar = new SAR(fSar.val, SAR.types.func_sar, SAR.pushes.func, fSar.symKey);
             functionSar.arguments = arguments.arguments;

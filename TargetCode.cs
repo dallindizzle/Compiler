@@ -303,7 +303,7 @@ namespace Compiler
             else register2 = FetchAndLoadValue(quad[2]);
 
             if (quad[2][0] == 'r') {
-                tQuads.Add(new List<string>() { "TRP", "99" });
+                //tQuads.Add(new List<string>() { "TRP", "99" });
                 tQuads.Add(new List<string>() { "LDR", register2, register2 });
             }
 

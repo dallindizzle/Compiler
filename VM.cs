@@ -465,7 +465,8 @@ namespace Compiler
             reg[8] = startIndex;
 
             // Register 9 is the Stack Limit register
-            reg[9] = memSize - (threadSize * curThread) - threadSize;
+            //reg[9] = memSize - (threadSize * curThread) - threadSize;
+            reg[9] = stackLimit;
 
             // Register 10 will be the the Stack Pointer which will point at the top of the stack. Right now there is nothing on the top of the stack so this points to the "bottom"
             reg[10] = size - 56;
@@ -610,7 +611,7 @@ namespace Compiler
                         AND(inst);
                         break;
                 }
-                threadSwitch(); // We thread switch here because we are doing Round Robin where we run 1 instruction each thread at a time
+                //threadSwitch(); // We thread switch here because we are doing Round Robin where we run 1 instruction each thread at a time
             }
         }
 
