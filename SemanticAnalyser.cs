@@ -1347,7 +1347,13 @@ namespace Compiler
             SAR expression = SAS.Pop();
 
             // Test that expression is an int
-            if (symTable[expression.symKey].Data["type"] != "int") semanticError(scanner.getToken().lineNum, "Array init", expression.val, $"Array requires int index got {symTable[expression.symKey].Data["type"]}");
+            if (symTable[expression.symKey].Data["type"] != "int")
+            {
+                //semanticError(scanner.getToken().lineNum, "Array init", expression.val, $"Array requires int index got {symTable[expression.symKey].Data["type"]}");
+                Console.WriteLine($"{scanner.getToken().lineNum}: Array requires int index got {symTable[expression.symKey].Data["type"]}");
+                Console.ReadKey();
+                Environment.Exit(0);
+            }
 
             // iCode
             string type = SAS.Peek().val;
@@ -1592,6 +1598,23 @@ namespace Compiler
             SAS.Push(sar);
         }
 
+        void funcError(int line, string name, List<SAR> args)
+        {
+            string argsTogether = "";
+            if (args.Count > 0)
+            {
+                foreach (var arg in args)
+                {
+                    argsTogether += symTable[arg.symKey].Data["type"] + ", ";
+                }
+                argsTogether = argsTogether.Substring(0, argsTogether.Length - 2);
+            }
+
+            Console.WriteLine($"{line}: Function {name}({argsTogether}) not defined");
+            Console.ReadKey();
+            Environment.Exit(0);
+        }
+
         void func()
         {
             SAR arguments = SAS.Pop();
@@ -1612,25 +1635,29 @@ namespace Compiler
 
             if (symTable[methodKey].Data.ContainsKey("Param"))
             {
-                if (arguments.arguments.Count == 0) semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
+                if (arguments.arguments.Count == 0) //semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
+                    funcError(scanner.getToken().lineNum, fSar.val, arguments.arguments);
 
                 List<string> parms = symTable[methodKey].Data["Param"];
                 var args = arguments.arguments;
 
-                if (parms.Count != args.Count) semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
+                if (parms.Count != args.Count) //semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
+                    funcError(scanner.getToken().lineNum, fSar.val, arguments.arguments);
 
                 for (int i = 0; i < parms.Count; i++)
                 {
                     string parmType = symTable[parms[i]].Data["type"];
                     string argsType = symTable[args[i].symKey].Data["type"];
 
-                    if (parmType != argsType) semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
+                    if (parmType != argsType) //semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
+                        funcError(scanner.getToken().lineNum, fSar.val, arguments.arguments);
                 }
 
             }
             else
             {
-                if (arguments.arguments.Count > 0) semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
+                if (arguments.arguments.Count > 0) //semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
+                    funcError(scanner.getToken().lineNum, fSar.val, arguments.arguments);
             }
 
             if (symTable[fSar.symKey].Data.ContainsKey("objectKey")) createQuad("FRAME", methodKey, symTable[fSar.symKey].Data["objectKey"]);
@@ -1692,7 +1719,9 @@ namespace Compiler
 
                     if (operTemp.val == "*" || operTemp.val == "/" || operTemp.val == "-" || operTemp.val == "+")
                     {
-                        if (symTable[x.symKey].Data["type"] != "int" && symTable[y.symKey].Data["type"] != "int") semanticError(scanner.getToken().lineNum, "Math operation", x.val, "Wrong types for math op");
+                        if (symTable[x.symKey].Data["type"] != "int" || symTable[y.symKey].Data["type"] != "int") //semanticError(scanner.getToken().lineNum, "Math operation", x.val, "Wrong types for math op");
+                            MathError(x, y, operTemp.val);
+
                         sym = genId("t");
                         symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "int" } }));
                         SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
@@ -1700,7 +1729,9 @@ namespace Compiler
                     }
                     else if (operTemp.val == "<" || operTemp.val == "<=" || operTemp.val == ">" || operTemp.val == ">=")
                     {
-                        if (symTable[x.symKey].Data["type"] != "int" && symTable[y.symKey].Data["type"] != "int") semanticError(scanner.getToken().lineNum, "Math operation", x.val, "Wrong types for math op");
+                        if (symTable[x.symKey].Data["type"] != "int" || symTable[y.symKey].Data["type"] != "int") //semanticError(scanner.getToken().lineNum, "Math operation", x.val, "Wrong types for math op");
+                            MathError(x, y, operTemp.val);
+
                         sym = genId("t");
                         symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "bool" } }));
                         SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
@@ -1708,7 +1739,9 @@ namespace Compiler
                     }
                     else if (operTemp.val == "==" || operTemp.val == "!=")
                     {
-                        if (symTable[x.symKey].Data["type"] != symTable[y.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Logical operation", x.val, "Wrong types for logical op");
+                        if (symTable[x.symKey].Data["type"] != symTable[y.symKey].Data["type"]) //semanticError(scanner.getToken().lineNum, "Logical operation", x.val, "Wrong types for logical op");
+                            MathError(x, y, operTemp.val);
+
                         sym = genId("t");
                         symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "bool" } }));
                         SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
@@ -1716,7 +1749,15 @@ namespace Compiler
                     }
                     else if (operTemp.val == "&&" || operTemp.val == "||")
                     {
-                        if (symTable[x.symKey].Data["type"] != "bool" || symTable[y.symKey].Data["type"] != "bool") semanticError(scanner.getToken().lineNum, "Logical operation", x.val, "Wrong types for logical op");
+                        if (symTable[x.symKey].Data["type"] != "bool" || symTable[y.symKey].Data["type"] != "bool")
+                        {
+                            if (operTemp.val == "&&") Console.WriteLine($"{scanner.getToken().lineNum}: And requires bool found {symTable[x.symKey].Data["type"]}, {symTable[y.symKey].Data["type"]}");
+                            else Console.WriteLine($"{scanner.getToken().lineNum}: Or requires bool found {symTable[x.symKey].Data["type"]}, {symTable[y.symKey].Data["type"]}");
+
+                            Console.ReadKey();
+                            Environment.Exit(0);
+                        }
+
                         sym = genId("t");
                         symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "bool" } }));
                         SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
@@ -1730,46 +1771,59 @@ namespace Compiler
                 SAR op1 = SAS.Pop();
                 SAR oper = OS.Pop();
 
-                if (oper.val != "=" || OS.Count > 0) semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
-                if (op1.val == "this") semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
+                if (oper.val != "=" || OS.Count > 0) //semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
+                    MathError(op1, op2, oper.val);
 
-                if (symTable[op1.symKey].Kind != "lvar" && symTable[op1.symKey].Kind != "ivar" && symTable[op1.symKey].Kind != "param" && symTable[op1.symKey].Kind != "ref var") semanticError(scanner.getToken().lineNum, "Type", op1.val, "not lvalue");
+                if (op1.val == "this") //semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
+                    MathError(op1, op2, oper.val);
+
+                if (symTable[op1.symKey].Kind != "lvar" && symTable[op1.symKey].Kind != "ivar" && symTable[op1.symKey].Kind != "param" && symTable[op1.symKey].Kind != "ref var") //semanticError(scanner.getToken().lineNum, "Type", op1.val, "not lvalue");
+                    MathError(op1, op2, oper.val);
 
                 if (op2.pushType == SAR.pushes.newObj)
                 {
-                    if (symTable[op2.symKey].Data["returnType"] != symTable[op1.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                    if (symTable[op2.symKey].Data["returnType"] != symTable[op1.symKey].Data["type"]) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                        MathError(op1, op2, oper.val);
                 }
                 else if (op2.pushType == SAR.pushes.newArray)
                 {
-                    if (op1.val.Substring(op1.val.Length - 2) != "[]") semanticError(scanner.getToken().lineNum, "Array init", op1.val, "Not array type");
+                    if (op1.val.Substring(op1.val.Length - 2) != "[]") //semanticError(scanner.getToken().lineNum, "Array init", op1.val, "Not array type");
+                        MathError(op1, op2, oper.val);
                 }
                 else if (symTable[op1.symKey].Data["type"][0] == '@')
                 {
                     string type = symTable[op1.symKey].Data["type"].Substring(2);
 
-                    if (op1.arguments.Count != 1 && symTable[op2.symKey].Data["type"] == type) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                    if (op1.arguments.Count != 1 && symTable[op2.symKey].Data["type"] == type) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                        MathError(op1, op2, oper.val);
 
                     if (symTable[op2.symKey].Data["type"] == $"@:{type}")
                     {
-                        if (op2.arguments.Count != 1) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                        if (op2.arguments.Count != 1) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                            MathError(op1, op2, oper.val);
                         return;
                     }
-                    else if (symTable[op2.symKey].Data["type"] != type) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                    else if (symTable[op2.symKey].Data["type"] != type) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                        MathError(op1, op2, oper.val);
                 }
                 else if (symTable[op2.symKey].Data["type"][0] == '@')
                 {
                     string type = symTable[op2.symKey].Data["type"].Substring(2);
 
-                    if (op2.arguments.Count != 1 && symTable[op2.symKey].Data["type"] == type) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                    if (op2.arguments.Count != 1 && symTable[op2.symKey].Data["type"] == type) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                        MathError(op1, op2, oper.val);
 
                     if (symTable[op1.symKey].Data["type"] == $"@:{type}")
                     {
-                        if (op1.arguments.Count != 1) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                        if (op1.arguments.Count != 1) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                            MathError(op1, op2, oper.val);
                         return;
                     }
-                    else if (symTable[op1.symKey].Data["type"] != type) semanticError(scanner.getToken().lineNum, "Type", op1.val, "not valid type");
+                    else if (symTable[op1.symKey].Data["type"] != type) //semanticError(scanner.getToken().lineNum, "Type", op1.val, "not valid type");
+                        MathError(op1, op2, oper.val);
                 }
-                else if (symTable[op2.symKey].Data["type"] != symTable[op1.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                else if (symTable[op2.symKey].Data["type"] != symTable[op1.symKey].Data["type"]) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                    MathError(op1, op2, oper.val);
 
                 // iCode
                 //quads.Add(new List<string>() { "MOV", op2.symKey, op1.symKey });
@@ -1786,7 +1840,9 @@ namespace Compiler
 
                 if (op.val == "*" || op.val == "/" || op.val == "-" || op.val == "+")
                 {
-                    if (symTable[x.symKey].Data["type"] != "int" && symTable[y.symKey].Data["type"] != "int") semanticError(scanner.getToken().lineNum, "Math operation", x.val, "Wrong types for math op");
+                    if (symTable[x.symKey].Data["type"] != "int" || symTable[y.symKey].Data["type"] != "int") //semanticError(scanner.getToken().lineNum, "Math operation", x.val, "Wrong types for math op");
+                        MathError(x, y, op.val);
+
                     sym = genId("t");
                     symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "int" } }));
                     SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
@@ -1794,7 +1850,9 @@ namespace Compiler
                 }
                 else if (op.val == "<" || op.val == "<=" || op.val == ">" || op.val == ">=")
                 {
-                    if (symTable[x.symKey].Data["type"] != "int" && symTable[y.symKey].Data["type"] != "int") semanticError(scanner.getToken().lineNum, "Math operation", x.val, "Wrong types for math op");
+                    if (symTable[x.symKey].Data["type"] != "int" || symTable[y.symKey].Data["type"] != "int") //semanticError(scanner.getToken().lineNum, "Math operation", x.val, "Wrong types for math op");
+                        MathError(x, y, op.val);
+
                     sym = genId("t");
                     symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "bool" } }));
                     SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
@@ -1802,7 +1860,9 @@ namespace Compiler
                 }
                 else if (op.val == "==" || op.val == "!=")
                 {
-                    if (symTable[x.symKey].Data["type"] != symTable[y.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Logical operation", x.val, "Wrong types for logical op");
+                    if (symTable[x.symKey].Data["type"] != symTable[y.symKey].Data["type"]) //semanticError(scanner.getToken().lineNum, "Logical operation", x.val, "Wrong types for logical op");
+                        MathError(x, y, op.val);
+
                     sym = genId("t");
                     symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "bool" } }));
                     SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
@@ -1810,7 +1870,15 @@ namespace Compiler
                 }
                 else if (op.val == "&&" || op.val == "||")
                 {
-                    if (symTable[x.symKey].Data["type"] != "bool" || symTable[y.symKey].Data["type"] != "bool") semanticError(scanner.getToken().lineNum, "Logical operation", x.val, "Wrong types for logical op");
+                    if (symTable[x.symKey].Data["type"] != "bool" || symTable[y.symKey].Data["type"] != "bool")
+                    {
+                        if (op.val == "&&") Console.WriteLine($"{scanner.getToken().lineNum}: And requires bool found {symTable[x.symKey].Data["type"]}, {symTable[y.symKey].Data["type"]}");
+                        else Console.WriteLine($"{scanner.getToken().lineNum}: Or requires bool found {symTable[x.symKey].Data["type"]}, {symTable[y.symKey].Data["type"]}");
+
+                        Console.ReadKey();
+                        Environment.Exit(0);
+                    }
+
                     sym = genId("t");
                     symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "bool" } }));
                     SAR sar = new SAR(sym, SAR.types.none, SAR.pushes.EOE, sym);
@@ -1825,6 +1893,16 @@ namespace Compiler
                 // iCode
                 MathAndLogicalInst(op.val, x.symKey, y.symKey, sym);
             }
+        }
+
+        void MathError(SAR op1, SAR op2, string oper)
+        {
+            string op1Type = symTable[op1.symKey].Data["type"];
+            string op2Type = symTable[op2.symKey].Data["type"];
+
+            Console.WriteLine($"{scanner.getToken().lineNum}: Invalid Operation {op1Type} {op1.val} {oper} {op2Type} {op2.val}");
+            Console.ReadKey();
+            Environment.Exit(0);
         }
 
         void ClosingParen()
@@ -1884,13 +1962,27 @@ namespace Compiler
             if (clss)
             {
                 var clssPotentials = symTable.Where(sym => sym.Value.Scope == "g").ToList().Where(sym => sym.Value.Value == val).ToList();
-                if (clssPotentials.Count > 1) semanticError(scanner.getToken().lineNum, "Duplicate name", val, "Duplicate name");
+                if (clssPotentials.Count > 1)
+                {
+                    //semanticError(scanner.getToken().lineNum, "Duplicate name", val, "Duplicate name");
+                    Console.WriteLine($"{scanner.getToken().lineNum}: Duplicate class {val}");
+                    Console.ReadKey();
+                    Environment.Exit(0);
+                }
                 return;
             }
 
             var potentials = symTable.Where(sym => sym.Value.Scope == scope).ToList().Where(sym => sym.Value.Value == val).ToList();
 
-            if (potentials.Count > 1) semanticError(scanner.getToken().lineNum, "Duplicate name", val, "Duplicate name");
+            if (potentials.Count > 1)
+            {
+                //semanticError(scanner.getToken().lineNum, "Duplicate name", val, "Duplicate name");
+                if (scanner.peekToken().lexeme == "(") Console.WriteLine($"{scanner.getToken().lineNum}: Duplicate function {val}");
+                else Console.WriteLine($"{scanner.getToken().lineNum}: Duplicate variable {val}");
+
+                Console.ReadKey();
+                Environment.Exit(0);
+            }
         }
 
         void ifCase()
