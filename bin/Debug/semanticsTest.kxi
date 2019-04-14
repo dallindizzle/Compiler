@@ -1,21 +1,16 @@
 class Cat {
-	public int age = 5;
-	public Dog d = new Dog();
+	private int age = 5;
 
 	Cat() {
 
 	}
 
-}
+	public void Print(int x) {
 
-class Dog {
-	private int size = 9;
-
-	Dog() {
 	}
 
-	public int GetSize() {
-		return size;
+	public int GetAge() {
+		cout << age;
 	}
 
 }
@@ -23,5 +18,5 @@ class Dog {
 void kxi2019 main() {
 	Cat a = new Cat();
 
-	cout << a.d.GetSize();
+	a.Print(a.GetAge());
 }

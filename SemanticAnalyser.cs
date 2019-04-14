@@ -1468,6 +1468,8 @@ namespace Compiler
 
                 if (ivarSar.type == SAR.types.func_sar || symTable[ivarSymId].Kind == "method")
                 {
+                    if (scanner.peekToken().lexeme != "(") semanticError(scanner.getToken().lineNum, "Not an ivar", scanner.getToken().lexeme, "Not an ivar");
+
                     symTable.Add(symId, new Symbol(scope, symId, ref_val, symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["returnType"] }}));
                 }
                 else symTable.Add(symId, new Symbol(scope, symId, ref_val, "ref var", new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));
@@ -1559,6 +1561,7 @@ namespace Compiler
             SAR fSar = SAS.Pop();
 
             // Get method key
+            if (!symTable[fSar.symKey].Data.ContainsKey("methodKey")) semanticError(scanner.getToken().lineNum, "Not a method", fSar.val, "Not a method");
             string methodKey = symTable[fSar.symKey].Data["methodKey"];
 
             if (symTable[methodKey].Data.ContainsKey("Param"))

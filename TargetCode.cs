@@ -647,7 +647,7 @@ namespace Compiler
         void PeekCase(List<string> quad)
         {
             // Debug VM
-            tQuads.Add(new List<string>() { "TRP", "99" });
+            //tQuads.Add(new List<string>() { "TRP", "99" });
 
             string register1 = "R" + getRegister("peek");
             //tQuads.Add(new List<string>() { "MOV", register1, "SP" });
@@ -685,6 +685,9 @@ namespace Compiler
 
         void PushCase(List<string> quad)
         {
+            // Debug VM
+            //tQuads.Add(new List<string>() { "TRP", "99" });
+
             var loc = getLocation(quad[1]);
 
             string valRegister = "";
@@ -764,7 +767,7 @@ namespace Compiler
         void Write1Case(List<string> quad)
         {
             // Debug VM
-            tQuads.Add(new List<string>() { "TRP", "99" });
+            //tQuads.Add(new List<string>() { "TRP", "99" });
 
             string register = FetchAndLoadValue(quad[1]);
 
