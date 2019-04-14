@@ -478,7 +478,7 @@ namespace Compiler
             {
                 // Semantic code
                 string symKey = "";
-                if (!symTable.Where(tempsym => tempsym.Value.Scope == scope).Any(sym => sym.Value.Value == scanner.getToken().lexeme))
+                if (!symTable.Where(tempsym => tempsym.Value.Scope == scope).Any(sym => sym.Value.Value == scanner.getToken().lexeme && sym.Value.Kind != "method"))
                 { 
                     Regex pat = new Regex(@"g\.(?!main).+");
                     if (pat.IsMatch(scope))

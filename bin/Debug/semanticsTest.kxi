@@ -2,16 +2,16 @@ class Cat {
 	private int age = 5;
 
 	Cat() {
-		int x = Double(age);
-		Print(x);
+		int x = 0;
+
+		while(x < 10) {
+			PrintAge();
+			x = x + 1;
+		}
 	}
 
-	public int Print(int x) {
-		cout << x;
-	}
-
-	public int Double(int x) {
-		return x * x;
+	public void PrintAge() {
+		cout << age;
 	}
 }
 
