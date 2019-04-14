@@ -1,21 +1,10 @@
 class Cat {
-	private int age = 5;
-
-	Cat() {
-		int x = 0;
-
-		while(x < 10) {
-			PrintAge();
-			x = x + 1;
-		}
+	Cat(int x, int y) {
+	
 	}
 
-	public void PrintAge() {
-		cout << age;
-	}
 }
 
 void kxi2019 main() {
-	Cat c = new Cat();
-
+	Cat c = new Cat(3);
 }

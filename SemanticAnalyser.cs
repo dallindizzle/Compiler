@@ -479,7 +479,7 @@ namespace Compiler
                 // Semantic code
                 string symKey = "";
                 if (!symTable.Where(tempsym => tempsym.Value.Scope == scope).Any(sym => sym.Value.Value == scanner.getToken().lexeme && sym.Value.Kind != "method"))
-                { 
+                {
                     Regex pat = new Regex(@"g\.(?!main).+");
                     if (pat.IsMatch(scope))
                     {
@@ -488,11 +488,21 @@ namespace Compiler
                         List<string> matchesList = new List<string>() { matches[0].ToString(), matches[1].ToString() };
 
                         string className = String.Join(".", matchesList);
-                        if (!symTable.Where(tempsym => tempsym.Value.Scope == className).Any(sym => sym.Value.Value == scanner.getToken().lexeme)) semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
+                        if (!symTable.Where(tempsym => tempsym.Value.Scope == className).Any(sym => sym.Value.Value == scanner.getToken().lexeme))
+                        {
+                            if (scanner.peekToken().lexeme == "[") semanticError(scanner.getToken().lineNum, "Array", scanner.getToken().lexeme, "not defined");
+                            else if (scanner.peekToken().lexeme == "(") semanticError(scanner.getToken().lineNum, "Function", scanner.getToken().lexeme, "not defined");
+                            semanticError(scanner.getToken().lineNum, "Variable", scanner.getToken().lexeme, "not defined");
+                        }
                         symKey = symTable.Where(tempsym => tempsym.Value.Scope == className).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
                         iPush($"this", symKey);
                     }
-                    else semanticError(scanner.getToken().lineNum, "identifier", scanner.getToken().lexeme, $"Variable {scanner.getToken().lexeme} not defined");
+                    else
+                    {
+                        if (scanner.peekToken().lexeme == "[") semanticError(scanner.getToken().lineNum, "Array", scanner.getToken().lexeme, "not defined");
+                        else if (scanner.peekToken().lexeme == "(") semanticError(scanner.getToken().lineNum, "Function", scanner.getToken().lexeme, "not defined");
+                        semanticError(scanner.getToken().lineNum, "Variable", scanner.getToken().lexeme, "not defined");
+                    }
                 }
                 else
                 {
@@ -673,7 +683,7 @@ namespace Compiler
             // iCode
             string staticConstKey = symTable.Where(sym => sym.Value.Scope == scope + ".constructor" && sym.Value.Value == "static constructor").First().Key;
             createQuad(staticConstKey, "FUNC", staticConstKey);
-            foreach(var quad in staticConstQuads)
+            foreach (var quad in staticConstQuads)
             {
                 quads.Add(quad);
             }
@@ -1040,7 +1050,7 @@ namespace Compiler
                 Console.WriteLine($"\tSymid:\t {symbol.Value.Symid}");
                 Console.WriteLine($"\tValue:\t {symbol.Value.Value}");
                 Console.WriteLine($"\tKind:\t {symbol.Value.Kind}");
-            
+
                 Console.Write($"\tData:\t ");
                 foreach (var data in symbol.Value.Data)
                 {
@@ -1253,6 +1263,23 @@ namespace Compiler
 
         }
 
+        void newObjError(int line, string name, List<SAR> args)
+        {
+            string argsTogether = "";
+            if (args.Count > 0)
+            {
+                foreach (var arg in args)
+                {
+                    argsTogether += symTable[arg.symKey].Data["type"] + ", ";
+                }
+                argsTogether = argsTogether.Substring(0, argsTogether.Length - 2);
+            }
+
+            Console.WriteLine($"{line}: Constructor {name}({argsTogether}) not defined");
+            Console.ReadKey();
+            Environment.Exit(0);
+        }
+
         void newObj()
         {
             SAR argumentsSar = SAS.Pop();
@@ -1263,15 +1290,18 @@ namespace Compiler
 
             if (argumentsSar.arguments.Count() > 0)
             {
-                if (!constructor.Value.Data.ContainsKey("Param")) semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+                if (!constructor.Value.Data.ContainsKey("Param")) //semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+                    newObjError(scanner.getToken().lineNum, typeSar.val, argumentsSar.arguments);
 
                 List<string> constructorArgs = constructor.Value.Data["Param"];
 
-                if (argumentsSar.arguments.Count() != constructorArgs.Count()) semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+                if (argumentsSar.arguments.Count() != constructorArgs.Count()) //semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+                    newObjError(scanner.getToken().lineNum, typeSar.val, argumentsSar.arguments);
 
                 for (int i = 0; i < constructorArgs.Count(); i++)
                 {
-                    if (i > argumentsSar.arguments.Count - 1) semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+                    if (i > argumentsSar.arguments.Count - 1) //semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+                        newObjError(scanner.getToken().lineNum, typeSar.val, argumentsSar.arguments);
 
                     // Get constructor type
                     string ct = symTable[constructorArgs[i]].Data["type"];
@@ -1279,11 +1309,13 @@ namespace Compiler
                     // Get passed in type
                     string pt = symTable[argumentsSar.arguments[i].symKey].Data["type"];
 
-                    if (pt != ct) semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+                    if (pt != ct) //semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+                        newObjError(scanner.getToken().lineNum, typeSar.val, argumentsSar.arguments);
                 }
             }
 
-            else if (constructor.Value.Data.ContainsKey("Param")) semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+            else if (constructor.Value.Data.ContainsKey("Param")) //semanticError(scanner.getToken().lineNum, "Constructor", typeSar.val, "Invalid arguments");
+                newObjError(scanner.getToken().lineNum, typeSar.val, argumentsSar.arguments);
 
             SAR new_sar = new SAR(typeSar.val, SAR.types.new_sar, SAR.pushes.newObj, constructor.Key);
             new_sar.arguments = argumentsSar.arguments;
@@ -1296,8 +1328,8 @@ namespace Compiler
             symTable.Add(objSizeSymId, new Symbol(scope, objSizeSymId, "new object memory", "new object memory", new Dictionary<string, dynamic>() { { "returnType", typeSar.val } }));
             createQuad("NEWI", objectSize.ToString(), objSizeSymId);
             string constructKey = symTable.Where(sym2 => sym2.Value.Kind == "Constructor").Where(sym => sym.Value.Data["returnType"] == typeSar.val).First().Key;
-            createQuad("FRAME", constructKey, objSizeSymId);          
-            foreach(var arg in new_sar.arguments)
+            createQuad("FRAME", constructKey, objSizeSymId);
+            foreach (var arg in new_sar.arguments)
             {
                 createQuad("PUSH", arg.symKey);
             }
@@ -1449,7 +1481,12 @@ namespace Compiler
 
             var classSym = symTable.Where(sym => sym.Value.Scope == $"g.{className}").ToList(); // Get list of symbols for the class
 
-            if (!classSym.Any(sym => sym.Value.Value == ivarSar.val)) semanticError(scanner.getToken().lineNum, "Variable", ivarSar.val, $"Not defined/not public in {scope}");
+            if (!classSym.Any(sym => sym.Value.Value == ivarSar.val))
+            {
+                if (scanner.peekToken().lexeme == "(") semanticError(scanner.getToken().lineNum, "Function", ivarSar.val, $"not defined/public in class {className}");
+                else if (scanner.peekToken().lexeme == "[") semanticError(scanner.getToken().lineNum, "Array", ivarSar.val, $"not defined/public in class {className}");
+                semanticError(scanner.getToken().lineNum, "Variable", ivarSar.val, $"not defined/public in class {className}");
+            }
 
             string ref_val = $"{classSar.val}.{ivarSar.val}";
 
@@ -1457,7 +1494,12 @@ namespace Compiler
 
             if (classSar.val != "this")
             {
-                if (symTable[ivarSymId].Data["accessMod"] == "private") semanticError(scanner.getToken().lineNum, "Variable", ivarSar.val, $"not public in {className}");
+                if (symTable[ivarSymId].Data["accessMod"] == "private")
+                {
+                    if (scanner.peekToken().lexeme == "(") semanticError(scanner.getToken().lineNum, "Function", ivarSar.val, $"not defined/public in class {className}");
+                    else if (scanner.peekToken().lexeme == "[") semanticError(scanner.getToken().lineNum, "Array", ivarSar.val, $"not defined/public in class {className}");
+                    semanticError(scanner.getToken().lineNum, "Variable", ivarSar.val, $"not defined/public in class {className}");
+                }
             }
 
             string symId;
@@ -1470,7 +1512,7 @@ namespace Compiler
                 {
                     if (scanner.peekToken().lexeme != "(") semanticError(scanner.getToken().lineNum, "Not an ivar", scanner.getToken().lexeme, "Not an ivar");
 
-                    symTable.Add(symId, new Symbol(scope, symId, ref_val, symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["returnType"] }}));
+                    symTable.Add(symId, new Symbol(scope, symId, ref_val, symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["returnType"] } }));
                 }
                 else symTable.Add(symId, new Symbol(scope, symId, ref_val, "ref var", new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));
 
@@ -1816,7 +1858,13 @@ namespace Compiler
             SAR argument = SAS.Pop();
             SAR array = SAS.Pop();
 
-            if (symTable[argument.symKey].Data["type"] != "int") semanticError(scanner.getToken().lineNum, "Array init", array.val, $"Array requires int idnex got {symTable[argument.symKey].Data["type"]}");
+            if (symTable[argument.symKey].Data["type"] != "int")
+            {
+                //semanticError(scanner.getToken().lineNum, "Array init", array.val, $"Array requires int idnex got {symTable[argument.symKey].Data["type"]}");
+                Console.WriteLine($"{scanner.getToken().lineNum}: Array requires int index got {symTable[argument.symKey].Data["type"]}");
+                Console.ReadKey();
+                Environment.Exit(0);
+            }
 
             SAR arr_sar = new SAR(array.val, SAR.types.arr_sar, SAR.pushes.arr, array.symKey);
             arr_sar.arguments.Add(argument);
@@ -1850,7 +1898,13 @@ namespace Compiler
             SAR sar = SAS.Pop();
             string type = symTable[sar.symKey].Data["type"];
 
-            if (type != "bool") semanticError(scanner.getToken().lineNum, "if", type, $"if requires bool got {type}");
+            if (type != "bool")
+            {
+                //semanticError(scanner.getToken().lineNum, "if", type, $"if requires bool got {type}");
+                Console.WriteLine($"{scanner.getToken().lineNum}: if requires bool got {type}");
+                Console.ReadKey();
+                Environment.Exit(0);
+            }
 
             // iCode
             //quads.Add(new List<string>() { "BF", sar.symKey, genSkipIf() });
@@ -1862,7 +1916,13 @@ namespace Compiler
             SAR sar = SAS.Pop();
             string type = symTable[sar.symKey].Data["type"];
 
-            if (type != "bool") semanticError(scanner.getToken().lineNum, "while", type, $"while requires bool got {type}");
+            if (type != "bool")
+            {
+                //semanticError(scanner.getToken().lineNum, "while", type, $"while requires bool got {type}");
+                Console.WriteLine($"{scanner.getToken().lineNum}: while requires bool got {type}");
+                Console.ReadKey();
+                Environment.Exit(0);
+            }
 
             // iCode
             quads.Add(new List<string>() { "BF", sar.symKey, genLabel("ENDWHILE") });
@@ -1890,7 +1950,13 @@ namespace Compiler
             var functionSym = symTable.Where(sym => sym.Value.Scope == classScope).Where(sym => sym.Value.Value == functionName).First();
             string functionReturnType = functionSym.Value.Data["returnType"];
 
-            if (functionReturnType != varType) semanticError(scanner.getToken().lineNum, "Return", varType, $"Function requires {functionReturnType} returned {varType}");
+            if (functionReturnType != varType)
+            {
+                //semanticError(scanner.getToken().lineNum, "Return", varType, $"Function requires {functionReturnType} returned {varType}");
+                Console.WriteLine($"{scanner.getToken().lineNum - 1}: Function requires {functionReturnType} returned {varType}");
+                Console.ReadKey();
+                Environment.Exit(0);
+            }
 
             // iCode
             createQuad("RETURN", sar.symKey);
@@ -1908,7 +1974,14 @@ namespace Compiler
 
             string varType = symTable[sar.symKey].Data["type"];
 
-            if (varType != "int" && varType != "char") semanticError(scanner.getToken().lineNum, "cout", sar.val, $"cout not defined for {varType}");
+            if (varType != "int" && varType != "char")
+            {
+                //semanticError(scanner.getToken().lineNum, "cout", sar.val, $"cout not defined for {varType}");
+                Console.WriteLine($"{scanner.getToken().lineNum}: cout not defined for {varType}");
+                Console.ReadKey();
+                Environment.Exit(0);
+
+            }
 
             // iCode
             if (varType == "int")
@@ -1932,7 +2005,14 @@ namespace Compiler
 
             string varType = symTable[sar.symKey].Data["type"];
 
-            if (varType != "int" && varType != "char") semanticError(scanner.getToken().lineNum, "cin", sar.val, $"cin not defined for {varType}");
+            if (varType != "int" && varType != "char")
+            {
+                //semanticError(scanner.getToken().lineNum, "cout", sar.val, $"cout not defined for {varType}");
+                Console.WriteLine($"{scanner.getToken().lineNum}: cin not defined for {varType}");
+                Console.ReadKey();
+                Environment.Exit(0);
+
+            }
 
             // iCode
             if (varType == "int")
@@ -1947,7 +2027,7 @@ namespace Compiler
 
         void semanticError(int line, string type, string lexeme, string prob)
         {
-            Console.WriteLine($"{line}:{type} {lexeme} {prob}");
+            Console.WriteLine($"{line}: {type} {lexeme} {prob}");
             Console.ReadKey();
             Environment.Exit(0);
         }
