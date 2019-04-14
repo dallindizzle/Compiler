@@ -1,14 +1,15 @@
 class Cat {
-	public void Print(int x) {
+	private void Print(int x) {
 		cout << x;
 	}
 
 	Cat() {
+
 	}
 }
 
 void kxi2019 main() {
 	Cat c = new Cat();
 
-	c.Print(3, true);
+	c.Print(3, 3);
 }

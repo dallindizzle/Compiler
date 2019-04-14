@@ -1598,8 +1598,15 @@ namespace Compiler
             SAS.Push(sar);
         }
 
-        void funcError(int line, string name, List<SAR> args)
+        void funcError(int line, SAR fsar, List<SAR> args)
         {
+            string name;
+            if (fsar.val == "this")
+            {
+                name = symTable[fsar.symKey].Value;
+            }
+            else name = fsar.val;
+
             string argsTogether = "";
             if (args.Count > 0)
             {
@@ -1636,13 +1643,13 @@ namespace Compiler
             if (symTable[methodKey].Data.ContainsKey("Param"))
             {
                 if (arguments.arguments.Count == 0) //semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
-                    funcError(scanner.getToken().lineNum, fSar.val, arguments.arguments);
+                    funcError(scanner.getToken().lineNum, fSar, arguments.arguments);
 
                 List<string> parms = symTable[methodKey].Data["Param"];
                 var args = arguments.arguments;
 
                 if (parms.Count != args.Count) //semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
-                    funcError(scanner.getToken().lineNum, fSar.val, arguments.arguments);
+                    funcError(scanner.getToken().lineNum, fSar, arguments.arguments);
 
                 for (int i = 0; i < parms.Count; i++)
                 {
@@ -1650,14 +1657,14 @@ namespace Compiler
                     string argsType = symTable[args[i].symKey].Data["type"];
 
                     if (parmType != argsType) //semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
-                        funcError(scanner.getToken().lineNum, fSar.val, arguments.arguments);
+                        funcError(scanner.getToken().lineNum, fSar, arguments.arguments);
                 }
 
             }
             else
             {
                 if (arguments.arguments.Count > 0) //semanticError(scanner.getToken().lineNum, "Method Params", fSar.val, "Invalid arguments");
-                    funcError(scanner.getToken().lineNum, fSar.val, arguments.arguments);
+                    funcError(scanner.getToken().lineNum, fSar, arguments.arguments);
             }
 
             if (symTable[fSar.symKey].Data.ContainsKey("objectKey")) createQuad("FRAME", methodKey, symTable[fSar.symKey].Data["objectKey"]);
