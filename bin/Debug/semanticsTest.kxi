@@ -1,4 +1,6 @@
 class Cat {
+	public Dog d = new Dog();
+
 	private void Print(int x) {
 		cout << x;
 	}
@@ -8,8 +10,17 @@ class Cat {
 	}
 }
 
+class Dog {
+	Dog() {
+	}
+
+	public void GetAge() {
+	
+	}
+}
+
 void kxi2019 main() {
 	Cat c = new Cat();
 
-	c.Print(3, 3);
+	c.d.GetAge(3);
 }

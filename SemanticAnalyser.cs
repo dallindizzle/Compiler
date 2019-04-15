@@ -1495,6 +1495,7 @@ namespace Compiler
             }
 
             string ref_val = $"{classSar.val}.{ivarSar.val}";
+            string symId;
 
             var ivarSymId = classSym.Where(sym => sym.Value.Value == ivarSar.val).First().Key; // Get the symid for the instance variable
 
@@ -1502,13 +1503,72 @@ namespace Compiler
             {
                 if (symTable[ivarSymId].Data["accessMod"] == "private")
                 {
-                    if (scanner.peekToken().lexeme == "(") semanticError(scanner.getToken().lineNum, "Function", ivarSar.val, $"not defined/public in class {className}");
+                    if (scanner.peekToken().lexeme == "(")
+                    {
+                        #region garbage
+                        if (!symTable.Where(sym => sym.Value.Scope == scope).Any(sym2 => sym2.Value.Value == ref_val)) // If the reference is already in the symbol table then we don't need a duplicate
+                        {
+                            symId = genId("r");
+
+                            if (ivarSar.type == SAR.types.func_sar || symTable[ivarSymId].Kind == "method")
+                            {
+                                if (scanner.peekToken().lexeme != "(") semanticError(scanner.getToken().lineNum, "Not an ivar", scanner.getToken().lexeme, "Not an ivar");
+
+                                symTable.Add(symId, new Symbol(scope, symId, ref_val, symTable[ivarSymId].Kind, new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["returnType"] } }));
+                            }
+                            else symTable.Add(symId, new Symbol(scope, symId, ref_val, "ref var", new Dictionary<string, dynamic>() { { "type", symTable[ivarSymId].Data["type"] } }));
+
+                            // iCode
+                            if (ivarSar.type == SAR.types.func_sar || symTable[ivarSymId].Kind == "method")
+                            {
+                                string refObject = "";
+                                if (classSar.val == "this") refObject = "this";
+                                else refObject = classSar.symKey;
+
+                                //createQuad("FRAME", ivarSymId, refObject);
+
+                                if (symTable[ivarSymId].Data.ContainsKey("returnType"))
+                                {
+                                    ivarSar.symKey = ivarSymId;
+                                    string tSymId = genId("t");
+                                    string type = "";
+                                    if (symTable[ivarSar.symKey].Data.ContainsKey("returnType")) type = symTable[ivarSar.symKey].Data["returnType"];
+                                    else type = symTable[ivarSar.symKey].Data["type"];
+                                    Symbol tSymbol = new Symbol(scope, tSymId, symTable[ivarSar.symKey].Value, symTable[ivarSar.symKey].Kind, new Dictionary<string, dynamic>() { { "type", type }, { "methodKey", ivarSymId }, { "objectKey", classSar.symKey } });
+                                    symTable.Remove(symId);
+                                    symId = tSymId;
+                                    symTable.Add(tSymId, tSymbol);
+                                    //createQuad("PEEK", tSymId);
+                                }
+                            }
+                            else
+                            {
+                                //createQuad("REF", classSar.symKey, ivarSymId, symId);
+                            }
+                        }
+                        else
+                        {
+                            symId = symTable.Where(sym => sym.Value.Scope == scope).Where(sym2 => sym2.Value.Value == ref_val).First().Key;
+
+                            // If the reference alread existed then we don't do any iCode here
+                        }
+
+                        SAR fnewSar = new SAR(ref_val, SAR.types.ref_sar, SAR.pushes.rExist, symId);
+                        fnewSar.arguments = ivarSar.arguments;
+
+                        SAS.Push(fnewSar);
+                        scanner.nextToken();
+                        fn_arr_member();
+
+                        #endregion
+                        semanticError(scanner.getToken().lineNum, "Function", ivarSar.val, $"not defined/public in class {className}");
+                    }
                     else if (scanner.peekToken().lexeme == "[") semanticError(scanner.getToken().lineNum, "Array", ivarSar.val, $"not defined/public in class {className}");
                     semanticError(scanner.getToken().lineNum, "Variable", ivarSar.val, $"not defined/public in class {className}");
                 }
             }
 
-            string symId;
+
 
             if (!symTable.Where(sym => sym.Value.Scope == scope).Any(sym2 => sym2.Value.Value == ref_val)) // If the reference is already in the symbol table then we don't need a duplicate
             {
@@ -1617,7 +1677,13 @@ namespace Compiler
                 argsTogether = argsTogether.Substring(0, argsTogether.Length - 2);
             }
 
-            Console.WriteLine($"{line}: Function {name}({argsTogether}) not defined");
+            if (fsar.pushType == SAR.pushes.rExist)
+            {
+                string className = symTable[symTable[fsar.symKey].Data["objectKey"]].Data["type"];
+
+                Console.WriteLine($"{line}: Function {name}({argsTogether}) not defined/public in class {className}");
+            }
+            else Console.WriteLine($"{line}: Function {name}({argsTogether}) not defined");
             Console.ReadKey();
             Environment.Exit(0);
         }
