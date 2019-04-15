@@ -105,6 +105,14 @@ namespace Compiler
                         Write2Case(quad);
                         break;
 
+                    case "READ 1":
+                        Read1Case(quad);
+                        break;
+
+                    case "READ 2":
+                        Read2Case(quad);
+                        break;
+
                     case "FUNC":
                         FuncCase(quad);
                         break;
@@ -302,7 +310,8 @@ namespace Compiler
             }
             else register2 = FetchAndLoadValue(quad[2]);
 
-            if (quad[2][0] == 'r') {
+            if (quad[2][0] == 'r')
+            {
                 //tQuads.Add(new List<string>() { "TRP", "99" });
                 tQuads.Add(new List<string>() { "LDR", register2, register2 });
             }
@@ -772,6 +781,25 @@ namespace Compiler
         {
             string register1 = FetchAndLoadValue(quad[1]);
             tQuads.Add(new List<string>() { "BRZ", register1, quad[2] });
+        }
+
+        void Read1Case(List<string> quad)
+        {
+            string register;
+            if (quad[1][0] == 'r') register = FetchAndLoadValue(quad[1]);
+            else register = FetchAndLoadAddress(quad[1]);
+            tQuads.Add(new List<string>() { "TRP", "2" });
+            tQuads.Add(new List<string>() { "STR", "R3", register });
+
+        }
+
+        void Read2Case(List<string> quad)
+        {
+            string register;
+            if (quad[1][0] == 'r') register = FetchAndLoadValue(quad[1]);
+            else register = FetchAndLoadAddress(quad[1]);
+            tQuads.Add(new List<string>() { "TRP", "4" });
+            tQuads.Add(new List<string>() { "STB", "R3", register });
         }
 
         void Write1Case(List<string> quad)

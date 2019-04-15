@@ -1,24 +1,14 @@
 class Cat {
-	public Dog d = new Dog();
+	public char name = 'd';
 
 	Cat() {
-
-	}
-}
-
-class Dog {
-	public int age = 7;
-
-	Dog() {
-	}
-
-	public int GetAge() {
-		return age;
+	
 	}
 }
 
 void kxi2019 main() {
 	Cat c = new Cat();
-	c.d.age = 9 + c.d.age;
-	cout << c.d.GetAge();
+
+	cin >> c.name;
+	cout << c.name;
 }
