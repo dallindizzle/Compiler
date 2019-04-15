@@ -1743,7 +1743,7 @@ namespace Compiler
             createQuad("CALL", methodKey);
             //createQuad("PEEK", fSar.symKey);
 
-            if (symTable[fSar.symKey].Data.ContainsKey("returnType"))
+            if (symTable[fSar.symKey].Data.ContainsKey("returnType") || symTable[fSar.symKey].Data.ContainsKey("type"))
             {
                 //sar.symKey = ivarSymId;
                 string tSymId = genId("t");

@@ -1,26 +1,24 @@
 class Cat {
 	public Dog d = new Dog();
 
-	private void Print(int x) {
-		cout << x;
-	}
-
 	Cat() {
 
 	}
 }
 
 class Dog {
+	public int age = 7;
+
 	Dog() {
 	}
 
-	public void GetAge() {
-	
+	public int GetAge() {
+		return age;
 	}
 }
 
 void kxi2019 main() {
 	Cat c = new Cat();
-
-	c.d.GetAge(3);
+	c.d.age = 9 + c.d.age;
+	cout << c.d.GetAge();
 }
