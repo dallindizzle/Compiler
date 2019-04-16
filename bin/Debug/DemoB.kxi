@@ -1,0 +1,122 @@
+class iTree {
+    private iNode root;
+    private bool first;
+
+	private int mod(int i, int j) { // k = i mod j
+		int k = i / j;
+		k = i - j * k;
+		return k;
+	}
+	
+	public int gcd(int a, int b) { 
+		if (b == 0) return a;
+		return gcd(b, mod(a, b));
+	}
+
+    iTree() {
+		root = null;
+    }
+
+    public int fib(int root) {
+		if (root == 0) return 0;
+		else if (root == 1) return 1;
+		else return (fib(root - 1) + fib(root - 2));
+    }
+
+    public bool add(char key) {
+		if (root == null) {
+			root = new iNode(key);
+			return true;
+		}
+		else return insert(key, root)				;
+    }
+
+    private bool insert(char key, iNode node) {
+	if (key < node.root)
+	    if (node.left == null) {
+		node.left = new iNode(key);
+		return true;
+	    }
+	    else 
+		return insert(key, node.left);
+	else if (key > node.root)
+	    if (node.right == null) {
+		node.right = new iNode(key);
+		return true;
+	    }
+	    else
+		return insert(key, node.right);
+	else { // key == node.root
+	     node.inc();
+	    return false;
+    }
+	}
+
+
+    public void print() {
+		first = true;
+		inorder(root);
+		cout << '\n';
+    }
+    
+    private void inorder(iNode node) {
+		if (node == null) return;
+
+		inorder(node.left);
+		visit(node);
+		inorder(node.right);
+    }
+
+    private void visit(iNode node) {
+	if (first) {
+	    first = false;
+	    cout << ' ';
+	}
+	else cout << ',';
+	
+
+	cout << node.root;
+	cout << '(';
+	cout << node.cnt;
+	cout << ',';
+	cout << fib(node.cnt);
+	cout << ')';
+    }
+}
+
+class iNode {
+    public char root;
+    public int cnt = 0;
+    public iNode left = null;
+    public iNode right = null;
+
+    iNode(char key) {
+		root = key;
+		cnt = 1;
+    }
+
+    public void inc() { cnt = cnt + 1; }
+}
+
+void kxi2019 main() {
+    char nl; // newline
+    char key;
+    iTree tree;
+    tree = new iTree();
+
+    cin >> key;
+    cout << '\n';
+
+    while (key != '!') {
+		if (tree.add(key)) {
+			tree.print();
+		}
+		else {
+			tree.print();
+		}
+
+		cin >> key;
+		cout << '\n';
+		
+	}
+}

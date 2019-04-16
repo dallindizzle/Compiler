@@ -805,6 +805,8 @@ namespace Compiler
 
         void Read2Case(List<string> quad)
         {
+            //tQuads.Add(new List<string>() { "TRP", "99" });
+
             string register;
             if (quad[1][0] == 'r') register = FetchAndLoadValue(quad[1]);
             else register = FetchAndLoadAddress(quad[1]);

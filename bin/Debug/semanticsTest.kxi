@@ -1,95 +1,17 @@
-class DemoC {
-	private int i;
-	private int j;
-	public bool noWay;
+class Cat {
+	public int age  = 3;
+
+	Cat() {
 	
-    DemoC() {}
-   
-	public int mod(int i, int j) { // k = i mod j
-		int k = i / j;
-		k = i - j * k;
-		return k;
 	}
-
-	public int gcd(int a, int b) { 
-		if (b == 0) return a;
-		return gcd(b, mod(a, b));
-	}
-
-    public int fib(int k) {
-		if (k == 0) return 0;
-		else if (k == 1) return 1;
-		else return (fib(k - 1) + fib(k - 2));
-    }
-	
-	public int fact(int n)
-    {
-		int result;
-
-		if (n == 1)
-			return 1;
-
-		result = fact(n-1) * n;
-		return result;
-    }
-	
-	public int inc(int i) { return i + 1; }
 }
 
-
 void kxi2019 main() {
-    int k;
-    int j;
-	int fa;
-	int fi;
+	Cat c = null;
 
-    int sum;
-    int two = 2;
-    DemoC dc = new DemoC(); // this is a No No
-
-    cout << '>';
-    cin >> k;
-    cout << '\n';
-
-	while (k != 0) {	
-	
-	    if (k < 0) {
-			k = 5 + k * -1 - two;
-			sum = 0;
-			while (k > 0) {
-				j = k;
-				while (j > 0) {
-					if ((j / 3) == 0) sum = sum + j;
-					j = j - 1;
-				}
-				k = k - 1;
-			}
-
-		cout << sum;
-		cout << '\n';
-	    }
-
-	    else {
-			fa = dc.fact(k);
-			fi = dc.fib(k);
-			sum = dc.gcd(fa, fi);
-			cout << sum;
-			cout << '=';
-			cout << fa;
-			cout << '@';
-			cout << fi;
-			cout << '\n';
-	    }
-	
-
-	    cout << '>';
-		cin >> k;
-	    cout << '\n';
-
+	if (c == null) {
+		c = new Cat();
+		cout << c.age;
 	}
- 	
-    cout << dc.inc(dc.inc(dc.fact(9)));
-    cout << '\n';
-
-
+	
 }

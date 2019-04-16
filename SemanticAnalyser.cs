@@ -1425,11 +1425,11 @@ namespace Compiler
 
             string mulKey = genId("t");
             symTable.Add(mulKey, new Symbol(scope, mulKey, "array allocation size", "array allocation size"));
-            createQuad("MUL", op1Id, expression.symKey, mulKey);
+            //createQuad("MUL", op1Id, expression.symKey, mulKey);
 
             string memLocKey = genId("t");
             symTable.Add(memLocKey, new Symbol(scope, memLocKey, "new array location", "new array location"));
-            createQuad("NEW", mulKey, memLocKey);
+            //createQuad("NEW", mulKey, memLocKey);
             new_sar.symKey = memLocKey;
 
             SAS.Push(new_sar);
@@ -1920,7 +1920,7 @@ namespace Compiler
                     else if (symTable[op1.symKey].Data["type"] != type) //semanticError(scanner.getToken().lineNum, "Type", op1.val, "not valid type");
                         MathError(op1, op2, oper.val);
                 }
-                else if (symTable[op2.symKey].Data["type"] != symTable[op1.symKey].Data["type"]) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                else if (symTable[op2.symKey].Data["type"] != symTable[op1.symKey].Data["type"] && symTable[op2.symKey].Value != "null") //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
                     MathError(op1, op2, oper.val);
 
                 // iCode
@@ -1948,8 +1948,14 @@ namespace Compiler
                 }
                 else if (op.val == "<" || op.val == "<=" || op.val == ">" || op.val == ">=")
                 {
-                    if (symTable[x.symKey].Data["type"] != "int" || symTable[y.symKey].Data["type"] != "int") //semanticError(scanner.getToken().lineNum, "Math operation", x.val, "Wrong types for math op");
-                        MathError(x, y, op.val);
+                    if (symTable[x.symKey].Data["type"] != "char" || symTable[y.symKey].Data["type"] != "char")
+                    {
+                        if (symTable[x.symKey].Data["type"] != "int" || symTable[y.symKey].Data["type"] != "int") //semanticError(scanner.getToken().lineNum, "Math operation", x.val, "Wrong types for math op");
+                            MathError(x, y, op.val);
+                    }
+
+                    //if (symTable[x.symKey].Data["type"] != "int" || symTable[y.symKey].Data["type"] != "int") //semanticError(scanner.getToken().lineNum, "Math operation", x.val, "Wrong types for math op");
+                    //    MathError(x, y, op.val);
 
                     sym = genId("t");
                     symTable.Add(sym, new Symbol(scope, sym, "temp", "tempVal", new Dictionary<string, dynamic>() { { "type", "bool" } }));
@@ -1958,7 +1964,7 @@ namespace Compiler
                 }
                 else if (op.val == "==" || op.val == "!=")
                 {
-                    if (symTable[x.symKey].Data["type"] != symTable[y.symKey].Data["type"]) //semanticError(scanner.getToken().lineNum, "Logical operation", x.val, "Wrong types for logical op");
+                    if (symTable[x.symKey].Data["type"] != symTable[y.symKey].Data["type"] && symTable[y.symKey].Value != "null") //semanticError(scanner.getToken().lineNum, "Logical operation", x.val, "Wrong types for logical op");
                         MathError(x, y, op.val);
 
                     sym = genId("t");
@@ -2057,7 +2063,7 @@ namespace Compiler
             // iCode
             string tempSymId = genId("t");
             symTable.Add(tempSymId, new Symbol(scope, tempSymId, $"{array.val}[{argument.symKey}]", "lvar", new Dictionary<string, dynamic>() { { "type", "int" } }));
-            createQuad("AEF", array.symKey, argument.symKey, tempSymId);
+            //createQuad("AEF", array.symKey, argument.symKey, tempSymId);
             arr_sar.symKey = tempSymId;
 
             SAS.Push(arr_sar);

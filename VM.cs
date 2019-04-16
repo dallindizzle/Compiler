@@ -922,9 +922,12 @@ namespace Compiler
             else if (inst[1] == 4)
             {
                 //char input = Console.ReadKey().KeyChar;
+
                 char input = (char)Console.Read();
                 if (input == '\r') input = '\n';
+
                 reg[3] = input;
+
             }
             else if (inst[1] == 99)
             {
