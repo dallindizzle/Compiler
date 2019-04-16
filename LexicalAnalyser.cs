@@ -42,7 +42,8 @@ namespace Compiler
         int lineNum;
 
         string indentPat = @"[a-zA-Z0-9_]+";
-        string pat = @"([*+/\-<>=)(,;.{}?!:\[\]&\|]|[0-9]+|'\\n'|[""'][a-zA-Z._0-9 ]+[""']|[a-zA-Z0-9_]+)";
+        //string pat = @"([*+/\-<>=)(,;.{}?!:\[\]&\|]|[0-9]+|'\\n'|[""'][a-zA-Z._0-9 ]+[""']|[a-zA-Z0-9_]+)";
+        string pat = @"([*+/\-<>=)(,;.{}?!:\[\]&\|]|[0-9]+|'\\[a-z]'|[""'][a-zA-Z._0-9 ]+[""']|[a-zA-Z0-9_]+)";
 
         public LexicalAnalyser(string file)
         {

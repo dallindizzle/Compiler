@@ -1,5 +1,26 @@
-void kxi2019 main() {
+class Cat {
+	
+	Cat() {
+	
+	}
 
-	cout << 3 / 3; // I print right here
-	cout << 234;
+	public void PrintDog(Dog d) {
+		cout << d.age;
+	}
+}
+
+class Dog {
+	public int age = 5;
+
+	Dog() {
+	
+	}
+}
+
+void kxi2019 main() {
+	Dog d = new Dog();
+	Cat c = new Cat();
+
+	c.PrintDog(new Dog());
+
 }

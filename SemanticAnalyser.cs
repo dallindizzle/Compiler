@@ -1164,6 +1164,7 @@ namespace Compiler
             // Check for Non-Printable ASCII characters
             if (lit == "'\\n'") symTable[symKey].Value = "10";
             else if (lit == "' '") symTable[symKey].Value = "32";
+            else if (lit == "'\\t'") symTable[symKey].Value = ((int)'\t').ToString();
 
             SAS.Push(new SAR(lit, SAR.types.lit_sar, SAR.pushes.lPush, symKey));
         }
