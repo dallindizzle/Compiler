@@ -740,15 +740,23 @@ namespace Compiler
         {
             //Debug VM
             //tQuads.Add(new List<string>() { "TRP", "99" });
-
-            string register1 = FetchAndLoadValue(quad[1]);
+            string register1;
+            if (quad[1] == "this") register1 = FetchAndLoadThis();
+            else register1 = FetchAndLoadValue(quad[1]);
 
             if (quad[1][0] == 'r') tQuads.Add(new List<string>() { "LDR", register1, register1 });
 
 
             // Get offset
+            List<KeyValuePair<string, Symbol>> fellowIvars;
             int offset = 0;
-            var fellowIvars = symTable.Where(sym => sym.Value.Scope == "g." + symTable[quad[1]].Data["type"] && sym.Value.Kind == "ivar").ToList();
+            if (quad[1] == "this")
+            {
+                var tokens = symTable[quad[2]].Scope.Split('.');
+
+                fellowIvars = symTable.Where(sym => sym.Value.Scope == "g." + tokens[tokens.Count()-1] && sym.Value.Kind == "ivar").ToList();
+            }
+            else fellowIvars = symTable.Where(sym => sym.Value.Scope == "g." + symTable[quad[1]].Data["type"] && sym.Value.Kind == "ivar").ToList();
             foreach (var ivar in fellowIvars)
             {
                 if (ivar.Key == quad[2]) break;

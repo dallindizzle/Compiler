@@ -1,14 +1,5 @@
-class Cat {
-	public char name = 'd';
-
-	Cat() {
-	
-	}
-}
-
 void kxi2019 main() {
-	Cat c = new Cat();
 
-	cin >> c.name;
-	cout << c.name;
+	cout << 3 / 3; // I print right here
+	cout << 234;
 }

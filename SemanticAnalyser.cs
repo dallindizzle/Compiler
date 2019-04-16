@@ -1449,7 +1449,7 @@ namespace Compiler
                 if (!pat.IsMatch(scope)) semanticError(scanner.getToken().lineNum, "iExist", "this", "Wrong use of \"this\"");
                 sar.pushType = SAR.pushes.iExist;
                 sar.type = SAR.types.id_sar;
-                sar.val = "i var";
+                //sar.val = "i var";
                 SAS.Push(sar);
                 return;
             }
@@ -1607,7 +1607,8 @@ namespace Compiler
                 }
                 else
                 {
-                    createQuad("REF", classSar.symKey, ivarSymId, symId);
+                    if (classSar.symKey == "") createQuad("REF", "this", ivarSymId, symId);
+                    else createQuad("REF", classSar.symKey, ivarSymId, symId);
                 }
             }
             else
@@ -1847,7 +1848,7 @@ namespace Compiler
                 if (oper.val != "=" || OS.Count > 0) //semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
                     MathError(op1, op2, oper.val);
 
-                if (op1.val == "this") //semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
+                if (op1.val == "this" && op1.symKey == "") //semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
                     MathError(op1, op2, oper.val);
 
                 if (symTable[op1.symKey].Kind != "lvar" && symTable[op1.symKey].Kind != "ivar" && symTable[op1.symKey].Kind != "param" && symTable[op1.symKey].Kind != "ref var") //semanticError(scanner.getToken().lineNum, "Type", op1.val, "not lvalue");
@@ -1970,6 +1971,14 @@ namespace Compiler
 
         void MathError(SAR op1, SAR op2, string oper)
         {
+            if (op1.pushType == SAR.pushes.func || op1.type == SAR.types.lit_sar || op1.val == "this")
+            {
+                if (op1.val == "this") Console.WriteLine($"{scanner.getToken().lineNum}: this not an lvalue");
+                else Console.WriteLine($"{scanner.getToken().lineNum}: {symTable[op1.symKey].Value} not an lvalue");
+                Console.ReadKey();
+                Environment.Exit(0);
+            }
+
             string op1Type = symTable[op1.symKey].Data["type"];
             string op2Type = symTable[op2.symKey].Data["type"];
 

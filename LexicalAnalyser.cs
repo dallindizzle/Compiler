@@ -91,10 +91,21 @@ namespace Compiler
                 lineNum++;
                 line = reader.ReadLine();
             }
-
+            int comment = 0;
             var matches = Regex.Matches(line, pat, RegexOptions.Singleline);
             foreach (var match in matches)
             {
+                if (match.ToString() == "/")
+                {
+                    comment++;
+                    if (comment == 2)
+                    {
+                        comment = 0;
+                        buffer.RemoveAt(buffer.Count - 1);
+                        break;
+                    }
+                }
+                else comment = 0;
 
                 if (int.TryParse(match.ToString(), out int i)) buffer.Add(new Token("Number", lineNum, match.ToString()));
                 else if (match.ToString()[0] == '\'') buffer.Add(new Token("Character", lineNum, match.ToString()));
