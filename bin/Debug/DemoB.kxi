@@ -32,20 +32,22 @@ class iTree {
     }
 
     private bool insert(char key, iNode node) {
-	if (key < node.root)
+	if (key < node.root) {
 	    if (node.left == null) {
 		node.left = new iNode(key);
 		return true;
 	    }
 	    else 
 		return insert(key, node.left);
-	else if (key > node.root)
+		}
+	else if (key > node.root) {
 	    if (node.right == null) {
 		node.right = new iNode(key);
 		return true;
 	    }
 	    else
 		return insert(key, node.right);
+		}
 	else { // key == node.root
 	     node.inc();
 	    return false;

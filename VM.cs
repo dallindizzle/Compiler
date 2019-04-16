@@ -928,6 +928,8 @@ namespace Compiler
 
                 reg[3] = input;
 
+                while (Console.In.Peek() != -1) // flush 
+                    Console.In.Read();
             }
             else if (inst[1] == 99)
             {

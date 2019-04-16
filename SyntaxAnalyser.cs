@@ -256,6 +256,8 @@ namespace Compiler
             {
                 string id = genId("H");
 
+                if (scanner.getToken().lexeme.Length > 3 && scanner.getToken().lexeme[1] != '\\') syntaxError("Characer");
+
                 if (!symTable.Any(sym => sym.Value.Value == scanner.getToken().lexeme)) // Check if literal is already in symbol table
                 { 
                     symTable.Add(id, new Symbol("g", id, scanner.getToken().lexeme, "clit", new Dictionary<string, dynamic>() { { "type", "char" } }));

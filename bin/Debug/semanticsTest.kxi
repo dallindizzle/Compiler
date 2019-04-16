@@ -1,17 +1,5 @@
-class Cat {
-	public int age  = 3;
-
-	Cat() {
-	
-	}
-}
-
 void kxi2019 main() {
-	Cat c = null;
 
-	if (c == null) {
-		c = new Cat();
-		cout << c.age;
-	}
+	cout << ' ';
 	
 }
