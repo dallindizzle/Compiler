@@ -4,23 +4,37 @@ class Cat {
 	
 	}
 
+	private int Double(int x) {
+		return x + x;
+	}
+
 	public void PrintDog(Dog d) {
 		cout << d.age;
+		cout << '\n';
+		cout << Double(d.age);
+
 	}
 }
 
 class Dog {
-	public int age = 5;
+	public int age;
 
-	Dog() {
-	
+	Dog(int age) {
+		this.age = age;
 	}
 }
 
 void kxi2019 main() {
-	Dog d = new Dog();
+	Dog d = new Dog(5);
 	Cat c = new Cat();
 
-	c.PrintDog(new Dog());
+	c.PrintDog(d);
+
+	cout << '\n';
+
+	while(d.age <= 10) {
+		cout << d.age;
+		d.age = d.age + 1;
+	}
 
 }

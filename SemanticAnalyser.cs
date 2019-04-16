@@ -179,9 +179,25 @@ namespace Compiler
 
         #region SynataxAnalyser definition
 
+        void SetAsciiValues()
+        {
+            var globals = symTable.Where(sym => sym.Value.Scope == "g" && sym.Value.Kind == "clit");
+
+            foreach(var literal in globals)
+            {
+                string lit = literal.Value.Value;
+                string symKey = literal.Key;
+
+                if (lit == "'\\n'") symTable[symKey].Value = "10";
+                else if (lit == "' '") symTable[symKey].Value = "32";
+                else if (lit == "'\\t'") symTable[symKey].Value = ((int)'\t').ToString();
+            }
+        }
+
         public void go()
         {
             compilation_unit();
+            SetAsciiValues();
         }
 
         void compilation_unit()
@@ -1162,9 +1178,9 @@ namespace Compiler
             else symKey = symTable.Where(sym => sym.Value.Scope == "g").Where(sym => sym.Value.Kind == "clit" || sym.Value.Kind == "ilit").Where(sym => sym.Value.Value == lit).First().Key;
 
             // Check for Non-Printable ASCII characters
-            if (lit == "'\\n'") symTable[symKey].Value = "10";
-            else if (lit == "' '") symTable[symKey].Value = "32";
-            else if (lit == "'\\t'") symTable[symKey].Value = ((int)'\t').ToString();
+            //if (lit == "'\\n'") symTable[symKey].Value = "10";
+            //else if (lit == "' '") symTable[symKey].Value = "32";
+            //else if (lit == "'\\t'") symTable[symKey].Value = ((int)'\t').ToString();
 
             SAS.Push(new SAR(lit, SAR.types.lit_sar, SAR.pushes.lPush, symKey));
         }
