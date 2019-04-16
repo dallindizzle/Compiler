@@ -16,7 +16,7 @@ namespace Compiler
             SyntaxAnalyser syntaxAnalyser = new SyntaxAnalyser(scanner);
 
             syntaxAnalyser.go();
-            syntaxAnalyser.printTable();
+            //syntaxAnalyser.printTable();
 
             SemanticAnalyser semanticsAnalyser = new SemanticAnalyser(new LexicalAnalyser(file), syntaxAnalyser.symTable);
 

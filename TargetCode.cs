@@ -288,7 +288,7 @@ namespace Compiler
 
         private int SizeOfFunc(string funcKey)
         {
-            string funScope = "g." + symTable[funcKey].Value;
+            string funScope = symTable[funcKey].Scope + "." + symTable[funcKey].Value;
 
             int size = symTable.Where(sym => sym.Value.Scope == funScope).Count();
 
@@ -525,6 +525,8 @@ namespace Compiler
 
         void MathLogicCase(List<string> quad)
         {
+            //tQuads.Add(new List<string>() { "TRP", "99" });
+
             string register1Value = FetchAndLoadValue(quad[1]);
 
             if (quad[1][0] == 'r')

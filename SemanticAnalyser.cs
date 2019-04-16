@@ -1303,6 +1303,13 @@ namespace Compiler
             SAR typeSar = SAS.Pop();
 
             // Get constructor
+            if (symTable.Where(sym => sym.Value.Scope == $"g.{typeSar.val}").Where(sym => sym.Value.Kind == "Constructor").Count() == 0)
+            {
+                Console.WriteLine($"{scanner.getToken().lineNum}: Constructor not defined for type {typeSar.val}");
+                Console.ReadKey();
+                Environment.Exit(0);
+            } 
+
             var constructor = symTable.Where(sym => sym.Value.Scope == $"g.{typeSar.val}").Where(sym => sym.Value.Kind == "Constructor").First();
 
             if (argumentsSar.arguments.Count() > 0)
