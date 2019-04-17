@@ -404,17 +404,95 @@ namespace Compiler
 
                 scanner.nextToken();
             }
+            else if (scanner.getToken().lexeme == "switch")
+            {
+                scanner.nextToken();
+                if (scanner.getToken().lexeme != "(") syntaxError("(");
+                scanner.nextToken();
+                expression();
+                if (scanner.getToken().lexeme != ")") syntaxError(")");
+                scanner.nextToken();
+                case_block();
+            }
+            else if (scanner.getToken().lexeme == "break")
+            {
+                scanner.nextToken();
+                if (scanner.getToken().lexeme != ";") syntaxError(";");
+                scanner.nextToken();
+            }
             else
             {
                 expression();
                 if (scanner.getToken().lexeme != ";") syntaxError(";");
 
-                // Semantic code
                 EOE(true);
 
                 scanner.nextToken();
             }
 
+        }
+
+        void case_block()
+        {
+            if (scanner.getToken().lexeme != "{") syntaxError("{");
+            scanner.nextToken();
+
+            while (scanner.getToken().lexeme == "case")
+            {
+                case_label();
+            }
+
+            if (scanner.getToken().lexeme != "}") syntaxError("}");
+            scanner.nextToken();
+        }
+
+        void case_label()
+        {
+            if (scanner.getToken().lexeme != "case") syntaxError("case");
+            scanner.nextToken();
+
+            literal();
+
+            if (scanner.getToken().lexeme != ":") syntaxError(":");
+
+            scanner.nextToken();
+
+            statement();
+
+            //if (scanner.getToken().lexeme != ";") syntaxError(";");
+            //scanner.nextToken();
+        }
+
+        void literal()
+        {
+            if (scanner.getToken().type == "Number" || scanner.getToken().lexeme == "+" || scanner.getToken().lexeme == "-")
+            {
+                string id = genId("N");
+
+                if (!symTable.Any(sym => sym.Value.Value == scanner.getToken().lexeme)) // Check if literal is already in symbol table
+                {
+                    symTable.Add(id, new Symbol("g", id, scanner.getToken().lexeme, "ilit", new Dictionary<string, dynamic>() { { "type", "int" } }));
+                }
+
+                numeric_literal();
+                //if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
+            }
+            else if (scanner.getToken().type == "Character")
+            {
+                string id = genId("H");
+
+                if (scanner.getToken().lexeme.Length > 3 && scanner.getToken().lexeme[1] != '\\') syntaxError("Character");
+                if (scanner.getToken().lexeme == "'") syntaxError("Character");
+
+                if (!symTable.Any(sym => sym.Value.Value == scanner.getToken().lexeme)) // Check if literal is already in symbol table
+                {
+                    symTable.Add(id, new Symbol("g", id, scanner.getToken().lexeme, "clit", new Dictionary<string, dynamic>() { { "type", "char" } }));
+                }
+
+                scanner.nextToken();
+                //if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
+            }
+            else syntaxError("literal");
         }
 
         void variable_declaration()
@@ -1229,7 +1307,7 @@ namespace Compiler
                 return;
             }
 
-            if (op == "=" && OS.Count > 0) semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
+            //if (op == "=" && OS.Count > 0) semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
 
             if (OS.Count == 0) OS.Push(sar);
             else if (op == "*" || op == "/")
@@ -1929,6 +2007,8 @@ namespace Compiler
                 {
                     if (op1.val.Substring(op1.val.Length - 2) != "[]") //semanticError(scanner.getToken().lineNum, "Array init", op1.val, "Not array type");
                         MathError(op1, op2, oper.val);
+
+                    return; // do nothing for arrays
                 }
                 else if (symTable[op1.symKey].Data["type"][0] == '@')
                 {
@@ -1945,6 +2025,8 @@ namespace Compiler
                     }
                     else if (symTable[op2.symKey].Data["type"] != type) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
                         MathError(op1, op2, oper.val);
+
+                    //return; // Do nothing for arrays
                 }
                 else if (symTable[op2.symKey].Data["type"][0] == '@')
                 {
@@ -1961,6 +2043,8 @@ namespace Compiler
                     }
                     else if (symTable[op1.symKey].Data["type"] != type) //semanticError(scanner.getToken().lineNum, "Type", op1.val, "not valid type");
                         MathError(op1, op2, oper.val);
+
+                    //return; // Do nothing for arrays
                 }
                 else if (symTable[op2.symKey].Data["type"] != symTable[op1.symKey].Data["type"] && symTable[op2.symKey].Value != "null") //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
                     MathError(op1, op2, oper.val);

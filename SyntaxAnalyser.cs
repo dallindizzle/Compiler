@@ -263,6 +263,7 @@ namespace Compiler
                 scanner.nextToken();
                 //if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
             }
+            else syntaxError("literal");
         }
 
         void variable_declaration()
@@ -724,7 +725,7 @@ namespace Compiler
         void syntaxError(string expected)
         {
             Console.WriteLine($"<Line {scanner.getToken().lineNum}>: Found {scanner.getToken().lexeme} expecting {expected}");
-            Console.ReadKey();
+            //Console.ReadKey();
             Environment.Exit(0);
         }
 
