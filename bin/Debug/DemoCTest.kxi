@@ -1,22 +1,22 @@
 class DemoC {
-    DemxC() {}							// Semantics: DemxC
+    DemoC() {}							// Semantics: DemxC
    
-	public static int mod(int i, int j, bool noWay) { // Syntax: static
+	public int mod(int i, int j) { // Syntax: static
 		int k = i / j;
 		k = i - j * k;
 		return k;
 	}
 	
-	public static int gcd(int a[], integer b) { // Syntax: static; Semantic: return int vs @:int
+	public int gcd(int a, int b) { // Syntax: static; Semantic: return int vs @:int
 		if (b == 0) return a;
 		return gcd(b, mod(a, b));				// Semantics: not defined mod(int, int)
 	}
 
 
-    public it fib(int k) {						// Semantics: it vs int
-	if (k == 0) retrn 'j';						// Syntax: retrn
+    public int fib(int k) {						// Semantics: it vs int
+	if (k == 0) return 0;						// Syntax: retrn
 	else if (k == 1) return 1;					
-	ese return (fib(k, - 1) + fb('k' - 2));		// Syntax: ese; Semantics: fib(int, int), char - int, no fb(int)
+	else return (fib(k - 1) + fib(k - 2));		// Syntax: ese; Semantics: fib(int, int), char - int, no fb(int)
     }
 	
 public int fact(int n)
@@ -30,80 +30,82 @@ public int fact(int n)
        return result;
     }
 	
-	public static int inc(int i) { return i + 1; }	// Syntax: static
+	public int inc(int i) { return i + 1; }	// Syntax: static
 }
 
 // Check here for Syntax and Semantic Errors
-classs Bugs {								// Syntax
-      int i;								// Syntax: no mod
-      protected car c = null + 7;			// Semantic: car, null + 7
-      bool b;								// Syntax: no mod
+class Bugs {								// Syntax
+      private int i;								// Syntax: no mod
+      private char c;			// Semantic: car, null + 7
+      private bool b;								// Syntax: no mod
 
-      Buugs(int i; char c) {				// Syntax: ';' vs ',' ; Semantic: Buugs vs Bugs
-         this.i = d;						// Semantic: no d
-         that.c = i;						// Semantic: no that, char = int
+      Bugs(int i, char c) {				// Syntax: ';' vs ',' ; Semantic: Buugs vs Bugs
+         this.i = i;						// Semantic: no d
+         this.c = c;						// Semantic: no that, char = int
 
-	 int i = 99; // This is a Syntax NO NO
+	 //int i = 99; // This is a Syntax NO NO
       }
 
-      protected void split() {
-      		spawn checkit() set i;			// Syntax: spawn
-		block;								// Syntax: block vs wait	
-		lck c;								// Syntax: lck vs lock
-		release checkit();					// Syntax: release vs unlock, checkkit() vs c
+      private void split() {
+      		//spawn checkit() set i;			// Syntax: spawn
+		//block;								// Syntax: block vs wait	
+		//lck c;								// Syntax: lck vs lock
+		//release checkit();					// Syntax: release vs unlock, checkkit() vs c
 		
-		swith(i] {							// syntax
+		switch(i) {							// syntax
 		case 1: break;
 		case 'a': {
 			i = i + i;
 			}
-		cse 2: beak;						// syntax
+		case 2: break;						// syntax
 	}
 
       }
 
-      pulic vod checkit() {					// Semantic: vod
-         char cc[] = new char[10a00];		// Syntax: 10a00
+      public void checkit() {					// Semantic: vod
+         char cc[] = new char[1000];		// Syntax: 10a00
 	 int  ii[] = new int[512];
-	 Bugs ss[] = new Bug[256];				// Semantic: Bug vs Bugs
+	 Bugs ss[] = new Bugs[256];				// Semantic: Bug vs Bugs
 
 	 cc[1] = cc[2]; 
-	 cc[31] = cc;   						// Semantic: char = @
-	 cc[100] = 5 + i;						// Semantics: char = int
+	 cc[31] = cc[31];   						// Semantic: char = @
+	 //cc[100] = 5 + i;						// Semantics: char = int
 	 cc[10] = c;    
 
-	 this = null;							// Semantics: #LVar
-	 this.this = null;						// Syntax: this.this
+	 //this = null;							// Semantics: #LVar
+	 //this = null;						// Syntax: this.this
 	 
-	 ii[] = ii[]; 							// Syntax: no index
-	 i[4] = 5 + i;							// Semantic: Array i not defined
+	 ii[3] = ii[3]; 							// Syntax: no index
+	 ii[4] = 5 + i;							// Semantic: Array i not defined
 	 ii[5000] = 5 + i;
-	 ii = ss;								// Semantics: @:int = @:Bugs
+	 //ii = ss;								// Semantics: @:int = @:Bugs
 	 i = ii[0];  
 
-	 ss[0] = new Insect('c', 7, 3);			// Semantics: Insect, no Bugs(char, int, int)
+	 ss[0] = new Bugs(3, 'c');			// Semantics: Insect, no Bugs(char, int, int)
 	 ss[i] = ss[i+1]; 
-	 ss[i+7/3] = new Bug(i, c); 			// Semantics: Bug vs Bugs
+	 ss[i+7/3] = new Bugs(i, c); 			// Semantics: Bug vs Bugs
 
-	 return ii;								// Semantics: return @ 
+	 //return ii;								// Semantics: return @ 
       } 
 }
 
 
-public void main(int buggy) {				// Syntax: multiple
-    it k;									// Semantic: it vs int
+void kxi2019 main() {				// Syntax: multiple
+    int k;									// Semantic: it vs int
     int j;
 
-    k = 0;  // can't have a statement before var declarations
+    //k = 0;  // can't have a statement before var declarations
     int sum;
+    int fa;
+    int fi;
 
-    float two = 2.0;						// Syntax: .0; Semantics: float
-    DmoC dc;								// Semantics: Dmo
+    int two = 2;						// Syntax: .0; Semantics: float
+    DemoC dc;								// Semantics: Dmo
 
-    cout << ">";							// Syntax: "
-    cin >> x;								// Semantics: no x vs k
-    cout << "\n";							// Syntax: "
-	whle (k = 0) {							// Syntax: whle; Semantic: if requires bool
+    cout << '>';							// Syntax: "
+    cin >> k;								// Semantics: no x vs k
+    cout << '\n';							// Syntax: "
+	while (k != 0) {							// Syntax: whle; Semantic: if requires bool
 		
 	    if (k < 0) {
 			k = 5 + k * -1 - two;
@@ -111,22 +113,22 @@ public void main(int buggy) {				// Syntax: multiple
 			while (k > 0) {
 				j = k;
 				while (j > 0) {
-					iff ((j / 3) == 0) sum = sum + j;	// Syntax: iff
+					if ((j / 3) == 0) sum = sum + j;	// Syntax: iff
 					j = j - 1;
 				}
 				k = k - 1;
 			}
 
-		System.out.print(sum);				// Semantics: cout
-		System.out.print('\n');				// Semantics: cout
+		cout << sum;				// Semantics: cout
+		cout << '\n';				// Semantics: cout
 	    }
 	    else {
 		fa = dc.fact(k);					// Semantics: no fa
 		fi = dc.fib(k);						// Semantics: no fi
-		sum = this.gcd(fa, fi);				// Semantics: this vs dc
+		sum = dc.gcd(fa, fi);				// Semantics: this vs dc
 		cout << sum;
 		cout << '=';
-		cout << fa);						// Syntax: )
+		cout << fa;						// Syntax: )
 		cout << '%';
 		cout << fi;
 		cout << '\n';
@@ -134,7 +136,7 @@ public void main(int buggy) {				// Syntax: multiple
 	
 
 	    cout << '>';
-	    k = cin.nextInt();					// Semantics: cin
+	    cin >> k;					// Semantics: cin
 	    cout << '\n';
 
 	}
@@ -144,5 +146,5 @@ public void main(int buggy) {				// Syntax: multiple
 
 
 }
-this is an error							// Syntax
-class NoGo { }
+//this is an error							// Syntax
+//class NoGo { }

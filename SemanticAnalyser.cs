@@ -980,6 +980,20 @@ namespace Compiler
                 scanner.nextToken();
                 expression();
             }
+
+            if (OS.Last().val == "=")
+            {
+                if (OS.Where(os => os.val == "=").Count() > 1)
+                {
+                    Console.WriteLine($"{scanner.getToken().lineNum}: Invalid assignment statement");
+                    Environment.Exit(0);
+                } 
+            }
+            else if (OS.Any(os => os.val == "="))
+            {
+                Console.WriteLine($"{scanner.getToken().lineNum}: Invalid assignment statement");
+                Environment.Exit(0);
+            }
         }
 
         void type()
@@ -1308,6 +1322,7 @@ namespace Compiler
             }
 
             //if (op == "=" && OS.Count > 0) semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
+            if (op == "=" && OS.Count > 0) OS.Push(sar);
 
             if (OS.Count == 0) OS.Push(sar);
             else if (op == "*" || op == "/")
@@ -2116,6 +2131,9 @@ namespace Compiler
                 }
                 else if (op.val == "=")
                 {
+                    SAS.Push(y);
+                    SAS.Push(x);
+
                     if (symTable[x.symKey].Kind != "lvar") semanticError(scanner.getToken().lineNum, "Type", x.val, "not lvalue");
                     if (symTable[y.symKey].Data["type"] != symTable[x.symKey].Data["type"]) semanticError(scanner.getToken().lineNum, "Type", y.val, "not valid type");
                 }
@@ -2264,7 +2282,7 @@ namespace Compiler
             if (type != "bool")
             {
                 //semanticError(scanner.getToken().lineNum, "if", type, $"if requires bool got {type}");
-                Console.WriteLine($"{scanner.getToken().lineNum}: if requires bool got {type}");
+                Console.WriteLine($"{scanner.getToken().lineNum}: if requires bool");
                 //Console.ReadKey();
                 Environment.Exit(0);
             }
@@ -2282,7 +2300,7 @@ namespace Compiler
             if (type != "bool")
             {
                 //semanticError(scanner.getToken().lineNum, "while", type, $"while requires bool got {type}");
-                Console.WriteLine($"{scanner.getToken().lineNum}: while requires bool got {type}");
+                Console.WriteLine($"{scanner.getToken().lineNum}: while requires bool");
                 //Console.ReadKey();
                 Environment.Exit(0);
             }

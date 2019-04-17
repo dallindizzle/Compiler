@@ -1,6 +1,9 @@
-void kxi2019 main() {
-	int x[] = new int[3];
-	x[3] = 3;
+class Cat {
+	public int Add(int x) {
+		return x + 1;
+	}
+}
 
-	cout << 'd';
+void kxi2019 main() {
+	int k = cin.nextInt();
 }
