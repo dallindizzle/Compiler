@@ -127,6 +127,7 @@ namespace Compiler
                 {
                     quads.Add(new List<string>() { skipStack.Peek(), op, oper1, oper2, oper3 }); // Create the quad then do the back patching
 
+
                     string replace = skipStack.Pop();
                     string find = skipStack.Pop();
 
@@ -136,6 +137,23 @@ namespace Compiler
                         if (index != -1)
                         {
                             quad[index] = replace;
+                        }
+                    }
+
+                    if (skipStack.Count > 0)
+                    {
+                        while(skipStack.Count > 0)
+                        {
+                            find = replace;
+                            replace = skipStack.Pop();
+                            foreach (var quad in quads)
+                            {
+                                int index = quad.FindIndex(idx => idx.Equals(find));
+                                if (index != -1)
+                                {
+                                    quad[index] = replace;
+                                }
+                            }
                         }
                     }
                 }
@@ -288,13 +306,17 @@ namespace Compiler
                 scanner.nextToken();
                 statement();
 
-                // iCode
+                // iCode $skip
                 if (scanner.getToken().lexeme == "else")
                 {
-                    skipStack.Push(labelStack.Pop());
-                    quads.Add(new List<string>() { "JMP", genLabel("SKIPELSE") });
+                    string labelToPush = labelStack.Pop();
+                    //skipStack.Push(labelStack.Pop());
+                    string label = genLabel("SKIPELSE");
+                    //quads.Add(new List<string>() { "JMP", label });
 
-                    //createQuad("JMP", genLabel("SKIPELSE"));
+                    createQuad("JMP", label);
+
+                    skipStack.Push(labelToPush);
                 }
                 else
                 {
@@ -761,6 +783,9 @@ namespace Compiler
 
                 // iCode
                 staticConstructor = false;
+
+                //skipStack.Clear();
+
                 createQuad(sar.symKey, "FUNC", sar.symKey);
 
                 scanner.nextToken();
@@ -1000,6 +1025,8 @@ namespace Compiler
 
         bool isAexpression()
         {
+            if (scanner.getToken().lexeme == "-" && scanner.peekToken().type == "Number")
+                return true;
             if (exp.Contains(scanner.getToken().lexeme) || scanner.getToken().type == "Number" || scanner.getToken().type == "Character" || scanner.getToken().type == "Identifier")
                 return true;
             return false;
@@ -1477,7 +1504,11 @@ namespace Compiler
                 //}
 
                 Regex pat = new Regex(@"g\.\w*\.\w+");
-                if (!pat.IsMatch(scope)) //semanticError(scanner.getToken().lineNum, "iExist", "this", "Wrong use of \"this\"");
+                if (!pat.IsMatch(scope))
+                {
+                    Console.WriteLine($"{scanner.getToken().lineNum}: Invalid use of this in main");
+                    Environment.Exit(0);
+                }
                     
                 sar.pushType = SAR.pushes.iExist;
                 sar.type = SAR.types.id_sar;
@@ -1919,7 +1950,7 @@ namespace Compiler
                 {
                     string type = symTable[op2.symKey].Data["type"].Substring(2);
 
-                    if (op2.arguments.Count != 1 && symTable[op2.symKey].Data["type"] == type) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                    if (op2.arguments.Count != 1) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
                         MathError(op1, op2, oper.val);
 
                     if (symTable[op1.symKey].Data["type"] == $"@:{type}")
@@ -2154,9 +2185,9 @@ namespace Compiler
                 Environment.Exit(0);
             }
 
-            // iCode
-            //quads.Add(new List<string>() { "BF", sar.symKey, genSkipIf() });
-            createQuad("BF", sar.symKey, genLabel("SKIPIF"));
+            //// iCode
+            quads.Add(new List<string>() { "BF", sar.symKey, genLabel("SKIPIF") });
+            //createQuad("BF", sar.symKey, genLabel("SKIPIF"));
         }
 
         void whileCase()

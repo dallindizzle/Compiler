@@ -45,8 +45,10 @@ namespace Compiler
                 Stack<string> leadingLabel = new Stack<string>();
 
                 var quad = iQuads[i];
+
                 string instruction;
-                if (quad[1] == "FUNC") instruction = "FUNC";
+                if (quad[1] == "FUNC")
+                    instruction = "FUNC";
                 else instruction = quad[0];
 
                 Restart: switch (instruction)
@@ -799,7 +801,7 @@ namespace Compiler
 
         void Read1Case(List<string> quad)
         {
-            tQuads.Add(new List<string>() { "TRP", "99" });
+            //tQuads.Add(new List<string>() { "TRP", "99" });
 
             string register;
             if (quad[1][0] == 'r') register = FetchAndLoadValue(quad[1]);

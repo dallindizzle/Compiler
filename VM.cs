@@ -258,7 +258,7 @@ namespace Compiler
                     break;
 
                 case "LDB":
-                    if (op2[0] == 'R') opInt = 25;
+                    if (op2[0] == 'R' || regSym.Contains(op2)) opInt = 25;
                     else opInt = 12;
                     break;
 

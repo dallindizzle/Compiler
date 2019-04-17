@@ -605,6 +605,8 @@ namespace Compiler
 
         bool isAexpression()
         {
+            if (scanner.getToken().lexeme == "-" && scanner.peekToken().type == "Number")
+                return true;
             if (exp.Contains(scanner.getToken().lexeme) || scanner.getToken().type == "Number" || scanner.getToken().type == "Character" || scanner.getToken().type == "Identifier")
                 return true;
             return false;

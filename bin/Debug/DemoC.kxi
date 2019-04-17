@@ -23,7 +23,7 @@ class DemoC {
 	else return (fib(k - 1) + fib(k - 2));
     }
 	
-	public int fact(int n)
+public int fact(int n)
     {
         int result;
 
@@ -37,32 +37,28 @@ class DemoC {
 	public int inc(int i) { return i + 1; }
 }
 
-// Check here for Syntax and Semantic Errors
-
-
 
 void kxi2019 main() {
     int k;
     int j;
 
-  // can't have a statement before var declarations
     int sum;
-    int two = 20;
-    DemoC dc; // this is a No No
+    int two = 2;
+    DemoC dc;
 	int fa;
 	int fi;
 
     cout << '>';
     cin >> k;
     cout << '\n';
-	while (k == 0) {
+	while (k != 0) {
 		
 	    if (k < 0) {
 			k = 5 + k * -1 - two;
 			sum = 0;
 			while (k > 0) {
 				j = k;
-				while (j == 0) {
+				while (j > 0) {
 					if ((j / 3) == 0) sum = sum + j;
 					j = j - 1;
 				}
