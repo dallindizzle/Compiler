@@ -293,6 +293,8 @@ namespace Compiler
                 {
                     skipStack.Push(labelStack.Pop());
                     quads.Add(new List<string>() { "JMP", genLabel("SKIPELSE") });
+
+                    //createQuad("JMP", genLabel("SKIPELSE"));
                 }
                 else
                 {
@@ -335,7 +337,8 @@ namespace Compiler
                 // iCode
                 string endLabel = labelStack.Pop();
                 string beginLabel = labelStack.Pop();
-                quads.Add(new List<string>() { "JMP", beginLabel });
+                //quads.Add(new List<string>() { "JMP", beginLabel });
+                createQuad("JMP", beginLabel);
                 skipStack.Push(endLabel);
             }
             else if (scanner.getToken().lexeme == "return")
@@ -697,14 +700,18 @@ namespace Compiler
             }
 
             // iCode
-            string staticConstKey = symTable.Where(sym => sym.Value.Scope == scope + ".constructor" && sym.Value.Value == "static constructor").First().Key;
-            createQuad(staticConstKey, "FUNC", staticConstKey);
-            foreach (var quad in staticConstQuads)
+            // check if class has constructor
+            if (symTable.Any(sym => sym.Value.Scope == scope && sym.Value.Kind == "Constructor")) 
             {
-                quads.Add(quad);
+                string staticConstKey = symTable.Where(sym => sym.Value.Scope == scope + ".constructor" && sym.Value.Value == "static constructor").First().Key;
+                createQuad(staticConstKey, "FUNC", staticConstKey);
+                foreach (var quad in staticConstQuads)
+                {
+                    quads.Add(quad);
+                }
+                createQuad("RTN");
+                staticConstQuads.Clear();
             }
-            createQuad("RTN");
-            staticConstQuads.Clear();
 
             if (scanner.getToken().lexeme != "}") syntaxError("}");
 
@@ -813,7 +820,7 @@ namespace Compiler
             if (scanner.getToken().lexeme != ")") syntaxError(")");
             scanner.nextToken();
 
-            // iCode static contructor
+            //iCode static contructor
             string key = genId("S");
             symTable.Add(key, new Symbol(scope, key, "static constructor", "static constructor"));
             createQuad("FRAME", key, "this");
@@ -1031,7 +1038,7 @@ namespace Compiler
         void syntaxError(string expected)
         {
             Console.WriteLine($"<Line {scanner.getToken().lineNum}>:Found {scanner.getToken().lexeme} expecting {expected}");
-            Console.ReadKey();
+            //Console.ReadKey();
             Environment.Exit(0);
         }
 
@@ -1293,7 +1300,7 @@ namespace Compiler
             }
 
             Console.WriteLine($"{line}: Constructor {name}({argsTogether}) not defined");
-            Console.ReadKey();
+            //Console.ReadKey();
             Environment.Exit(0);
         }
 
@@ -1306,7 +1313,7 @@ namespace Compiler
             if (symTable.Where(sym => sym.Value.Scope == $"g.{typeSar.val}").Where(sym => sym.Value.Kind == "Constructor").Count() == 0)
             {
                 Console.WriteLine($"{scanner.getToken().lineNum}: Constructor not defined for type {typeSar.val}");
-                Console.ReadKey();
+                //Console.ReadKey();
                 Environment.Exit(0);
             } 
 
@@ -1375,7 +1382,7 @@ namespace Compiler
             {
                 //semanticError(scanner.getToken().lineNum, "Array init", expression.val, $"Array requires int index got {symTable[expression.symKey].Data["type"]}");
                 Console.WriteLine($"{scanner.getToken().lineNum}: Array requires int index got {symTable[expression.symKey].Data["type"]}");
-                Console.ReadKey();
+               // Console.ReadKey();
                 Environment.Exit(0);
             }
 
@@ -1470,7 +1477,8 @@ namespace Compiler
                 //}
 
                 Regex pat = new Regex(@"g\.\w*\.\w+");
-                if (!pat.IsMatch(scope)) semanticError(scanner.getToken().lineNum, "iExist", "this", "Wrong use of \"this\"");
+                if (!pat.IsMatch(scope)) //semanticError(scanner.getToken().lineNum, "iExist", "this", "Wrong use of \"this\"");
+                    
                 sar.pushType = SAR.pushes.iExist;
                 sar.type = SAR.types.id_sar;
                 //sar.val = "i var";
@@ -1709,7 +1717,7 @@ namespace Compiler
                 Console.WriteLine($"{line}: Function {name}({argsTogether}) not defined/public in class {className}");
             }
             else Console.WriteLine($"{line}: Function {name}({argsTogether}) not defined");
-            Console.ReadKey();
+            //Console.ReadKey();
             Environment.Exit(0);
         }
 
@@ -1852,7 +1860,7 @@ namespace Compiler
                             if (operTemp.val == "&&") Console.WriteLine($"{scanner.getToken().lineNum}: And requires bool found {symTable[x.symKey].Data["type"]}, {symTable[y.symKey].Data["type"]}");
                             else Console.WriteLine($"{scanner.getToken().lineNum}: Or requires bool found {symTable[x.symKey].Data["type"]}, {symTable[y.symKey].Data["type"]}");
 
-                            Console.ReadKey();
+                           // Console.ReadKey();
                             Environment.Exit(0);
                         }
 
@@ -1873,6 +1881,9 @@ namespace Compiler
                     MathError(op1, op2, oper.val);
 
                 if (op1.val == "this" && op1.symKey == "") //semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
+                    MathError(op1, op2, oper.val);
+
+                if (op2.val == "this" && op2.symKey == "") //semanticError(scanner.getToken().lineNum, "Assignment", string.Join("", scanner.buffer.Select(token => token.lexeme)), "Wrong assignment");
                     MathError(op1, op2, oper.val);
 
                 if (symTable[op1.symKey].Kind != "lvar" && symTable[op1.symKey].Kind != "ivar" && symTable[op1.symKey].Kind != "param" && symTable[op1.symKey].Kind != "ref var") //semanticError(scanner.getToken().lineNum, "Type", op1.val, "not lvalue");
@@ -1979,7 +1990,7 @@ namespace Compiler
                         if (op.val == "&&") Console.WriteLine($"{scanner.getToken().lineNum}: And requires bool found {symTable[x.symKey].Data["type"]}, {symTable[y.symKey].Data["type"]}");
                         else Console.WriteLine($"{scanner.getToken().lineNum}: Or requires bool found {symTable[x.symKey].Data["type"]}, {symTable[y.symKey].Data["type"]}");
 
-                        Console.ReadKey();
+                        //Console.ReadKey();
                         Environment.Exit(0);
                     }
 
@@ -1999,21 +2010,42 @@ namespace Compiler
             }
         }
 
-        void MathError(SAR op1, SAR op2, string oper)
+        void MathError(SAR op1, SAR op2, string oper, int line = -1)
         {
+            if (line == -1) line = scanner.getToken().lineNum;
+
+            if (op1.val == "this" && op2.val == "this")
+            {
+                Console.WriteLine($"{scanner.getToken().lineNum}: Invalid Operation this {oper} this");
+                Environment.Exit(0);
+            }
+
             if (op1.pushType == SAR.pushes.func || op1.type == SAR.types.lit_sar || op1.val == "this")
             {
-                if (op1.val == "this") Console.WriteLine($"{scanner.getToken().lineNum}: this not an lvalue");
-                else Console.WriteLine($"{scanner.getToken().lineNum}: {symTable[op1.symKey].Value} not an lvalue");
-                Console.ReadKey();
+                string op2Type1 = symTable[op2.symKey].Data["type"];
+
+                if (op1.val == "this") Console.WriteLine($"{scanner.getToken().lineNum}: Invalid Operation this {oper} {op2Type1} {op2.val}");
+                else if (op1.type == SAR.types.lit_sar)
+                {
+                    string op1Type1 = symTable[op1.symKey].Data["type"];
+                    Console.WriteLine($"{scanner.getToken().lineNum - 1}: Invalid Operation {op1Type1} {op1.val} {oper} {op2Type1} {op2.val}");
+                }
+                else Console.WriteLine($"{scanner.getToken().lineNum}: Invalid Operation {symTable[op1.symKey].Value} {oper} {op2Type1} {op2.val}");
+                //Console.ReadKey();
+                Environment.Exit(0);
+            }
+
+            if (op2.val == "this")
+            {
+                Console.WriteLine($"{scanner.getToken().lineNum}: Invalid Operation {symTable[op1.symKey].Data["type"]} {symTable[op1.symKey].Value} {oper} this");
                 Environment.Exit(0);
             }
 
             string op1Type = symTable[op1.symKey].Data["type"];
             string op2Type = symTable[op2.symKey].Data["type"];
 
-            Console.WriteLine($"{scanner.getToken().lineNum}: Invalid Operation {op1Type} {op1.val} {oper} {op2Type} {op2.val}");
-            Console.ReadKey();
+            Console.WriteLine($"{line}: Invalid Operation {op1Type} {op1.val} {oper} {op2Type} {op2.val}");
+            //Console.ReadKey();
             Environment.Exit(0);
         }
 
@@ -2052,17 +2084,29 @@ namespace Compiler
             {
                 //semanticError(scanner.getToken().lineNum, "Array init", array.val, $"Array requires int idnex got {symTable[argument.symKey].Data["type"]}");
                 Console.WriteLine($"{scanner.getToken().lineNum}: Array requires int index got {symTable[argument.symKey].Data["type"]}");
-                Console.ReadKey();
+                //Console.ReadKey();
                 Environment.Exit(0);
             }
 
             SAR arr_sar = new SAR(array.val, SAR.types.arr_sar, SAR.pushes.arr, array.symKey);
             arr_sar.arguments.Add(argument);
 
+            var tokens = symTable[array.symKey].Data["type"].Split(':');
+
+            if (tokens.Length < 2)
+            {
+                Console.WriteLine($"{scanner.getToken().lineNum}: Array {symTable[array.symKey].Value} not defined");
+                //Console.ReadKey();
+                Environment.Exit(0);
+            }
+
+            string type = symTable[array.symKey].Data["type"].Split(':')[1];
+
+
 
             // iCode
             string tempSymId = genId("t");
-            symTable.Add(tempSymId, new Symbol(scope, tempSymId, $"{array.val}[{argument.symKey}]", "lvar", new Dictionary<string, dynamic>() { { "type", "int" } }));
+            symTable.Add(tempSymId, new Symbol(scope, tempSymId, $"{array.val}[{argument.symKey}]", "lvar", new Dictionary<string, dynamic>() { { "type", type } }));
             //createQuad("AEF", array.symKey, argument.symKey, tempSymId);
             arr_sar.symKey = tempSymId;
 
@@ -2078,7 +2122,7 @@ namespace Compiler
                 {
                     //semanticError(scanner.getToken().lineNum, "Duplicate name", val, "Duplicate name");
                     Console.WriteLine($"{scanner.getToken().lineNum}: Duplicate class {val}");
-                    Console.ReadKey();
+                   // Console.ReadKey();
                     Environment.Exit(0);
                 }
                 return;
@@ -2092,7 +2136,7 @@ namespace Compiler
                 if (scanner.peekToken().lexeme == "(") Console.WriteLine($"{scanner.getToken().lineNum}: Duplicate function {val}");
                 else Console.WriteLine($"{scanner.getToken().lineNum}: Duplicate variable {val}");
 
-                Console.ReadKey();
+                //Console.ReadKey();
                 Environment.Exit(0);
             }
         }
@@ -2106,7 +2150,7 @@ namespace Compiler
             {
                 //semanticError(scanner.getToken().lineNum, "if", type, $"if requires bool got {type}");
                 Console.WriteLine($"{scanner.getToken().lineNum}: if requires bool got {type}");
-                Console.ReadKey();
+                //Console.ReadKey();
                 Environment.Exit(0);
             }
 
@@ -2124,7 +2168,7 @@ namespace Compiler
             {
                 //semanticError(scanner.getToken().lineNum, "while", type, $"while requires bool got {type}");
                 Console.WriteLine($"{scanner.getToken().lineNum}: while requires bool got {type}");
-                Console.ReadKey();
+                //Console.ReadKey();
                 Environment.Exit(0);
             }
 
@@ -2158,7 +2202,7 @@ namespace Compiler
             {
                 //semanticError(scanner.getToken().lineNum, "Return", varType, $"Function requires {functionReturnType} returned {varType}");
                 Console.WriteLine($"{scanner.getToken().lineNum - 1}: Function requires {functionReturnType} returned {varType}");
-                Console.ReadKey();
+                //Console.ReadKey();
                 Environment.Exit(0);
             }
 
@@ -2182,7 +2226,7 @@ namespace Compiler
             {
                 //semanticError(scanner.getToken().lineNum, "cout", sar.val, $"cout not defined for {varType}");
                 Console.WriteLine($"{scanner.getToken().lineNum}: cout not defined for {varType}");
-                Console.ReadKey();
+                //Console.ReadKey();
                 Environment.Exit(0);
 
             }
@@ -2213,7 +2257,7 @@ namespace Compiler
             {
                 //semanticError(scanner.getToken().lineNum, "cout", sar.val, $"cout not defined for {varType}");
                 Console.WriteLine($"{scanner.getToken().lineNum}: cin not defined for {varType}");
-                Console.ReadKey();
+                //Console.ReadKey();
                 Environment.Exit(0);
 
             }
@@ -2232,7 +2276,7 @@ namespace Compiler
         void semanticError(int line, string type, string lexeme, string prob)
         {
             Console.WriteLine($"{line}: {type} {lexeme} {prob}");
-            Console.ReadKey();
+            //Console.ReadKey();
             Environment.Exit(0);
         }
 

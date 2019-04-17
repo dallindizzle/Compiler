@@ -1,0 +1,7 @@
+// kxi_test_files/tcode_generation/return_void_1.kxi.txt
+// kxi_test_files/tcode_generation/return_void_1.kxi.out
+
+class C {
+  public void f() { return; }
+}
+void kxi2019 main() {}

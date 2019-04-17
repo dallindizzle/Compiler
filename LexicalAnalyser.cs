@@ -72,6 +72,11 @@ namespace Compiler
             {
                 ReadLine();
                 curToken = 0;
+                while (buffer.Count() == 0)
+                {
+                    ReadLine();
+                    curToken = 0;
+                }
             }
             else curToken++;
         }

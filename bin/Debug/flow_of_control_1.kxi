@@ -1,0 +1,37 @@
+// kxi_test_files/tcode_generation/flow_of_control_1.kxi.txt
+// kxi_test_files/tcode_generation/flow_of_control_1.kxi.out
+
+void kxi2019 main() {
+  bool t = true;
+  bool f = false;
+
+  if (t) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (f) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+}

@@ -1,0 +1,47 @@
+// kxi_test_files/tcode_generation/runtime_stack_5.kxi.txt
+// kxi_test_files/tcode_generation/runtime_stack_5.kxi.out
+
+// fib(0) = 0
+// fib(1) = 1
+// fib(2) = 1
+// fib(3) = 2
+// fib(4) = 3
+// fib(5) = 5
+// fib(6) = 8
+// fib(7) = 13
+// fib(8) = 21
+// fib(9) = 34
+// fib(10) = 55
+// fib(11) = 89
+// fib(12) = 144
+// fib(13) = 233
+// fib(14) = 377
+// fib(15) = 610
+
+class Cat {
+  public int fib(int x) {
+    if (x <= 1) return x;
+    return fib(x - 1) + fib(x - 2);
+  }
+}
+
+void kxi2019 main() {
+  Cat c;
+  int x = 0;
+  int k;
+
+  while (x <= 15) {
+    cout << 'f';
+    cout << 'i';
+    cout << 'b';
+    cout << '(';
+    cout << x;
+    cout << ')';
+    cout << ' ';
+    cout << '=';
+    cout << ' ';
+    cout << c.fib(x);
+    cout << '\n';
+    x = x + 1;
+  }
+}

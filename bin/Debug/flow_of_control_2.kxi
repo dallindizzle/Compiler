@@ -1,0 +1,127 @@
+// kxi_test_files/tcode_generation/flow_of_control_2.kxi.txt
+// kxi_test_files/tcode_generation/flow_of_control_2.kxi.out
+
+void kxi2019 main() {
+  bool t = true;
+  bool f = false;
+
+  if (t && t) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (f && t) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (t && f) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (f && f) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (true && true) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (false && true) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (true && false) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (false && false) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+}

@@ -1,0 +1,49 @@
+// kxitestfiles/tcodegeneration/runtimestack3.kxi.txt
+// kxitestfiles/tcodegeneration/runtimestack3.kxi.out
+
+class Cat {
+  public void meow(int times) {
+    while (times > 0) {
+      cout << 'm';
+      cout << 'e';
+      cout << 'o';
+      cout << 'w';
+      cout << ' ';
+      cout << '(';
+      cout << times;
+      cout << ')';
+      cout << '\n';
+      times = times - 1;
+    }
+  }
+
+  public bool hungry(int time) {
+    if (time > 3) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public void nothungry() {
+    cout << '.';
+    cout << '.';
+    cout << '.';
+    cout << '\n';
+  }
+}
+
+void kxi2019 main() {
+  Cat c;
+  int hungerlevel = 0;
+
+  while (hungerlevel < 5) {
+    hungerlevel = hungerlevel + 1;
+
+    if (c.hungry(hungerlevel)) {
+      c.meow(hungerlevel);
+    } else {
+      c.nothungry();
+    }
+  }
+}

@@ -10,59 +10,55 @@ class DemoC {
 		k = i - j * k;
 		return k;
 	}
-	
+
 	public int gcd(int a, int b) { 
 		if (b == 0) return a;
 		return gcd(b, mod(a, b));
 	}
 
-
     public int fib(int k) {
-	if (k == 0) return 0;
-	else if (k == 1) return 1;
-	else return (fib(k - 1) + fib(k - 2));
+		if (k == 0) return 0;
+		else if (k == 1) return 1;
+		else return (fib(k - 1) + fib(k - 2));
     }
 	
 	public int fact(int n)
     {
-        int result;
+		int result;
 
-       if(n==1)
-         return 1;
+		if (n == 1)
+			return 1;
 
-       result = fact(n-1) * n;
-       return result;
+		result = fact(n-1) * n;
+		return result;
     }
 	
 	public int inc(int i) { return i + 1; }
 }
 
-// Check here for Syntax and Semantic Errors
-
-
 
 void kxi2019 main() {
     int k;
     int j;
-
-  // can't have a statement before var declarations
-    int sum;
-    int two = 20;
-    DemoC dc; // this is a No No
 	int fa;
 	int fi;
+
+    int sum;
+    int two = 2;
+    DemoC dc = new DemoC(); // this is a No No
 
     cout << '>';
     cin >> k;
     cout << '\n';
-	while (k == 0) {
-		
+
+	while (k != 0) {	
+	
 	    if (k < 0) {
 			k = 5 + k * -1 - two;
 			sum = 0;
 			while (k > 0) {
 				j = k;
-				while (j == 0) {
+				while (j > 0) {
 					if ((j / 3) == 0) sum = sum + j;
 					j = j - 1;
 				}
@@ -72,21 +68,22 @@ void kxi2019 main() {
 		cout << sum;
 		cout << '\n';
 	    }
+
 	    else {
-		fa = dc.fact(k);
-		fi = dc.fib(k);
-		sum = dc.gcd(fa, fi);
-		cout << sum;
-		cout << '=';
-		cout << fa;
-		cout << '@';
-		cout << fi;
-		cout << '\n';
+			fa = dc.fact(k);
+			fi = dc.fib(k);
+			sum = dc.gcd(fa, fi);
+			cout << sum;
+			cout << '=';
+			cout << fa;
+			cout << '@';
+			cout << fi;
+			cout << '\n';
 	    }
 	
 
 	    cout << '>';
-	    cin >> k;
+		cin >> k;
 	    cout << '\n';
 
 	}

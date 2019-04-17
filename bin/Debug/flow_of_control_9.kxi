@@ -1,0 +1,208 @@
+// kxi_test_files/tcode_generation/flow_of_control_9.kxi.txt
+// kxi_test_files/tcode_generation/flow_of_control_9.kxi.out
+
+void kxi2019 main() {
+  int i = 5;
+  int foo = 28;
+  int bar = -97;
+  bool t = true;
+  bool f = false;
+  char a = 'a';
+  char b = 'b';
+  int j = 5;
+
+  if ('a' <= a) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (i <= -100) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (7 <= 6) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if ('a' <= 'b') {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if ('b' <= a) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if ('a' <= a) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (a <= a) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (i <= foo) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (i <= i) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (i <= j) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (i <= 5) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (5 <= i) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+
+  if (5 <= 5) {
+    cout << 't';
+    cout << 'r';
+    cout << 'u';
+    cout << 'e';
+    cout << '\n';
+  } else {
+    cout << 'f';
+    cout << 'a';
+    cout << 'l';
+    cout << 's';
+    cout << 'e';
+    cout << '\n';
+  }
+}

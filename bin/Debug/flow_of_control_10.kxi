@@ -1,0 +1,35 @@
+// kxi_test_files/tcode_generation/flow_of_control_10.kxi.txt
+// kxi_test_files/tcode_generation/flow_of_control_10.kxi.out
+
+void kxi2019 main() {
+  int i;
+  int j;
+
+  while (true) {
+    cin >> i;
+    j = i - i / 5 * 5;
+
+    if (i > 0) {
+      cout << '+';
+      if (j == 0) {
+        cout << 'J';
+        cout << 'J';
+        cout << '\n';
+      } 
+      else {
+        cout << 'j';
+        cout << '\n';
+      }
+
+      cout << '\n';
+    } 
+    else if (i < 0) {
+      cout << '-';
+      cout << '\n';
+    } 
+    else {
+      cout << '=';
+      cout << '\n';
+    }
+  }
+}

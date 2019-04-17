@@ -471,6 +471,8 @@ namespace Compiler
 
         void RtnCase(List<string> quad)
         {
+            tQuads.Add(new List<string>() { "MOV", "SP", "FP" });
+
             // Check underflow
 
             string register1 = "R" + getRegister("RTN");
@@ -486,6 +488,8 @@ namespace Compiler
         {
             // VM Debug
             //tQuads.Add(new List<string>() { "TRP", "99" });
+
+            tQuads.Add(new List<string>() { "MOV", "SP", "FP" });
 
             // Check underflow
 
@@ -795,6 +799,8 @@ namespace Compiler
 
         void Read1Case(List<string> quad)
         {
+            tQuads.Add(new List<string>() { "TRP", "99" });
+
             string register;
             if (quad[1][0] == 'r') register = FetchAndLoadValue(quad[1]);
             else register = FetchAndLoadAddress(quad[1]);
@@ -864,10 +870,10 @@ namespace Compiler
                 }
             }
 
-            foreach (var quad in tQuads)
-            {
-                Console.WriteLine(string.Join(" ", quad));
-            }
+            //foreach (var quad in tQuads)
+            //{
+            //    Console.WriteLine(string.Join(" ", quad));
+            //}
         }
     }
 }

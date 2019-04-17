@@ -1,0 +1,30 @@
+// kxitestfiles/tcodegeneration/null1.kxi.txt
+// kxitestfiles/tcodegeneration/null1.kxi.out
+
+class Cat {
+  public int age;
+  public char name;
+
+  Cat() {}
+}
+
+void kxi2019 main() {
+  Cat cat = new Cat();
+  Cat cat2 = null;
+
+  cat.age = 7;
+  cat.name = 'c';
+
+  cat2.age = 8;
+  cat2.name = 'd';
+
+  cout << cat.age;
+  cout << cat.name;
+
+  cout << '\n';
+
+  cout << cat2.age;
+  cout << cat2.name;
+
+  cout << '\n';
+}

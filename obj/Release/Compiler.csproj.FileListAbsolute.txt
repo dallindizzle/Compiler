@@ -1,0 +1,6 @@
+C:\Users\dcs37\source\repos\Compiler\Compiler\bin\Release\Compiler.exe.config
+C:\Users\dcs37\source\repos\Compiler\Compiler\bin\Release\Compiler.exe
+C:\Users\dcs37\source\repos\Compiler\Compiler\bin\Release\Compiler.pdb
+C:\Users\dcs37\source\repos\Compiler\Compiler\obj\Release\Compiler.csproj.CoreCompileInputs.cache
+C:\Users\dcs37\source\repos\Compiler\Compiler\obj\Release\Compiler.exe
+C:\Users\dcs37\source\repos\Compiler\Compiler\obj\Release\Compiler.pdb

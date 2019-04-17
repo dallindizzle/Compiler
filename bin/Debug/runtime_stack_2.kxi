@@ -1,0 +1,37 @@
+// kxitestfiles/tcodegeneration/runtimestack2.kxi.txt
+// kxitestfiles/tcodegeneration/runtimestack2.kxi.out
+
+class Cat {
+  public void meow(int times) {
+    while (times > 0) {
+      cout << 'm';
+      cout << 'e';
+      cout << 'o';
+      cout << 'w';
+      cout << ' ';
+      cout << '(';
+      cout << times;
+      cout << ')';
+      cout << '\n';
+      times = times - 1;
+    }
+  }
+}
+
+void kxi2019 main() {
+  Cat c;
+  int times = 5;
+  int times2;
+
+  c.meow(10);
+  cout << '\n';
+  c.meow(times);
+  cout << '\n';
+  times2 = 7;
+  c.meow(times2);
+  cout << '\n';
+  cout << times;
+  cout << '\n';
+  cout << times2;
+  cout << '\n';
+}

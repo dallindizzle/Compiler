@@ -10,7 +10,12 @@ namespace Compiler
     {
         static void Main(string[] args)
         {
-            string file = "semanticsTest.kxi";
+            if (args.Length < 1) { Console.WriteLine("No arguments"); return; }
+
+            //string file = "semanticsTest.kxi";
+
+            string file = args[0];
+
             LexicalAnalyser scanner = new LexicalAnalyser(file);
 
             SyntaxAnalyser syntaxAnalyser = new SyntaxAnalyser(scanner);
@@ -32,7 +37,7 @@ namespace Compiler
 
             VM.go("output.asm");
 
-            Console.ReadKey();
+            //Console.ReadKey();
         }
     }
 }

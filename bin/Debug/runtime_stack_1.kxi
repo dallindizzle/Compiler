@@ -1,0 +1,25 @@
+// kxi_test_files/tcode_generation/runtime_stack_1.kxi.txt
+// kxi_test_files/tcode_generation/runtime_stack_1.kxi.out
+
+class Cat {
+  public void meow() {
+    cout << 'm';
+    cout << 'e';
+    cout << 'o';
+    cout << 'w';
+    cout << '\n';
+  }
+}
+
+void kxi2019 main() {
+  Cat c;
+
+  c.meow();
+  c.meow();
+  c.meow();
+  c.meow();
+  c.meow();
+  c.meow();
+  c.meow();
+  c.meow();
+}
