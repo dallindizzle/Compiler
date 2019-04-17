@@ -178,6 +178,22 @@ namespace Compiler
                 if (scanner.getToken().lexeme != ";") syntaxError(";");
                 scanner.nextToken();
             }
+            else if (scanner.getToken().lexeme == "switch")
+            {
+                scanner.nextToken();
+                if (scanner.getToken().lexeme != "(") syntaxError("(");
+                scanner.nextToken();
+                expression();
+                if (scanner.getToken().lexeme != ")") syntaxError(")");
+                scanner.nextToken();
+                case_block();
+            }
+            else if (scanner.getToken().lexeme == "break")
+            {
+                scanner.nextToken();
+                if (scanner.getToken().lexeme != ";") syntaxError(";");
+                scanner.nextToken();
+            }
             else
             {
                 expression();
@@ -185,6 +201,68 @@ namespace Compiler
                 scanner.nextToken();
             }
 
+        }
+
+        void case_block()
+        {
+            if (scanner.getToken().lexeme != "{") syntaxError("{");
+            scanner.nextToken();
+
+            while(scanner.getToken().lexeme == "case")
+            {
+                case_label();
+            }
+
+            if (scanner.getToken().lexeme != "}") syntaxError("}");
+            scanner.nextToken();
+        }
+
+        void case_label()
+        {
+            if (scanner.getToken().lexeme != "case") syntaxError("case");
+            scanner.nextToken();
+
+            literal();
+
+            if (scanner.getToken().lexeme != ":") syntaxError(":");
+
+            scanner.nextToken();
+
+            statement();
+
+            //if (scanner.getToken().lexeme != ";") syntaxError(";");
+            //scanner.nextToken();
+        }
+
+        void literal()
+        {
+            if (scanner.getToken().type == "Number" || scanner.getToken().lexeme == "+" || scanner.getToken().lexeme == "-")
+            {
+                string id = genId("N");
+
+                if (!symTable.Any(sym => sym.Value.Value == scanner.getToken().lexeme)) // Check if literal is already in symbol table
+                {
+                    symTable.Add(id, new Symbol("g", id, scanner.getToken().lexeme, "ilit", new Dictionary<string, dynamic>() { { "type", "int" } }));
+                }
+
+                numeric_literal();
+                //if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
+            }
+            else if (scanner.getToken().type == "Character")
+            {
+                string id = genId("H");
+
+                if (scanner.getToken().lexeme.Length > 3 && scanner.getToken().lexeme[1] != '\\') syntaxError("Character");
+                if (scanner.getToken().lexeme == "'") syntaxError("Character");
+
+                if (!symTable.Any(sym => sym.Value.Value == scanner.getToken().lexeme)) // Check if literal is already in symbol table
+                {
+                    symTable.Add(id, new Symbol("g", id, scanner.getToken().lexeme, "clit", new Dictionary<string, dynamic>() { { "type", "char" } }));
+                }
+
+                scanner.nextToken();
+                //if (isAexpressionZ(scanner.getToken().lexeme)) expressionZ();
+            }
         }
 
         void variable_declaration()
@@ -646,7 +724,7 @@ namespace Compiler
         void syntaxError(string expected)
         {
             Console.WriteLine($"<Line {scanner.getToken().lineNum}>: Found {scanner.getToken().lexeme} expecting {expected}");
-            //Console.ReadKey();
+            Console.ReadKey();
             Environment.Exit(0);
         }
 

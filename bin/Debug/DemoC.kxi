@@ -1,26 +1,22 @@
 class DemoC {
-	private int i;
-	private int j;
-	public bool noWay;
-	
-    DemoC() {}
+    DemxC() {}							// Semantics: DemxC
    
-	public int mod(int i, int j) { // k = i mod j
+	public int mod(int i, int j, bool noWay) { // Syntax: static
 		int k = i / j;
 		k = i - j * k;
 		return k;
 	}
 	
-	public int gcd(int a, int b) { 
+	public int gcd(int a[], integer b) { // Syntax: static; Semantic: return int vs @:int
 		if (b == 0) return a;
-		return gcd(b, mod(a, b));
+		return gcd(b, mod(a, b));				// Semantics: not defined mod(int, int)
 	}
 
 
-    public int fib(int k) {
-	if (k == 0) return 0;
-	else if (k == 1) return 1;
-	else return (fib(k - 1) + fib(k - 2));
+    public it fib(int k) {						// Semantics: it vs int
+	if (k == 0) return 'j';						// Syntax: retrn
+	else if (k == 1) return 1;					
+	else return (fib(k, - 1) + fb('k' - 2));		// Syntax: ese; Semantics: fib(int, int), char - int, no fb(int)
     }
 	
 public int fact(int n)
@@ -34,24 +30,80 @@ public int fact(int n)
        return result;
     }
 	
-	public int inc(int i) { return i + 1; }
+	public int inc(int i) { return i + 1; }	// Syntax: static
+}
+
+// Check here for Syntax and Semantic Errors
+class Bugs {								// Syntax
+      private int i;								// Syntax: no mod
+      private car c = null + 7;			// Semantic: car, null + 7
+      private bool b;								// Syntax: no mod
+
+      Buugs(int i, char c) {				// Syntax: ';' vs ',' ; Semantic: Buugs vs Bugs
+         this.i = d;						// Semantic: no d
+         that.c = i;						// Semantic: no that, char = int
+
+	 //int i = 99; // This is a Syntax NO NO
+      }
+
+      private void split() {
+      		//spawn checkit() set i;			// Syntax: spawn
+		//block;								// Syntax: block vs wait	
+		lck c;								// Syntax: lck vs lock
+		//release checkit();					// Syntax: release vs unlock, checkkit() vs c
+		
+		switch(i] {							// syntax
+		case 1: break;
+		case 'a': {
+			i = i + i;
+			}
+		cse 2: beak;						// syntax
+	}
+
+      }
+
+      pulic vod checkit() {					// Semantic: vod
+         char cc[] = new char[10a00];		// Syntax: 10a00
+	 int  ii[] = new int[512];
+	 Bugs ss[] = new Bug[256];				// Semantic: Bug vs Bugs
+
+	 cc[1] = cc[2]; 
+	 cc[31] = cc;   						// Semantic: char = @
+	 cc[100] = 5 + i;						// Semantics: char = int
+	 cc[10] = c;    
+
+	 this = null;							// Semantics: #LVar
+	 this.this = null;						// Syntax: this.this
+	 
+	 ii[] = ii[]; 							// Syntax: no index
+	 i[4] = 5 + i;							// Semantic: Array i not defined
+	 ii[5000] = 5 + i;
+	 ii = ss;								// Semantics: @:int = @:Bugs
+	 i = ii[0];  
+
+	 ss[0] = new Insect('c', 7, 3);			// Semantics: Insect, no Bugs(char, int, int)
+	 ss[i] = ss[i+1]; 
+	 ss[i+7/3] = new Bug(i, c); 			// Semantics: Bug vs Bugs
+
+	 return ii;								// Semantics: return @ 
+      } 
 }
 
 
-void kxi2019 main() {
-    int k;
+public void main(int buggy) {				// Syntax: multiple
+    it k;									// Semantic: it vs int
     int j;
 
+    k = 0;  // can't have a statement before var declarations
     int sum;
-    int two = 2;
-    DemoC dc;
-	int fa;
-	int fi;
 
-    cout << '>';
-    cin >> k;
-    cout << '\n';
-	while (k != 0) {
+    float two = 2.0;						// Syntax: .0; Semantics: float
+    DmoC dc;								// Semantics: Dmo
+
+    cout << ">";							// Syntax: "
+    cin >> x;								// Semantics: no x vs k
+    cout << "\n";							// Syntax: "
+	whle (k = 0) {							// Syntax: whle; Semantic: if requires bool
 		
 	    if (k < 0) {
 			k = 5 + k * -1 - two;
@@ -59,30 +111,30 @@ void kxi2019 main() {
 			while (k > 0) {
 				j = k;
 				while (j > 0) {
-					if ((j / 3) == 0) sum = sum + j;
+					iff ((j / 3) == 0) sum = sum + j;	// Syntax: iff
 					j = j - 1;
 				}
 				k = k - 1;
 			}
 
-		cout << sum;
-		cout << '\n';
+		System.out.print(sum);				// Semantics: cout
+		System.out.print('\n');				// Semantics: cout
 	    }
 	    else {
-		fa = dc.fact(k);
-		fi = dc.fib(k);
-		sum = dc.gcd(fa, fi);
+		fa = dc.fact(k);					// Semantics: no fa
+		fi = dc.fib(k);						// Semantics: no fi
+		sum = this.gcd(fa, fi);				// Semantics: this vs dc
 		cout << sum;
 		cout << '=';
-		cout << fa;
-		cout << '@';
+		cout << fa);						// Syntax: )
+		cout << '%';
 		cout << fi;
 		cout << '\n';
 	    }
 	
 
 	    cout << '>';
-	    cin >> k;
+	    k = cin.nextInt();					// Semantics: cin
 	    cout << '\n';
 
 	}
@@ -92,3 +144,5 @@ void kxi2019 main() {
 
 
 }
+this is an error							// Syntax
+class NoGo { }

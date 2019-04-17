@@ -1,4 +1,9 @@
 void kxi2019 main() {
-	int xd = 3;
-	cout << "xd";
+		switch(i) {							// syntax
+		case 1: break;
+		case 'a': {
+			i = i + i;
+			}
+		case 2: beak;
+		}
 }
