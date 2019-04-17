@@ -41,12 +41,17 @@ class iTree {
 		return insert(key, node.left);
 		}
 	else if (key > node.root) {
+			cout << 't';
 	    if (node.right == null) {
-		node.right = new iNode(key);
-		return true;
+				cout << 'h';
+				node.right = new iNode(key);
+				cout << 's';
+				return true;
 	    }
-	    else
-		return insert(key, node.right);
+	    else {
+				cout << 'i';
+				return insert(key, node.right);
+			}
 		}
 	else { // key == node.root
 	     node.inc();
@@ -95,6 +100,7 @@ class iNode {
     iNode(char key) {
 		root = key;
 		cnt = 1;
+		cout << key;
     }
 
     public void inc() { cnt = cnt + 1; }
