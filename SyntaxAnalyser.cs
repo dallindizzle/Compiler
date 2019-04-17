@@ -644,7 +644,7 @@ namespace Compiler
 
         void syntaxError(string expected)
         {
-            Console.WriteLine($"<Line {scanner.getToken().lineNum}>:Found {scanner.getToken().lexeme} expecting {expected}");
+            Console.WriteLine($"<Line {scanner.getToken().lineNum}>: Found {scanner.getToken().lexeme} expecting {expected}");
             //Console.ReadKey();
             Environment.Exit(0);
         }

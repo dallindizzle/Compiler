@@ -1,3 +1,5 @@
 void kxi2019 main() {
-	this = null;
+	char xd = 'd';
+
+	if (xd == 'd'){cout << 'C';}
 }
