@@ -1,5 +1,4 @@
 void kxi2019 main() {
-	char xd = 'd';
-
-	if (xd == 'd'){cout << 'C';}
+	int xd = 3;
+	cout << "xd";
 }
