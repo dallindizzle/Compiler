@@ -16,5 +16,5 @@ void kxi2019 main() {
 	Cat b;
 	Dog d[] = new Dog[3];
 
-	c.Print(3);
+	d = d;
 }
