@@ -1,9 +1,5 @@
-class Cat {
-	public int Add(int x) {
-		return x + 1;
-	}
-}
-
 void kxi2019 main() {
-	int k = cin.nextInt();
+	int ii[] = new int[34];
+	char kk[] = new int[3];
+	ii = ii;
 }

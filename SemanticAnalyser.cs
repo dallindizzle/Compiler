@@ -2034,9 +2034,9 @@ namespace Compiler
 
                     if (symTable[op2.symKey].Data["type"] == $"@:{type}")
                     {
-                        if (op2.arguments.Count != 1) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
-                            MathError(op1, op2, oper.val);
-                        return;
+                        //if (op2.arguments.Count != 1) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
+                        //    MathError(op1, op2, oper.val);
+                        //return;
                     }
                     else if (symTable[op2.symKey].Data["type"] != type) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
                         MathError(op1, op2, oper.val);
@@ -2334,7 +2334,7 @@ namespace Compiler
             if (functionReturnType != varType)
             {
                 //semanticError(scanner.getToken().lineNum, "Return", varType, $"Function requires {functionReturnType} returned {varType}");
-                Console.WriteLine($"{scanner.getToken().lineNum - 1}: Function requires {functionReturnType} returned {varType}");
+                Console.WriteLine($"{scanner.getToken().lineNum}: Function requires {functionReturnType} returned {varType}");
                 //Console.ReadKey();
                 Environment.Exit(0);
             }
