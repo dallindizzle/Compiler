@@ -610,11 +610,17 @@ namespace Compiler
                         if (!symTable.Where(tempsym => tempsym.Value.Scope == className).Any(sym => sym.Value.Value == scanner.getToken().lexeme))
                         {
                             if (scanner.peekToken().lexeme == "[") semanticError(scanner.getToken().lineNum, "Array", scanner.getToken().lexeme, "not defined");
-                            else if (scanner.peekToken().lexeme == "(") semanticError(scanner.getToken().lineNum, "Function", scanner.getToken().lexeme, "not defined");
-                            semanticError(scanner.getToken().lineNum, "Variable", scanner.getToken().lexeme, "not defined");
+                            else if (scanner.peekToken().lexeme == "(") //semanticError(scanner.getToken().lineNum, "Function", scanner.getToken().lexeme, "not defined");
+                            {
+                                iPush(scanner.getToken().lexeme);
+                            }
+                            else semanticError(scanner.getToken().lineNum, "Variable", scanner.getToken().lexeme, "not defined");
                         }
-                        symKey = symTable.Where(tempsym => tempsym.Value.Scope == className).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
-                        iPush($"this", symKey);
+                        else
+                        {
+                            symKey = symTable.Where(tempsym => tempsym.Value.Scope == className).Where(sym2 => sym2.Value.Value == scanner.getToken().lexeme).First().Key;
+                            iPush($"this", symKey);
+                        }
                     }
                     else
                     {
@@ -1849,6 +1855,11 @@ namespace Compiler
         {
             SAR arguments = SAS.Pop();
             SAR fSar = SAS.Pop();
+
+            if (fSar.symKey == "")
+            {
+                funcError(scanner.getToken().lineNum, fSar, arguments.arguments);
+            }
 
             // Get method key
             string methodKey;
