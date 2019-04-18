@@ -1,5 +1,20 @@
+class Cat {
+	public void Print(int x) {
+		cout << x;
+	}
+}
+
+class Dog {
+	public int x = 3;
+	Dog() {
+		
+	}
+}
+
 void kxi2019 main() {
-	int ii[] = new int[34];
-	char kk[] = new int[3];
-	ii = ii;
+	Cat c;
+	Cat b;
+	Dog d[] = new Dog[3];
+
+	c.Print(3);
 }

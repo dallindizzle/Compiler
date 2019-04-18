@@ -68,14 +68,14 @@ class Bugs {								// Syntax
 	 Bugs ss[] = new Bugs[256];				// Semantic: Bug vs Bugs
 
 	 cc[1] = cc[2]; 
-	 cc[31] = cc[2];   						// Semantic: char = @
+	 cc[31] = cc[4];   						// Semantic: char = @
 	 cc[100] = cc[5 + i];						// Semantics: char = int
 	 cc[10] = c;    
 
 	 //this = null;							// Semantics: #LVar
-	// this.this = null;						// Syntax: this.this
+	 //this.this = null;						// Syntax: this.this
 	 
-	 ii[3] = ii[4]; 							// Syntax: no index
+	 ii[3] = ii[3]; 							// Syntax: no index
 	 ii[4] = 5 + i;							// Semantic: Array i not defined
 	 ii[5000] = 5 + i;
 	 ii = ii;								// Semantics: @:int = @:Bugs
@@ -100,7 +100,7 @@ void kxi2019 main() {				// Syntax: multiple
     int sum;
 
     int two = 2;						// Syntax: .0; Semantics: float
-    DemoC dc;							// Semantics: Dmo
+    DemoC dc;								// Semantics: Dmo
 	k = 0;
     cout << '>';							// Syntax: "
     cin >> k;								// Semantics: no x vs k
@@ -119,7 +119,7 @@ void kxi2019 main() {				// Syntax: multiple
 				k = k - 1;
 			}
 
-		cout << sum;				// Semantics: cout
+		cout << sum;			// Semantics: cout
 		cout << '\n';			// Semantics: cout
 	    }
 	    else {
