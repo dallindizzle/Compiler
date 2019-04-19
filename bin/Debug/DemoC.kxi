@@ -68,11 +68,11 @@ class Bugs {								// Syntax
 	 Bugs ss[] = new Bugs[256];				// Semantic: Bug vs Bugs
 
 	 cc[1] = cc[2]; 
-	 cc[31] = cc[4];   						// Semantic: char = @
+	 cc[31] = c;   						// Semantic: char = @
 	 cc[100] = cc[5 + i];						// Semantics: char = int
 	 cc[10] = c;    
 
-	 //this = null;							// Semantics: #LVar
+	 this = null;							// Semantics: #LVar
 	 //this.this = null;						// Syntax: this.this
 	 
 	 ii[3] = ii[3]; 							// Syntax: no index
@@ -81,11 +81,11 @@ class Bugs {								// Syntax
 	 ii = ii;								// Semantics: @:int = @:Bugs
 	 i = ii[0];  
 
-	 ss[0] = new Bugs(4,'c');			// Semantics: Insect, no Bugs(char, int, int)
+	 ss[0] = new Bugs(7, 'c');			// Semantics: Insect, no Bugs(char, int, int)
 	 ss[i] = ss[i+1]; 
 	 ss[i+7/3] = new Bugs(i, c); 			// Semantics: Bug vs Bugs
 
-	 //return ii;								// Semantics: return @ 
+	 return;								// Semantics: return @ 
       } 
 }
 
@@ -98,7 +98,7 @@ void kxi2019 main() {				// Syntax: multiple
 
       // can't have a statement before var declarations
     int sum;
-
+	
     int two = 2;						// Syntax: .0; Semantics: float
     DemoC dc;								// Semantics: Dmo
 	k = 0;
@@ -119,7 +119,7 @@ void kxi2019 main() {				// Syntax: multiple
 				k = k - 1;
 			}
 
-		cout << sum;			// Semantics: cout
+		cout << sum;				// Semantics: cout
 		cout << '\n';			// Semantics: cout
 	    }
 	    else {
@@ -136,7 +136,7 @@ void kxi2019 main() {				// Syntax: multiple
 	
 
 	    cout << '>';
-	    cin >> k;					// Semantics: cin
+	    cin >> k;				// Semantics: cin
 	    cout << '\n';
 
 	}

@@ -1438,7 +1438,8 @@ namespace Compiler
             // Get constructor
             if (symTable.Where(sym => sym.Value.Scope == $"g.{typeSar.val}").Where(sym => sym.Value.Kind == "Constructor").Count() == 0)
             {
-                Console.WriteLine($"{scanner.getToken().lineNum}: Constructor not defined for type {typeSar.val}");
+                newObjError(scanner.getToken().lineNum, typeSar.val, argumentsSar.arguments);
+                //Console.WriteLine($"{scanner.getToken().lineNum}: Constructor not defined for type {typeSar.val}");
                 //Console.ReadKey();
                 Environment.Exit(0);
             } 
@@ -1605,7 +1606,7 @@ namespace Compiler
                 Regex pat = new Regex(@"g\.\w*\.\w+");
                 if (!pat.IsMatch(scope))
                 {
-                    Console.WriteLine($"{scanner.getToken().lineNum}: Invalid use of this in main");
+                    Console.WriteLine($"{scanner.getToken().lineNum}: Variable this not defined");
                     Environment.Exit(0);
                 }
                     
@@ -2034,6 +2035,7 @@ namespace Compiler
                     if (op1.val.Substring(op1.val.Length - 2) != "[]") //semanticError(scanner.getToken().lineNum, "Array init", op1.val, "Not array type");
                         MathError(op1, op2, oper.val);
 
+                    SAS.Clear();
                     return; // do nothing for arrays
                 }
                 else if (symTable[op1.symKey].Data["type"][0] == '@')
@@ -2065,6 +2067,7 @@ namespace Compiler
                     {
                         if (op1.arguments.Count != 1) //semanticError(scanner.getToken().lineNum, "Type", op2.val, "not valid type");
                             MathError(op1, op2, oper.val);
+                        
                         return;
                     }
                     else if (symTable[op1.symKey].Data["type"] != type) //semanticError(scanner.getToken().lineNum, "Type", op1.val, "not valid type");
@@ -2168,7 +2171,14 @@ namespace Compiler
             {
                 string op2Type1 = symTable[op2.symKey].Data["type"];
 
-                if (op1.val == "this") Console.WriteLine($"{scanner.getToken().lineNum}: Invalid Operation this {oper} {op2Type1} {op2.val}");
+                if (op1.val == "this")
+                {
+                    // Get type of this
+                    var tokens = scope.Split('.');
+                    var thisType = tokens[1];
+
+                    Console.WriteLine($"{scanner.getToken().lineNum}: Invalid Operation {thisType} this {oper} {op2Type1} {op2.val}");
+                }
                 else if (op1.type == SAR.types.lit_sar)
                 {
                     string op1Type1 = symTable[op1.symKey].Data["type"];
@@ -2327,8 +2337,21 @@ namespace Compiler
                 EOE();
             }
 
+            string functionName = scope.Split('.').Last();
+            string classScope = scope.Substring(0, scope.LastIndexOf('.'));
+
+            var functionSym = symTable.Where(sym => sym.Value.Scope == classScope).Where(sym => sym.Value.Value == functionName).First();
+            string functionReturnType = functionSym.Value.Data["returnType"];
+
             if (SAS.Count == 0)
             {
+                if (functionReturnType != "void")
+                {
+                    Console.WriteLine($"{scanner.getToken().lineNum}: Function requires {functionReturnType} return");
+                    //Console.ReadKey();
+                    Environment.Exit(0);
+                }
+
                 createQuad("RTN");
                 return;
             }
@@ -2336,11 +2359,6 @@ namespace Compiler
             SAR sar = SAS.Pop();
             string varType = symTable[sar.symKey].Data["type"];
 
-            string functionName = scope.Split('.').Last();
-            string classScope = scope.Substring(0, scope.LastIndexOf('.'));
-
-            var functionSym = symTable.Where(sym => sym.Value.Scope == classScope).Where(sym => sym.Value.Value == functionName).First();
-            string functionReturnType = functionSym.Value.Data["returnType"];
 
             if (functionReturnType != varType)
             {
